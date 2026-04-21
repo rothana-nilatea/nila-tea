@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:bot": "node telegram-bot.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {

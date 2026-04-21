@@ -244,9 +244,11 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .mfoot .btn{flex:1;padding:13px;font-size:14px;}
 
 /* ── LOGIN ── */
-.login-wrap{display:flex;align-items:center;justify-content:center;height:100vh;padding:20px;background:var(--bg);}
-.login-box{background:var(--card);border-radius:22px;padding:28px 22px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,0.1);}
-.login-logo{width:52px;height:52px;background:var(--g);border-radius:15px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.login-wrap{display:flex;flex-direction:column;height:100vh;background:var(--g);}
+.login-top{flex:0 0 42%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:#5C2E0E;}
+.login-logo{width:200px;height:80px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+.login-logo img{width:140px;height:140px;object-fit:contain;}
+.login-box{flex:1;background:var(--card);border-radius:28px 28px 0 0;padding:28px 22px 32px;width:100%;box-shadow:0 -4px 20px rgba(0,0,0,0.08);}
 .login-title{font-size:22px;font-weight:700;text-align:center;color:var(--t1);}
 .login-sub{font-size:12px;color:var(--t2);text-align:center;margin:3px 0 20px;}
 .lf{margin-bottom:12px;}
@@ -335,11 +337,155 @@ const API = 'https://nila-tea.onrender.com';
 const RATE = 4100;
 const STORES = {
   atm: { id:'atm', name:'Angtamin Store', short:'ATM', color:'#7B3F1E', bg:'#FDF0E6', lt:'#5C2E0E' },
-  hru: { id:'hru', name:'HRU Store', short:'HRU', color:'#4A2C0E', bg:'#F5E6D3', lt:'#2C1A08' }
+  hru: { id:'hru', name:t('hruStore'), short:'HRU', color:'#4A2C0E', bg:'#F5E6D3', lt:'#2C1A08' }
 };
 
 // ── STATE ──
-let me=null, token=null, lang='en', currentStore='atm';
+let me=null, token=null, lang='en', currentStore='atm', logoUrl=null;
+
+const T={
+en:{
+  appName:'Nila Tea',appSub:'Multi-store POS',signIn:'Sign in to your store',
+  username:'Username',password:'Password',signInBtn:'Sign in',wrongPass:'Wrong username or password',
+  signingIn:'Signing in...',
+  dashboard:'Dashboard',sales:t('recordBtn'),closeday:t('closeDayTitle'),
+  menu:'Menu',inventory:'Inventory',endstock:'End-day stock',
+  revenue:t('revenueTitle'),settings:'Settings',logout:t('logoutBtn'),
+  main:'Main',manage:'Manage',account:'Account',reports:'Reports',
+  goodMorning:t('goodMorning'),bothStores:t('bothStores'),
+  combinedRevenue:t('combinedRevenue'),totalRevenue:t('totalRevenue'),
+  todayOrders:'Orders today',menuItems:'Menu items',lowStock:'Low stock',
+  needsRestock:'needs restock',recentSales:t('recentSales'),seeAll:t('seeAll'),
+  noSalesYet:t('noSalesYet'),jumpTo:'Jump to store',
+  atmSales:'ATM Sales →',hruSales:'HRU Sales →',
+  recordSale:t('recordSale'),amountReceived:t('amountReceived'),
+  payMethod:t('payMethod'),cash:'Cash',aba:'ABA',physicalMoney:t('physicalMoney'),
+  bankTransfer:t('bankTransfer'),noteOptional:t('noteOptional'),
+  notePlaceholder:'e.g. Milk Tea x2, Taro Latte',recordBtn:t('recordBtn'),
+  salesLog:t('salesLog'),totalLabel:'total',noSalesRecorded:t('noSalesRecorded'),
+  cashToday:t('cashToday'),abaToday:t('abaToday'),txns:'txns',
+  closeDayTitle:t('closeDayTitle'),grandTotal:t('grandTotal'),totalCollected:'Total collected',
+  cashCollected:'Cash collected',manuallyRecorded:'manually recorded',
+  abaTransactions:'ABA transactions',autoPulled:t('autoPulled'),
+  connected:t('connected'),
+  abaMore:'ABA shows more than recorded — check unmatched transactions',
+  abaLess:'in ABA sales not yet received in account',
+  abaMatched:t('abaMatched'),
+  submitClose:t('submitClose'),ownerNotifiedInstant:t('ownerNotifiedInstant'),
+  ownerNotifiedMsg:'Nila received the full closing report with Cash & ABA breakdown.',
+  dayClosed:t('dayClosed'),backToSales:t('backToSales'),
+  totalCash:t('totalCash'),totalABA:t('totalABA'),noABA:t('noABA'),
+  menuTitle:'Menu',addItem:t('addItem'),noPhoto:t('noPhoto'),
+  category:'Category',priceUSD:'Price (USD)',photo:'Photo',
+  tapUpload:'Tap to upload photo',saveItem:t('saveItem'),cancelBtn:t('cancelBtn'),
+  editItem:t('editItem'),addMenuItem:t('addMenuItem'),
+  inventoryTitle:'Inventory',addIngredient:t('addIngredient'),
+  countDaily:t('countDaily'),skip:'Skip',
+  editIngredient:t('editIngredient'),addIngredientTitle:t('addIngredientTitle'),
+  countInStock:t('countInStock'),staffCountsDaily:t('staffCountsDaily'),
+  endStockTitle:t('endStockTitle'),itemsToCount:'items to count · photo proof required',
+  openingLabel:'Opening',closingLabel:'Closing',statusLabel:'Status',okLabel:'OK',lowLabel:'Low',
+  noPhotoYet:t('noPhotoYet'),photoTaken:t('photoTaken'),
+  requiredBefore:t('requiredBefore'),readyToSubmit:t('readyToSubmit'),
+  submitStock:t('submitStock'),stockSubmitted:t('stockSubmitted'),
+  allItemsCounted:t('allItemsCounted'),
+  ownerNotifiedStock:'Nila received the closing stock count and photos.',
+  noItemsMarked:t('noItemsMarked'),
+  doneBtn:t('doneBtn'),
+  revenueTitle:t('revenueTitle'),bothStoresComp:t('bothStoresComp'),
+  todayTotal:'Today total',combinedTotalLabel:t('combinedTotalLabel'),
+  atmStore:t('atmStore'),hruStore:t('hruStore'),grandTotalLabel:t('grandTotalLabel'),
+  payBreakdown:t('payBreakdown'),
+  settingsTitle:t('settingsTitle'),languageLabel:'Language',
+  exchangeRate:'Exchange rate',usersPerms:'Users & permissions',
+  addUser:'+ Add user',ownerLabel2:'Owner',staffLabel:'Staff',
+  viewRevenue:'View revenue',manageMenu:'Manage menu',manageStock:'Manage stock',
+  endDayStock:'End-day stock',recordSales:'Record sales',closeday:'Close day',closeDayPerm:'Close day',
+  fullName:'Full name',usernameLbl:'Username',passwordLbl:'Password',
+  storeLbl:'Store',roleLbl:'Role',saveUser:t('saveUser'),
+  editUser:t('editUser'),addUserTitle:t('addUserTitle'),
+  signedInAs:'Signed in as',logoutBtn:t('logoutBtn'),
+  deleteQ:t('deleteQ'),permanentlyRemoved:t('permanentlyRemoved'),
+  yesDelete:t('yesDelete'),
+  currentStoreLbl:'Current store',atmBranch:'ATM branch',hruBranch:'HRU branch',
+  combinedView:'Combined view',allStoresLabel:'All stores',
+  matchedLabel:'matched',unmatchedLabel:'unmatched',liveLabel:'Live',
+  noPhotoLabel:t('noPhoto'),photoCheckLabel:'Photo ✓',
+  ownerAllStores:'Owner · All stores',transactions:'transactions',
+},
+km:{
+  appName:'នីឡា ទ',appSub:'ប្រព័ន្ធគ្រប់គ្រងហាង',signIn:'ចូលទៅគ្រប់គ្រងហាង',
+  username:'ឈ្មោះអ្នកប្រើ',password:'លេខសម្ងាត់',signInBtn:'ចូលប្រើ',wrongPass:'ឈ្មោះអ្នកប្រើ ឬ លេខសម្ងាត់មិនត្រឹមត្រូវ',
+  signingIn:'កំពុងចូល...',
+  dashboard:'ផ្ទាំងគ្រប់គ្រង',sales:'កត់ត្រាការលក់',closeday:'បិទថ្ងៃ',
+  menu:'មុខម្ហូប',inventory:'សារពើភ័ណ្ឌ',endstock:'ស្តុកបិទថ្ងៃ',
+  revenue:'ចំណូល',settings:'ការកំណត់',logout:'ចាកចេញ',
+  main:'មេ',manage:'គ្រប់គ្រង',account:'គណនី',reports:'របាយការណ៍',
+  goodMorning:'អរុណសួស្តី',bothStores:'ហាងទាំងពីរ',
+  combinedRevenue:'ចំណូលសរុបថ្ងៃនេះ',totalRevenue:'ចំណូលថ្ងៃនេះ',
+  todayOrders:'ការបញ្ជាទិញថ្ងៃនេះ',menuItems:'មុខទំនិញ',lowStock:'ស្តុកទាប',
+  needsRestock:'ត្រូវការបន្ថែម',recentSales:'ការលក់ថ្មីៗ',seeAll:'មើលទាំងអស់',
+  noSalesYet:'មិនទាន់មានការលក់ថ្ងៃនេះ',jumpTo:'ទៅហាង',
+  atmSales:'ការលក់ ATM →',hruSales:'ការលក់ HRU →',
+  recordSale:'កត់ត្រាការលក់ថ្មី',amountReceived:'ចំនួនទឹកប្រាក់ (ដុល្លារ)',
+  payMethod:'វិធីបង់ប្រាក់',cash:'សាច់ប្រាក់',aba:'ABA',physicalMoney:'ប្រាក់សាច់',
+  bankTransfer:'ផ្ទេរប្រាក់',noteOptional:'កំណត់ចំណាំ (ស្រេចចិត្ត)',
+  notePlaceholder:'ឧ. តែទឹកដោះគោ x2',recordBtn:'កត់ត្រា',
+  salesLog:'កំណត់ត្រាការលក់ថ្ងៃនេះ',totalLabel:'សរុប',noSalesRecorded:'មិនទាន់មានការលក់',
+  cashToday:'សាច់ប្រាក់ថ្ងៃនេះ',abaToday:'ABA ថ្ងៃនេះ',txns:'ប្រតិបត្តិការ',
+  closeDayTitle:'បិទថ្ងៃ',grandTotal:'ចំណូលសរុបថ្ងៃនេះ',totalCollected:'ចំនួនសរុបប្រមូលបាន',
+  cashCollected:'សាច់ប្រាក់ប្រមូលបាន',manuallyRecorded:'កត់ត្រាដោយដៃ',
+  abaTransactions:'ប្រតិបត្តិការ ABA',autoPulled:'ទាញពី ABA API ដោយស្វ័យប្រវត្តិ',
+  connected:'បានភ្ជាប់ · ABA webhook សកម្ម',
+  abaMore:'ABA បង្ហាញច្រើនជាងការកត់ត្រា — សូមពិនិត្យ',
+  abaLess:'ការលក់ ABA មិនទាន់ទទួលបាន',
+  abaMatched:'ប្រតិបត្តិការ ABA ទាំងអស់ត្រូវគ្នា',
+  submitClose:'ដាក់ស្នើរបាយការណ៍បិទថ្ងៃ',ownerNotifiedInstant:'ម្ចាស់ហាងនឹងទទួលការជូនដំណឹង',
+  ownerNotifiedMsg:'នីឡាទទួលបានរបាយការណ៍បិទថ្ងៃ Cash និង ABA',
+  dayClosed:'បិទថ្ងៃហើយ!',backToSales:'ត្រឡប់ទៅការលក់',
+  totalCash:'សាច់ប្រាក់សរុប',totalABA:'ABA សរុប',noABA:'មិនទាន់មានប្រតិបត្តិការ ABA',
+  menuTitle:'មុខម្ហូប',addItem:'+ បន្ថែមមុខទំនិញ',noPhoto:'គ្មានរូបភាព',
+  category:'ប្រភេទ',priceUSD:'តម្លៃ (ដុល្លារ)',photo:'រូបភាព',
+  tapUpload:'ចុចដើម្បីផ្ទុករូបភាព',saveItem:'រក្សាទុក',cancelBtn:'បោះបង់',
+  editItem:'កែសម្រួលមុខទំនិញ',addMenuItem:'បន្ថែមមុខទំនិញ',
+  inventoryTitle:'សារពើភ័ណ្ឌ',addIngredient:'+ បន្ថែម',
+  countDaily:'រាប់រាល់ថ្ងៃ',skip:'រំលង',
+  editIngredient:'កែសម្រួលគ្រឿងផ្សំ',addIngredientTitle:'បន្ថែមគ្រឿងផ្សំ',
+  countInStock:'រាប់នៅក្នុងស្តុកបិទថ្ងៃ',staffCountsDaily:'បុគ្គលិករាប់រាល់ថ្ងៃ',
+  endStockTitle:'ស្តុកបិទថ្ងៃ',itemsToCount:'មុខទំនិញត្រូវរាប់ · ត្រូវការរូបភាព',
+  openingLabel:'ការបើក',closingLabel:'ការបិទ',statusLabel:'ស្ថានភាព',okLabel:'ល្អ',lowLabel:'ទាប',
+  noPhotoYet:'មិនទាន់មានរូបភាព',photoTaken:'មានរូបភាពហើយ',
+  requiredBefore:'ត្រូវការមុនពេលដាក់ស្នើ',readyToSubmit:'រួចរាល់',
+  submitStock:'ដាក់ស្នើការរាប់ស្តុក',stockSubmitted:'ស្តុកបានដាក់ស្នើ!',
+  allItemsCounted:'មុខទំនិញទាំងអស់ត្រូវបានរាប់ជាមួយរូបភាព។',
+  ownerNotifiedStock:'នីឡាទទួលបានការរាប់ស្តុក និងរូបភាព។',
+  noItemsMarked:'មិនមានមុខទំនិញដែលសម្គាល់ជារាប់ប្រចាំថ្ងៃ។',
+  doneBtn:'រួចរាល់',
+  revenueTitle:'ចំណូល',bothStoresComp:'ប្រៀបធៀបហាងទាំងពីរ',
+  todayTotal:'សរុបថ្ងៃនេះ',combinedTotalLabel:'សរុបរួមថ្ងៃនេះ',
+  atmStore:'ហាង ATM',hruStore:'ហាង HRU',grandTotalLabel:'សរុបធំ',
+  payBreakdown:'ការបែងចែកការទូទាត់',
+  settingsTitle:'ការកំណត់ & ហាង',languageLabel:'ភាសា',
+  exchangeRate:'អត្រាប្តូរប្រាក់',usersPerms:'អ្នកប្រើ & សិទ្ធិ',
+  addUser:'+ បន្ថែមអ្នកប្រើ',ownerLabel2:'ម្ចាស់',staffLabel:'បុគ្គលិក',
+  viewRevenue:'មើលចំណូល',manageMenu:'គ្រប់គ្រងមុខម្ហូប',manageStock:'គ្រប់គ្រងស្តុក',
+  endDayStock:'ស្តុកបិទថ្ងៃ',recordSales:'កត់ត្រាការលក់',
+  fullName:'ឈ្មោះពេញ',usernameLbl:'ឈ្មោះអ្នកប្រើ',passwordLbl:'លេខសម្ងាត់',
+  storeLbl:'ហាង',roleLbl:'តួនាទី',saveUser:'រក្សាទុក',
+  editUser:'កែសម្រួលអ្នកប្រើ',addUserTitle:'បន្ថែមអ្នកប្រើ',
+  signedInAs:'បានចូលជា',logoutBtn:'ចាកចេញ',
+  deleteQ:'លុប?',permanentlyRemoved:'មុខទំនិញនេះនឹងត្រូវលុបចោល។',
+  yesDelete:'បាទ/ចាស លុប',
+  currentStoreLbl:'ហាងបច្ចុប្បន្ន',atmBranch:'សាខា ATM',hruBranch:'សាខា HRU',
+  combinedView:'មើលរួម',allStoresLabel:'ហាងទាំងអស់',
+  matchedLabel:'ត្រូវគ្នា',unmatchedLabel:'មិនត្រូវ',liveLabel:'រស់នៅ',
+  noPhotoLabel:'គ្មានរូបភាព',photoCheckLabel:'រូបភាព ✓',
+  ownerAllStores:'ម្ចាស់ · ហាងទាំងអស់',transactions:'ប្រតិបត្តិការ',
+}
+};
+function t(key){return(T[lang]&&T[lang][key])||T.en[key]||key;}
+function getLogo(){return logoUrl||'logo.svg';}
+function logoImg(w=40,h=40,style=''){return `<img src="${getLogo()}" style="width:${w}px;height:${h}px;object-fit:contain;${style}" onerror="this.src='logo.svg'">`;}
 let menuData={atm:[],hru:[]}, invData={atm:[],hru:[]};
 let salesData={atm:[],hru:[]}, abaData={atm:[],hru:[]};
 let usersData=[], storeStats={atm:{},hru:{}};
@@ -398,12 +544,12 @@ function render(){
 function buildLogin(){
   return `<div class="login-wrap"><div class="login-box">
     <div class="login-logo" style="background:transparent;padding:0;"><img src="Logo_Nila_Tea.png" style="width:52px;height:52px;object-fit:contain;border-radius:14px;"></div>
-    <div class="login-title">Nila Tea</div>
-    <div class="login-sub">Sign in to your store</div>
-    <div class="lf"><label>Username</label><input type="text" id="l-u" placeholder="admin" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <div class="lf"><label>Password</label><input type="password" id="l-p" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <div class="login-err" id="l-err">Wrong username or password</div>
-    <button style="width:100%;padding:13px;background:var(--g);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;" onclick="doLogin()">Sign in</button>
+    <div class="login-title">${t('appName')}</div>
+    <div class="login-sub">${t('signIn')}</div>
+    <div class="lf"><label>${t('username')}</label><input type="text" id="l-u" placeholder="admin" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="lf"><label>${t('password')}</label><input type="password" id="l-p" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-err" id="l-err">${t('wrongPass')}</div>
+    <button style="width:100%;padding:13px;background:var(--g);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;" onclick="doLogin()">${t('signInBtn')}</button>
 
   </div></div>`;
 }
@@ -417,14 +563,29 @@ async function doLogin(){
     token=data.token; me=data.user;
     localStorage.setItem('nila_token',token);
     currentStore=me.store_id||'atm';
+    await loadLogo();
     render();
     await loadAllData();
     showPage('dashboard');
   }catch(e){
     const err=document.getElementById('l-err');
-    if(err)err.style.display='block';
+    if(err){err.textContent=t('wrongPass');err.style.display='block';}
     if(btn){btn.textContent='Sign in';btn.disabled=false;}
   }
+}
+
+async function loadLogo(){
+  try{
+    // Try cache first
+    const cached=localStorage.getItem('nila_logo');
+    if(cached){logoUrl=cached;}
+    // Then fetch fresh from DB
+    const data=await api('GET','/api/logo');
+    if(data.logo){
+      logoUrl=data.logo;
+      localStorage.setItem('nila_logo',data.logo);
+    }
+  }catch(e){console.warn('Logo load:',e);}
 }
 
 async function loadAllData(){
@@ -454,27 +615,27 @@ function doLogout(){
 
 // ── NAV PAGES ──
 const navDefs=[
-  {id:'dashboard',label:'Dashboard',always:true,sec:'Main',
+  {id:'dashboard',label:'Dashboard',always:true,sec:'Main',get secLabel(){return t('main')},
    ico:'<rect x="1.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="1.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>'},
-  {id:'sales',label:'Record sale',always:true,sec:'Main',
+  {id:'sales',label:t('recordBtn'),always:true,sec:'Main',get secLabel(){return t('main')},
    ico:'<circle cx="7" cy="9" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M7 7v2l1.5 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M11 4h3M13 2v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'},
-  {id:'closeday',label:'Close day',always:true,sec:'Main',dot:true,
+  {id:'closeday',label:t('closeDayTitle'),always:true,sec:'Main',get secLabel(){return t('main')},dot:true,
    ico:'<circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 7l2 2 3.5-3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>'},
-  {id:'menu',label:'Menu',perm:'menu',sec:'Manage',
+  {id:'menu',label:'Menu',perm:'menu',sec:'Manage',get secLabel(){return t('manage')},
    ico:'<path d="M2 4h10M2 7h10M2 10h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'},
-  {id:'inventory',label:'Inventory',perm:'inv',sec:'Manage',
+  {id:'inventory',label:'Inventory',perm:'inv',sec:'Manage',get secLabel(){return t('manage')},
    ico:'<path d="M7 1.5L2 4.5v6L7 13.5l5-3v-6L7 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M2 4.5l5 3m0 0l5-3m-5 3v6" stroke="currentColor" stroke-width="1.3"/>'},
-  {id:'endstock',label:'End-day stock',perm:'endstock',sec:'Manage',
+  {id:'endstock',label:'End-day stock',perm:'endstock',sec:'Manage',get secLabel(){return t('manage')},
    ico:'<path d="M2 3h10v8a3 3 0 01-3 3H5a3 3 0 01-3-3V3z" stroke="currentColor" stroke-width="1.3"/><path d="M4 3V2a1 1 0 012 0v1M8 3V2a1 1 0 012 0v1" stroke="currentColor" stroke-width="1.3"/>'},
-  {id:'revenue',label:'Revenue',perm:'revenue',sec:'Reports',
+  {id:'revenue',label:t('revenueTitle'),perm:'revenue',sec:'Reports',get secLabel(){return t('reports')},
    ico:'<path d="M1 10l3-4 3 3 3-5 3 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>'},
-  {id:'settings',label:'Settings',always:true,sec:'Account',
+  {id:'settings',label:'Settings',always:true,sec:'Account',get secLabel(){return t('account')},
    ico:'<circle cx="7" cy="7" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 1v1.5M7 12.5V14M1 7h1.5M12.5 7H14M3 3l1 1M10 10l1 1M10 4l1-1M3 11l1-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'},
 ];
 
 // ── APP SHELL ──
 function buildApp(){
-  const nav=navDefs.filter(p=>p.always||can(p.perm));
+  const nav=navDefs.filter(p=>p.always||(p.perm&&(me.role==='owner'||can(p.perm))));
   const isOwner=me.role==='owner';
   const s=STORES[currentStore];
 
@@ -487,7 +648,7 @@ function buildApp(){
     <div class="drawer" id="drawer">
       <div class="d-top">
         <div class="d-logo-row">
-          <div class="d-logo-ico" style="background:transparent;padding:0;"><img src="Logo_Nila_Tea.png" style="width:40px;height:40px;object-fit:contain;border-radius:12px;"></div>
+          <div class="d-logo-ico" style="background:transparent;padding:0;">${logoImg(40,40,"border-radius:12px;")}</div>
           <div><div class="d-app-name">Nila Tea</div></div>
           <button class="d-close" onclick="closeDrawer()"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 1.5l8 8M9.5 1.5l-8 8" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round"/></svg></button>
         </div>
@@ -537,7 +698,7 @@ function buildApp(){
 function buildNavItems(nav){
   let html='',lastSec='';
   nav.forEach(p=>{
-    if(p.sec!==lastSec){html+=`<div class="d-sec">${p.sec}</div>`;lastSec=p.sec;}
+    if(p.sec!==lastSec){html+=`<div class="d-sec">${p.secLabel||p.sec}</div>`;lastSec=p.sec;}
     html+=`<button class="d-item" id="di-${p.id}" onclick="goPage('${p.id}')">
       <div class="d-ico"><svg width="14" height="14" viewBox="0 0 14 14" fill="none">${p.ico}</svg></div>
       <span>${p.label}</span>
@@ -577,7 +738,7 @@ function showPage(id){
   const pg=document.getElementById('pg-'+id);
   if(pg){pg.classList.add('active');pg.innerHTML=buildPage(id);}
   const di=document.getElementById('di-'+id);if(di)di.classList.add('active');
-  const labels={dashboard:'Dashboard',sales:'Record sale',closeday:'Close day',menu:'Menu',inventory:'Inventory',endstock:'End-day stock',revenue:'Revenue',settings:'Settings'};
+  const labels={dashboard:t('dashboard'),sales:t('sales'),closeday:t('closeday'),menu:t('menu'),inventory:t('inventory'),endstock:t('endstock'),revenue:t('revenue'),settings:t('settings')};
   const lbl=document.getElementById('pg-lbl');if(lbl)lbl.textContent=labels[id]||id;
   document.getElementById('mc')?.scrollTo(0,0);
 }
@@ -778,12 +939,15 @@ async function recordSale(){
 // ════════ CLOSE DAY ════════
 function bCloseDay(){
   const s=currentStore, st=STORES[s];
-  const sl=salesData[s]||[], abaL=abaData[s]||[];
-  const cashT=sl.filter(x=>x.payment_method==='cash').reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
-  const abaRecorded=sl.filter(x=>x.payment_method==='aba').reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
+  const abaL=abaData[s]||[];
   const abaAuto=abaL.reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
-  const grandTotal=cashT+abaAuto;
-  const diff=abaAuto-abaRecorded;
+  const isOwner=me.role==='owner';
+  // Get saved cash entry for today
+  const savedCash=parseFloat(localStorage.getItem('nila_cash_'+s+'_'+new Date().toDateString())||'0');
+  const savedNote=localStorage.getItem('nila_cashnote_'+s+'_'+new Date().toDateString())||'';
+  const grandTotal=savedCash+abaAuto;
+  const cashT=savedCash;
+  const diff=0;
 
   return `<div id="cd-form">
     <div style="font-size:18px;font-weight:700;margin-bottom:3px;">Close day</div>
@@ -865,10 +1029,38 @@ function bCloseDay(){
   </div>`;
 }
 
+function saveCashDraft(){
+  const v=parseFloat(document.getElementById('cash-input')?.value||0);
+  const key='nila_cash_'+currentStore+'_'+new Date().toDateString();
+  localStorage.setItem(key, v||0);
+  const disp=document.getElementById('cash-display');
+  if(disp)disp.textContent=fmt(v||0);
+  // Update grand total display
+  const abaL=abaData[currentStore]||[];
+  const abaAuto=abaL.reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
+  const grand=document.getElementById('grand-total-val');
+  if(grand)grand.textContent=fmt((v||0)+abaAuto);
+  const grandK=document.getElementById('grand-total-khr');
+  if(grandK)grandK.textContent=fmtK((v||0)+abaAuto);
+}
+function saveCashNote(){
+  const v=document.getElementById('cash-note')?.value||'';
+  localStorage.setItem('nila_cashnote_'+currentStore+'_'+new Date().toDateString(),v);
+}
+
 async function submitClose(){
+  const cashAmt=parseFloat(document.getElementById('cash-input')?.value||0);
+  const cashNote=document.getElementById('cash-note')?.value||'';
   try{
-    await api('POST',`/api/stores/${currentStore}/close`,{submitted_by:me.username});
+    await api('POST',`/api/stores/${currentStore}/close`,{
+      submitted_by:me.username,
+      cash_total:cashAmt,
+      cash_note:cashNote
+    });
   }catch(e){console.warn('Close day API error:',e.message);}
+  // Clear draft
+  localStorage.removeItem('nila_cash_'+currentStore+'_'+new Date().toDateString());
+  localStorage.removeItem('nila_cashnote_'+currentStore+'_'+new Date().toDateString());
   document.getElementById('cd-form').style.display='none';
   document.getElementById('cd-success').style.display='block';
 }
@@ -890,7 +1082,7 @@ function bMenu(){
 }
 
 function openMM(i){eMI=i;pendingImg=null;const s=currentStore,e=i>=0,m=e?menuData[s][i]:{};
-  document.getElementById('mm-t').textContent=e?'Edit item':'Add menu item';
+  document.getElementById('mm-t').textContent=e?t('editItem'):t('addMenuItem');
   document.getElementById('mm-n').value=e?m.name:'';
   document.getElementById('mm-c').value=e?m.category:'Tea';
   document.getElementById('mm-p').value=e?m.price_usd:'';
@@ -900,7 +1092,7 @@ function openMM(i){eMI=i;pendingImg=null;const s=currentStore,e=i>=0,m=e?menuDat
 async function saveMI(){
   const s=currentStore;
   const n=document.getElementById('mm-n').value.trim(),c=document.getElementById('mm-c').value,p=parseFloat(document.getElementById('mm-p').value);
-  if(!n||isNaN(p)){alert('Fill name and price.');return;}
+  if(!n||isNaN(p)){alert(t('wrongPass'));return;}
   try{
     if(eMI>=0){await api('PUT',`/api/menu/${menuData[s][eMI].id}`,{name:n,category:c,price_usd:p,image_url:pendingImg||menuData[s][eMI].image_url});Object.assign(menuData[s][eMI],{name:n,category:c,price_usd:p});}
     else{const item=await api('POST',`/api/stores/${s}/menu`,{name:n,category:c,price_usd:p,image_url:pendingImg||null});menuData[s].push(item);}
@@ -924,14 +1116,14 @@ function bInv(){
     <div class="inv-th">${v.image_url?`<img src="${v.image_url}">`:`${icoSVG(16)}`}</div>
     <div style="flex:1;min-width:0;">
       <div style="font-size:13px;font-weight:600;">${v.name}</div>
-      <div style="font-size:11px;color:var(--t2);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${v.quantity} ${v.unit}<span class="badge ${v.status==='low'?'bg-a':'bg-g'}">${v.status==='low'?'Low':'OK'}</span><span class="badge ${v.count_daily?'bg-g':'bg-gr'}">${v.count_daily?'Count daily':'Skip'}</span></div>
+      <div style="font-size:11px;color:var(--t2);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${v.quantity} ${v.unit}<span class="badge ${v.status==='low'?'bg-a':'bg-g'}">${v.status==='low'?'Low':'OK'}</span><span class="badge ${v.count_daily?'bg-g':'bg-gr'}">${v.count_daily?t('countDaily'):'Skip'}</span></div>
     </div>
     <div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn sm" onclick="openII(${i})">Edit</button><button class="btn sm d" onclick="askDel('inv',${i})">Del</button></div>
   </div>`).join('')||`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No inventory items yet</div></div>`}`;
 }
 
 function openII(i){eII=i;pendingImg=null;const s=currentStore,e=i>=0,v=e?invData[s][i]:{};togOn=e?v.count_daily:true;
-  document.getElementById('mi-t').textContent=e?'Edit ingredient':'Add ingredient';
+  document.getElementById('mi-t').textContent=e?t('editIngredient'):t('addIngredientTitle');
   document.getElementById('mi-n').value=e?v.name:'';
   document.getElementById('mi-q').value=e?v.quantity:'';
   document.getElementById('mi-u').value=e?v.unit:'liters';
@@ -943,7 +1135,7 @@ function updTog(){const t=document.getElementById('ii-tog');if(t)t.className='to
 async function saveII(){
   const s=currentStore;
   const n=document.getElementById('mi-n').value.trim(),q=parseFloat(document.getElementById('mi-q').value),u=document.getElementById('mi-u').value;
-  if(!n||isNaN(q)){alert('Fill name and quantity.');return;}
+  if(!n||isNaN(q)){alert(t('wrongPass'));return;}
   try{
     if(eII>=0){await api('PUT',`/api/inventory/${invData[s][eII].id}`,{name:n,quantity:q,unit:u,status:invData[s][eII].status,count_daily:togOn,image_url:pendingImg||invData[s][eII].image_url});Object.assign(invData[s][eII],{name:n,quantity:q,unit:u,count_daily:togOn});}
     else{const item=await api('POST',`/api/stores/${s}/inventory`,{name:n,quantity:q,unit:u,status:'ok',count_daily:togOn,image_url:pendingImg||null});invData[s].push(item);}
@@ -987,8 +1179,8 @@ function bEndStock(){
           ${stkPh[i]?`<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="var(--g)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`:camSVG()}
           <div style="font-size:8px;color:${stkPh[i]?'var(--g)':'var(--t3)'};">${stkPh[i]?'done':'photo'}</div>
         </div>
-        <div><div style="font-size:12px;font-weight:600;">${stkPh[i]?'Photo taken':'No photo yet'}</div>
-          <div style="font-size:10px;margin-top:1px;color:${stkPh[i]?'var(--g)':'var(--red)'};">${stkPh[i]?'Ready to submit':'Required before submit'}</div></div>
+        <div><div style="font-size:12px;font-weight:600;">${stkPh[i]?t('photoTaken'):t('noPhotoYet')}</div>
+          <div style="font-size:10px;margin-top:1px;color:${stkPh[i]?'var(--g)':'var(--red)'};">${stkPh[i]?t('readyToSubmit'):t('requiredBefore')}</div></div>
       </div></div>`).join('')||`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No items marked for daily count. Go to Inventory to toggle items.</div></div>`}
     <div class="warn" id="es-warn"></div>
     ${total?`<button class="btn p full" onclick="submitES()">Submit stock count</button>
@@ -1039,7 +1231,7 @@ function bRevenue(){
 
   return `
   <div class="pg-title">Revenue</div>
-  <div class="pg-sub">${isOwner?'Both stores comparison':''+st.name+' · Today'}</div>
+  <div class="pg-sub">${isOwner?t('bothStoresComp'):''+st.name+' · Today'}</div>
 
   ${isOwner?`
   <div class="cmp-grid">
@@ -1095,7 +1287,7 @@ function bRevenue(){
 
 // ════════ SETTINGS ════════
 function bSettings(){
-  const perms=['revenue','menu','inv','endstock','sales'];
+  const perms=['revenue','menu','inv','endstock','sales','closeday'];
   const pl={revenue:'View revenue',menu:'Manage menu',inv:'Manage stock',endstock:'End-day stock',sales:'Record sales'};
   const isOwner=me.role==='owner';
   return `
@@ -1105,16 +1297,16 @@ function bSettings(){
     <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px;">@${me.username} · ${isOwner?'Owner (all stores)':'Staff · '+(STORES[me.store_id]?.name||'')}</div>
   </div>
   <div class="s-card">
-    <div class="s-row"><div><div class="s-l">Language</div><div class="s-sub">English / ភាសាខ្មែរ</div></div>
+    <div class="s-row"><div><div class="s-l">${t('languageLabel')}</div><div class="s-sub">English / ភាសាខ្មែរ</div></div>
       <div style="display:flex;gap:5px;">
         <button class="ltab ${lang==='en'?'active':''}" onclick="setLang('en')">EN</button>
         <button class="ltab ${lang==='km'?'active':''}" onclick="setLang('km')">ខ្មែរ</button>
       </div>
     </div>
-    <div class="s-row" style="border:none;"><div><div class="s-l">Exchange rate</div><div class="s-sub">$1 = ៛${RATE.toLocaleString()} KHR</div></div><span class="badge bg-g">Live</span></div>
+    <div class="s-row" style="border:none;"><div><div class="s-l">${t('exchangeRate')}</div><div class="s-sub">$1 = ៛${RATE.toLocaleString()} KHR</div></div><span class="badge bg-g">Live</span></div>
   </div>
   ${isOwner?`
-  <div class="sh" style="margin-top:4px;"><div class="sh-t">Users & permissions</div><button class="btn p sm" onclick="openUsr(-1)">+ Add user</button></div>
+  <div class="sh" style="margin-top:4px;"><div class="sh-t">${t('usersPerms')}</div><button class="btn p sm" onclick="openUsr(-1)">${t('addUser')}</button></div>
   ${(usersData||[]).map((u,i)=>`<div class="u-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${u.role!=='owner'?'10px':'0'};">
       <div style="display:flex;align-items:center;gap:10px;">
@@ -1137,7 +1329,30 @@ function bSettings(){
   <button class="btn full" style="margin-top:8px;color:var(--red);border-color:rgba(176,48,48,0.25);" onclick="doLogout()">Log out</button>`;
 }
 
-function setLang(l){lang=l;showPage('settings');}
+async function uploadLogo(input){
+  const file=input.files[0];if(!file)return;
+  if(file.size>2000000){alert('Image too large. Max 2MB.');return;}
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const base64=e.target.result;
+    try{
+      await api('POST','/api/logo',{logo:base64});
+      logoUrl=base64;
+      localStorage.setItem('nila_logo',base64);
+      showPage('settings');
+      // Update login logo if visible
+      const loginLogo=document.querySelector('.login-logo img');
+      if(loginLogo)loginLogo.src=base64;
+      // Update drawer logo
+      const drawerLogo=document.querySelector('.d-logo-ico img');
+      if(drawerLogo)drawerLogo.src=base64;
+      alert('Logo updated successfully!');
+    }catch(e){alert('Failed to save logo: '+e.message);}
+  };
+  reader.readAsDataURL(file);
+}
+
+function setLang(l){lang=l;localStorage.setItem('nila_lang',l);if(me){render();showPage('settings');}}
 
 async function togglePerm(userIdx,perm,el){
   const u=usersData[userIdx];
@@ -1151,7 +1366,7 @@ async function togglePerm(userIdx,perm,el){
 
 // ════════ USERS MODAL ════════
 function openUsr(i){eUI=i;const e=i>=0,u=e?usersData[i]:{};
-  document.getElementById('usr-t').textContent=e?'Edit user':'Add user';
+  document.getElementById('usr-t').textContent=e?t('editUser'):t('addUserTitle');
   document.getElementById('usr-n').value=e?u.name:'';
   document.getElementById('usr-u').value=e?u.username:'';
   document.getElementById('usr-p').value='';
@@ -1162,7 +1377,7 @@ function openUsr(i){eUI=i;const e=i>=0,u=e?usersData[i]:{};
 async function saveUsr(){
   const n=document.getElementById('usr-n').value.trim(),u=document.getElementById('usr-u').value.trim(),p=document.getElementById('usr-p').value;
   const s=document.getElementById('usr-s').value,r=document.getElementById('usr-r').value;
-  if(!n||!u||(!p&&eUI<0)){alert('Fill all fields.');return;}
+  if(!n||!u||(!p&&eUI<0)){alert(t('wrongPass'));return;}
   try{
     const body={name:n,username:u,password:p||undefined,role:r,store_id:s,perms:{revenue:r==='owner',menu:r==='owner',inv:true,users:r==='owner',sales:true,endstock:true}};
     if(eUI>=0){await api('PUT',`/api/users/${usersData[eUI].id}`,body);Object.assign(usersData[eUI],{...body,perms:body.perms});}
@@ -1215,6 +1430,9 @@ if('serviceWorker' in navigator){
 
 // ════════ AUTO-LOGIN ════════
 async function init(){
+  const savedLang=localStorage.getItem('nila_lang');if(savedLang)lang=savedLang;
+  const cachedLogo=localStorage.getItem('nila_logo');if(cachedLogo)logoUrl=cachedLogo;
+  await loadLogo();
   const saved=localStorage.getItem('nila_token');
   if(saved){
     try{

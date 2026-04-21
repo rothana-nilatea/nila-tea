@@ -359,3 +359,24 @@ app.get('/api/stores/:storeId/revenue/week', auth, async (req, res) => {
 initDB().then(() => {
   app.listen(PORT, () => console.log(`🍵 Nila Tea API on port ${PORT}`));
 }).catch(e => { console.error('DB init failed:', e); process.exit(1); });
+
+// ── LOGO ──
+app.get('/api/logo', async (req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT value FROM app_settings WHERE key='logo' LIMIT 1`);
+    res.json({ logo: rows.length && rows[0].value ? rows[0].value : null });
+  } catch (e) { res.json({ logo: null }); }
+});
+
+app.post('/api/logo', auth, ownerOnly, async (req, res) => {
+  try {
+    const { logo } = req.body;
+    if (!logo) return res.status(400).json({ error: 'No logo data' });
+    if (logo.length > 2800000) return res.status(400).json({ error: 'Image too large. Max 2MB.' });
+    await pool.query(
+      `INSERT INTO app_settings (key,value) VALUES ('logo',$1) ON CONFLICT (key) DO UPDATE SET value=$1,updated_at=NOW()`,
+      [logo]
+    );
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});

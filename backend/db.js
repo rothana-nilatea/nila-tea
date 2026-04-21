@@ -90,6 +90,12 @@ async function initDB() {
         notes TEXT
       );
 
+      CREATE TABLE IF NOT EXISTS app_settings (
+        key VARCHAR(50) PRIMARY KEY,
+        value TEXT,
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+
       CREATE TABLE IF NOT EXISTS closing_reports (
         id SERIAL PRIMARY KEY,
         store_id VARCHAR(10) REFERENCES stores(id),

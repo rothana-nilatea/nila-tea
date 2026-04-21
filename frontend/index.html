@@ -563,7 +563,7 @@ async function doLogin(){
     token=data.token; me=data.user;
     localStorage.setItem('nila_token',token);
     currentStore=me.store_id||'atm';
-    await loadLogo();
+    await loadLogo(true);
     render();
     await loadAllData();
     showPage('dashboard');
@@ -574,16 +574,20 @@ async function doLogin(){
   }
 }
 
-async function loadLogo(){
+async function loadLogo(fetchFromDb=false){
   try{
-    // Try cache first
+    // Always use cache first for instant load
     const cached=localStorage.getItem('nila_logo');
     if(cached){logoUrl=cached;}
-    // Then fetch fresh from DB
-    const data=await api('GET','/api/logo');
-    if(data.logo){
-      logoUrl=data.logo;
-      localStorage.setItem('nila_logo',data.logo);
+    // Only fetch from DB if logged in and requested
+    if(fetchFromDb && token){
+      try{
+        const data=await api('GET','/api/logo');
+        if(data.logo){
+          logoUrl=data.logo;
+          localStorage.setItem('nila_logo',data.logo);
+        }
+      }catch(e){console.warn('Logo DB fetch:',e);}
     }
   }catch(e){console.warn('Logo load:',e);}
 }
@@ -1432,7 +1436,7 @@ if('serviceWorker' in navigator){
 async function init(){
   const savedLang=localStorage.getItem('nila_lang');if(savedLang)lang=savedLang;
   const cachedLogo=localStorage.getItem('nila_logo');if(cachedLogo)logoUrl=cachedLogo;
-  await loadLogo();
+  await loadLogo(false);
   const saved=localStorage.getItem('nila_token');
   if(saved){
     try{
@@ -1442,7 +1446,7 @@ async function init(){
         me={id:payload.id,name:payload.name,username:payload.username,role:payload.role,store_id:payload.store_id,perms:payload.perms};
         currentStore=me.store_id||'atm';
         render();
-        try{await loadAllData();}catch(e){console.warn('Auto-login data load:',e);}
+        try{await loadLogo(true);await loadAllData();}catch(e){console.warn('Auto-login data load:',e);}
         showPage('dashboard');
         return;
       }

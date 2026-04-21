@@ -156,3 +156,11 @@ async function poll() {
 }
 
 poll();
+
+// Keep Render happy by listening on a port
+const http = require('http');
+const PORT = process.env.PORT || 3000;
+http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end('🤖 NilaTea ABA Bot is running');
+}).listen(PORT, () => console.log(`🌐 Health check on port ${PORT}`));

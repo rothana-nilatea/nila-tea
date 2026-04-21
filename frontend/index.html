@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#7B3F1E">
 <title>Nila Tea POS</title>
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -203,6 +203,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .aba-logo{width:36px;height:36px;border-radius:9px;background:var(--aba-bg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--aba-lt);flex-shrink:0;}
 .dot-pulse{width:8px;height:8px;border-radius:50%;background:var(--aba);animation:pulse 1.2s ease-in-out infinite;flex-shrink:0;}
 @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .aba-txn{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--bd);font-size:12px;}
 .aba-txn:last-child{border:none;}
 
@@ -381,14 +382,18 @@ async function api(method,path,body){
 
 async function loadStoreData(s){
   try{
-    const [menu,inv,sales,aba,stats]=await Promise.all([
+    const [menu,inv,sales,aba,stats]=await Promise.allSettled([
       api('GET',`/api/stores/${s}/menu`),
       api('GET',`/api/stores/${s}/inventory`),
       api('GET',`/api/stores/${s}/sales`),
       api('GET',`/api/stores/${s}/aba`),
       api('GET',`/api/stores/${s}/revenue/today`),
     ]);
-    menuData[s]=menu; invData[s]=inv; salesData[s]=sales; abaData[s]=aba; storeStats[s]=stats;
+    if(menu.status==='fulfilled') menuData[s]=menu.value;
+    if(inv.status==='fulfilled') invData[s]=inv.value;
+    if(sales.status==='fulfilled') salesData[s]=sales.value;
+    if(aba.status==='fulfilled') abaData[s]=aba.value;
+    if(stats.status==='fulfilled') storeStats[s]=stats.value;
   }catch(e){console.warn('Could not load data for',s,e.message);}
 }
 

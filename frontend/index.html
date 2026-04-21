@@ -248,12 +248,11 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .mfoot .btn{flex:1;padding:13px;font-size:14px;}
 
 /* ── LOGIN ── */
-.login-wrap{display:flex;flex-direction:column;height:100vh;height:100dvh;background:#7B3F1E;overflow:hidden;}
-.login-top{flex:0 0 42%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;position:relative;}
-.login-logo-circle{width:100px;height:100px;background:#FDF5EE;border-radius:50%;display:flex;align-items:center;justify-content:center;border:5px solid rgba(255,255,255,0.3);box-shadow:0 6px 24px rgba(0,0,0,0.25);position:absolute;bottom:-50px;overflow:hidden;}
-.login-box{flex:1;background:#FDF5EE;border-radius:28px 28px 0 0;padding:64px 24px 32px;overflow-y:auto;}
-.login-title{font-size:20px;font-weight:700;text-align:center;color:#2C1A08;}
-.login-sub{font-size:12px;color:#9A8A7A;text-align:center;margin:4px 0 20px;}
+.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;height:100dvh;background:#FBF5EF;padding:20px;}
+.login-card{background:#fff;border-radius:24px;padding:32px 24px;width:100%;max-width:360px;box-shadow:0 4px 24px rgba(123,63,30,0.12);border:0.5px solid #EAD8C8;}
+.login-logo-wrap{width:120px;height:120px;border-radius:50%;background:#7B3F1E;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;overflow:hidden;box-shadow:0 4px 16px rgba(123,63,30,0.35);}
+.login-title{font-size:21px;font-weight:700;text-align:center;color:#2C1A08;margin-bottom:3px;}
+.login-sub{font-size:12px;color:#9A8A7A;text-align:center;margin-bottom:22px;}
 .lf{margin-bottom:12px;}
 .lf label{font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:4px;}
 .lf input{width:100%;font-size:15px;padding:11px 13px;border:1.5px solid var(--bd2);border-radius:12px;background:var(--bg);color:var(--t1);font-family:inherit;}
@@ -406,22 +405,22 @@ function render(){
 // ── LOGIN ──
 function buildLogin(){
   return `<div class="login-wrap">
-    <div class="login-top">
-      <div style="text-align:center;margin-bottom:70px;">
-        <div style="font-size:24px;font-weight:700;color:#fff;letter-spacing:0.3px;">Nila Tea</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px;letter-spacing:0.5px;">នីឡា ធី · Coffee Shop</div>
+    <div class="login-card">
+      <div class="login-logo-wrap">
+        <img src="logo.svg" style="width:110px;height:110px;object-fit:contain;filter:brightness(0) invert(1);" onerror="this.style.display='none'">
       </div>
-      <div class="login-logo-circle">
-        <img src="logo.svg" style="width:90px;height:90px;object-fit:contain;" onerror="this.style.display='none'">
+      <div class="login-title">Nila Tea</div>
+      <div class="login-sub">នីឡា ធី · Sign in to your store</div>
+      <div class="lf" style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:600;color:#7A6A5A;display:block;margin-bottom:5px;">Username</label>
+        <input type="text" id="l-u" placeholder="admin" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;font-size:15px;padding:12px 14px;border:1.5px solid #E0D0C0;border-radius:12px;background:#FBF5EF;color:#2C1A08;font-family:inherit;-webkit-appearance:none;outline:none;">
       </div>
-    </div>
-    <div class="login-box">
-      <div class="login-title">Welcome back!</div>
-      <div class="login-sub">Sign in to manage your store</div>
-      <div class="lf"><label>Username</label><input type="text" id="l-u" placeholder="admin" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()" style="background:#fff;font-size:15px;padding:11px 13px;border:1.5px solid #E0D0C0;border-radius:12px;width:100%;font-family:inherit;color:#2C1A08;"></div>
-      <div class="lf" style="margin-top:10px;"><label>Password</label><input type="password" id="l-p" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" style="background:#fff;font-size:15px;padding:11px 13px;border:1.5px solid #E0D0C0;border-radius:12px;width:100%;font-family:inherit;color:#2C1A08;"></div>
-      <div class="login-err" id="l-err">Wrong username or password</div>
-      <button style="width:100%;padding:14px;background:#7B3F1E;color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:16px;box-shadow:0 4px 12px rgba(123,63,30,0.4);" onclick="doLogin()">Sign in</button>
+      <div class="lf" style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:600;color:#7A6A5A;display:block;margin-bottom:5px;">Password</label>
+        <input type="password" id="l-p" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;font-size:15px;padding:12px 14px;border:1.5px solid #E0D0C0;border-radius:12px;background:#FBF5EF;color:#2C1A08;font-family:inherit;-webkit-appearance:none;outline:none;">
+      </div>
+      <div class="login-err" id="l-err" style="font-size:12px;color:#B03030;background:#FDECEC;padding:10px 13px;border-radius:10px;margin-bottom:12px;display:none;font-weight:500;">Wrong username or password</div>
+      <button onclick="doLogin()" style="width:100%;padding:14px;background:#7B3F1E;color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(123,63,30,0.4);letter-spacing:0.3px;">Sign in</button>
     </div>
   </div>`;
 }

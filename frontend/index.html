@@ -329,7 +329,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 <script>
 // ══════════════════════════════════════════════════
 // !! CHANGE THIS TO YOUR RENDER BACKEND URL !!
-const API = 'https://nila-tea.onrender.com';
+const API = 'https://YOUR-NILA-TEA-BACKEND.onrender.com';
 // ══════════════════════════════════════════════════
 
 const RATE = 4100;
@@ -404,35 +404,44 @@ function buildLogin(){
     <div class="lf"><label>Password</label><input type="password" id="l-p" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="login-err" id="l-err">Wrong username or password</div>
     <button style="width:100%;padding:13px;background:var(--g);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;" onclick="doLogin()">Sign in</button>
-    <div class="login-hint">
-      <b>admin / 1234</b> — Owner (ATM + HRU)<br>
-      <b>sreymom / 1234</b> — Staff · ATM store<br>
-      <b>dara / 1234</b> — Staff · HRU store
-    </div>
+
   </div></div>`;
 }
 
 async function doLogin(){
   const u=document.getElementById('l-u').value.trim(),p=document.getElementById('l-p').value;
+  const btn=document.querySelector('.login-box button');
+  if(btn){btn.textContent='Signing in...';btn.disabled=true;}
   try{
     const data=await api('POST','/api/login',{username:u,password:p});
     token=data.token; me=data.user;
     localStorage.setItem('nila_token',token);
     currentStore=me.store_id||'atm';
-    await loadAllData();
     render();
+    await loadAllData();
+    showPage('dashboard');
   }catch(e){
-    document.getElementById('l-err').style.display='block';
+    const err=document.getElementById('l-err');
+    if(err)err.style.display='block';
+    if(btn){btn.textContent='Sign in';btn.disabled=false;}
   }
 }
 
 async function loadAllData(){
-  if(me.role==='owner'){
-    await Promise.all([loadStoreData('atm'),loadStoreData('hru')]);
-    try{usersData=await api('GET','/api/users');}catch(e){}
-  } else {
-    await loadStoreData(currentStore);
-  }
+  try{
+    if(me.role==='owner'){
+      await Promise.allSettled([loadStoreData('atm'),loadStoreData('hru')]);
+      try{usersData=await api('GET','/api/users');}catch(e){console.warn('Users load:',e);}
+    } else {
+      await loadStoreData(currentStore);
+    }
+    // Refresh current page with new data
+    const activePage=document.querySelector('.page.active');
+    if(activePage){
+      const id=activePage.id.replace('pg-','');
+      activePage.innerHTML=buildPage(id);
+    }
+  }catch(e){console.warn('loadAllData error:',e);}
 }
 
 function doLogout(){
@@ -1211,10 +1220,11 @@ async function init(){
     try{
       const payload=JSON.parse(atob(saved.split('.')[1]));
       if(payload.exp*1000>Date.now()){
-        token=saved;me={id:payload.id,name:payload.name,username:payload.username,role:payload.role,store_id:payload.store_id,perms:payload.perms};
+        token=saved;
+        me={id:payload.id,name:payload.name,username:payload.username,role:payload.role,store_id:payload.store_id,perms:payload.perms};
         currentStore=me.store_id||'atm';
         render();
-        await loadAllData();
+        try{await loadAllData();}catch(e){console.warn('Auto-login data load:',e);}
         showPage('dashboard');
         return;
       }

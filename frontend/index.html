@@ -619,27 +619,27 @@ function doLogout(){
 
 // ── NAV PAGES ──
 const navDefs=[
-  {id:'dashboard',label:'Dashboard',always:true,sec:'Main',get secLabel(){return t('main')},
+  {id:'dashboard',label:'Dashboard',always:true,sec:'Main',secLabel:t('main'),
    ico:'<rect x="1.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="1.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>'},
-  {id:'sales',label:t('recordBtn'),always:true,sec:'Main',get secLabel(){return t('main')},
+  {id:'sales',label:t('recordBtn'),always:true,sec:'Main',secLabel:t('main'),
    ico:'<circle cx="7" cy="9" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M7 7v2l1.5 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M11 4h3M13 2v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'},
-  {id:'closeday',label:t('closeDayTitle'),always:true,sec:'Main',get secLabel(){return t('main')},dot:true,
+  {id:'closeday',label:t('closeDayTitle'),always:true,sec:'Main',secLabel:t('main'),dot:true,
    ico:'<circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 7l2 2 3.5-3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>'},
-  {id:'menu',label:'Menu',perm:'menu',sec:'Manage',get secLabel(){return t('manage')},
+  {id:'menu',label:'Menu',perm:'menu',sec:'Manage',secLabel:t('manage'),
    ico:'<path d="M2 4h10M2 7h10M2 10h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'},
-  {id:'inventory',label:'Inventory',perm:'inv',sec:'Manage',get secLabel(){return t('manage')},
+  {id:'inventory',label:'Inventory',perm:'inv',sec:'Manage',secLabel:t('manage'),
    ico:'<path d="M7 1.5L2 4.5v6L7 13.5l5-3v-6L7 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M2 4.5l5 3m0 0l5-3m-5 3v6" stroke="currentColor" stroke-width="1.3"/>'},
-  {id:'endstock',label:'End-day stock',perm:'endstock',sec:'Manage',get secLabel(){return t('manage')},
+  {id:'endstock',label:'End-day stock',perm:'endstock',sec:'Manage',secLabel:t('manage'),
    ico:'<path d="M2 3h10v8a3 3 0 01-3 3H5a3 3 0 01-3-3V3z" stroke="currentColor" stroke-width="1.3"/><path d="M4 3V2a1 1 0 012 0v1M8 3V2a1 1 0 012 0v1" stroke="currentColor" stroke-width="1.3"/>'},
-  {id:'revenue',label:t('revenueTitle'),perm:'revenue',sec:'Reports',get secLabel(){return t('reports')},
+  {id:'revenue',label:t('revenueTitle'),perm:'revenue',sec:'Reports',secLabel:t('reports'),
    ico:'<path d="M1 10l3-4 3 3 3-5 3 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>'},
-  {id:'settings',label:'Settings',always:true,sec:'Account',get secLabel(){return t('account')},
+  {id:'settings',label:'Settings',always:true,sec:'Account',secLabel:t('account'),
    ico:'<circle cx="7" cy="7" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 1v1.5M7 12.5V14M1 7h1.5M12.5 7H14M3 3l1 1M10 10l1 1M10 4l1-1M3 11l1-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'},
 ];
 
 // ── APP SHELL ──
 function buildApp(){
-  const nav=navDefs.filter(p=>p.always||(p.perm&&(me.role==='owner'||can(p.perm))));
+  const nav=navDefs.filter(p=>p.always||can(p.perm));
   const isOwner=me.role==='owner';
   const s=STORES[currentStore];
 
@@ -702,7 +702,7 @@ function buildApp(){
 function buildNavItems(nav){
   let html='',lastSec='';
   nav.forEach(p=>{
-    if(p.sec!==lastSec){html+=`<div class="d-sec">${p.secLabel||p.sec}</div>`;lastSec=p.sec;}
+    if(p.sec!==lastSec){html+=`<div class="d-sec">${p.sec}</div>`;lastSec=p.sec;}
     html+=`<button class="d-item" id="di-${p.id}" onclick="goPage('${p.id}')">
       <div class="d-ico"><svg width="14" height="14" viewBox="0 0 14 14" fill="none">${p.ico}</svg></div>
       <span>${p.label}</span>

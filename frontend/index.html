@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Nila Tea">
-<meta name="theme-color" content="#1A6B3C">
+<meta name="theme-color" content="#7B3F1E">
 <title>Nila Tea POS</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -15,15 +15,15 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
-  --g:#1A6B3C;--gl:#EAF5EE;--gt:#065F46;
-  --bg:#F4F6F4;--card:#fff;--bd:#E8EDE8;--bd2:#D1D9D1;
+  --g:#7B3F1E;--gl:#FDF0E6;--gt:#5C2E0E;
+  --bg:#FBF5EF;--card:#fff;--bd:#E8EDE8;--bd2:#D1D9D1;
   --t1:#111;--t2:#6A7A6A;--t3:#9AAA9A;
   --red:#B03030;--rbg:#FDECEC;
   --amb:#8A5A00;--abg:#FFF3DC;
-  --aba:#1A4A8A;--aba-bg:#EBF2FF;--aba-lt:#0F3060;
+  --aba:#4A2C0E;--aba-bg:#F5E6D3;--aba-lt:#2C1A08;
   --cash-c:#8A5A00;--cash-bg:#FFF3DC;
-  --atm-c:#1A6B3C;--atm-bg:#EAF5EE;--atm-lt:#065F46;
-  --hru-c:#1A4A8A;--hru-bg:#EBF2FF;--hru-lt:#0F3060;
+  --atm-c:#7B3F1E;--atm-bg:#FDF0E6;--atm-lt:#5C2E0E;
+  --hru-c:#4A2C0E;--hru-bg:#F5E6D3;--hru-lt:#2C1A08;
   --r:12px;--r-lg:16px;
   --shadow:0 1px 3px rgba(0,0,0,0.07);
 }
@@ -70,7 +70,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .d-item:hover{background:var(--bg);color:var(--t1);}
 .d-item.active{background:var(--gl);color:var(--gt);font-weight:600;}
 .d-ico{width:32px;height:32px;border-radius:9px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.d-item.active .d-ico{background:#D4EDDF;}
+.d-item.active .d-ico{background:#F5DCCA;}
 .d-bot{padding:10px 10px 28px;border-top:1px solid var(--bd);}
 .logout-row{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:500;color:var(--red);border:none;background:transparent;font-family:inherit;width:100%;}
 .logout-row:hover{background:var(--rbg);}
@@ -127,7 +127,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .gt-part-val{font-size:15px;font-weight:700;color:#fff;}
 .cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .cmp-card{border-radius:var(--r);padding:12px;border:1.5px solid transparent;}
-.cmp-card.atm{background:var(--atm-bg);border-color:#A8D5B8;}
+.cmp-card.atm{background:var(--atm-bg);border-color:#D4A882;}
 .cmp-card.hru{background:var(--hru-bg);border-color:#A8C0E0;}
 .cmp-store{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
 .cmp-dot{width:7px;height:7px;border-radius:50%;}
@@ -222,7 +222,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:10px;}
 .perm-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--t2);padding:7px 9px;background:var(--bg);border-radius:8px;border:1.5px solid var(--bd);cursor:pointer;transition:all 0.15s;user-select:none;}
 .perm-item:hover{border-color:var(--g);}
-.perm-item.on{background:var(--gl);border-color:#A8D5B8;}
+.perm-item.on{background:var(--gl);border-color:#D4A882;}
 .perm-item.on span{color:var(--gt);font-weight:600;}
 .pchk{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--bd2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .pchk.on{background:var(--g);border-color:var(--g);}
@@ -334,8 +334,8 @@ const API = 'https://nila-tea.onrender.com';
 
 const RATE = 4100;
 const STORES = {
-  atm: { id:'atm', name:'Angtamin Store', short:'ATM', color:'#1A6B3C', bg:'#EAF5EE', lt:'#065F46' },
-  hru: { id:'hru', name:'HRU Store', short:'HRU', color:'#1A4A8A', bg:'#EBF2FF', lt:'#0F3060' }
+  atm: { id:'atm', name:'Angtamin Store', short:'ATM', color:'#7B3F1E', bg:'#FDF0E6', lt:'#5C2E0E' },
+  hru: { id:'hru', name:'HRU Store', short:'HRU', color:'#4A2C0E', bg:'#F5E6D3', lt:'#2C1A08' }
 };
 
 // ── STATE ──
@@ -397,7 +397,7 @@ function render(){
 // ── LOGIN ──
 function buildLogin(){
   return `<div class="login-wrap"><div class="login-box">
-    <div class="login-logo"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M5 6h14v10a4 4 0 01-4 4H9a4 4 0 01-4-4V6z" stroke="#fff" stroke-width="1.8"/><path d="M15 6c0-1.7-1.3-3-3-3s-3 1.3-3 3" stroke="#fff" stroke-width="1.8"/><path d="M19 9h2a2 2 0 010 4h-2" stroke="#fff" stroke-width="1.8"/></svg></div>
+    <div class="login-logo" style="background:transparent;padding:0;"><img src="Logo_Nila_Tea.png" style="width:52px;height:52px;object-fit:contain;border-radius:14px;"></div>
     <div class="login-title">Nila Tea</div>
     <div class="login-sub">Sign in to your store</div>
     <div class="lf"><label>Username</label><input type="text" id="l-u" placeholder="admin" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"></div>
@@ -487,7 +487,7 @@ function buildApp(){
     <div class="drawer" id="drawer">
       <div class="d-top">
         <div class="d-logo-row">
-          <div class="d-logo-ico"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 5h12v7a4 4 0 01-4 4H8a4 4 0 01-4-4V5z" stroke="#fff" stroke-width="1.6"/><path d="M13 5c0-1.7-1.3-3-3-3S7 3.3 7 5" stroke="#fff" stroke-width="1.6"/><path d="M16 8h1.5a1.5 1.5 0 010 3H16" stroke="#fff" stroke-width="1.6"/></svg></div>
+          <div class="d-logo-ico" style="background:transparent;padding:0;"><img src="Logo_Nila_Tea.png" style="width:40px;height:40px;object-fit:contain;border-radius:12px;"></div>
           <div><div class="d-app-name">Nila Tea</div></div>
           <button class="d-close" onclick="closeDrawer()"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 1.5l8 8M9.5 1.5l-8 8" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round"/></svg></button>
         </div>
@@ -634,7 +634,7 @@ function bDash(){
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <button class="btn" style="flex:1;background:var(--atm-bg);color:var(--atm-lt);border-color:#A8D5B8;" onclick="switchStore('atm');showPage('sales')">ATM Sales →</button>
+      <button class="btn" style="flex:1;background:var(--atm-bg);color:var(--atm-lt);border-color:#D4A882;" onclick="switchStore('atm');showPage('sales')">ATM Sales →</button>
       <button class="btn" style="flex:1;background:var(--hru-bg);color:var(--hru-lt);border-color:#A8C0E0;" onclick="switchStore('hru');showPage('sales')">HRU Sales →</button>
     </div>
     <div class="sh"><div class="sh-t">Recent sales — ${st.name}</div><button class="btn sm" onclick="showPage('sales')">See all</button></div>

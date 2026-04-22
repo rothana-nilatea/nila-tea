@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -331,17 +334,17 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 <script>
 // ══════════════════════════════════════════════════
 // !! CHANGE THIS TO YOUR RENDER BACKEND URL !!
-const API = 'https://nila-tea.onrender.com';
+var API = 'https://nila-tea.onrender.com';
 // ══════════════════════════════════════════════════
 
-const RATE = 4100;
-const STORES = {
+var RATE = 4100;
+var STORES = {
   atm: { id:'atm', name:'Angtamin Store', short:'ATM', color:'#7B3F1E', bg:'#FDF0E6', lt:'#5C2E0E' },
   hru: { id:'hru', name:'HRU Store', short:'HRU', color:'#4A2C0E', bg:'#F5E6D3', lt:'#2C1A08' }
 };
 
 // ── STATE ──
-const T={
+var T={
 en:{
   appName:'Nila Tea',appSub:'Multi-store POS',signIn:'Sign in to your store',
   username:'Username',password:'Password',signInBtn:'Sign in',wrongPass:'Wrong username or password',
@@ -482,15 +485,15 @@ km:{
 }
 };
 function t(key){return(T[lang]&&T[lang][key])||T.en[key]||key;}
-let me=null, token=null, lang='en', currentStore='atm', logoUrl=null;
+var me=null, token=null, lang='en', currentStore='atm', logoUrl=null;
 
 function getLogo(){return logoUrl||'logo.svg';}
 function logoImg(w=40,h=40,style=''){return `<img src="${getLogo()}" style="width:${w}px;height:${h}px;object-fit:contain;${style}" onerror="this.src='logo.svg'">`;}
-let menuData={atm:[],hru:[]}, invData={atm:[],hru:[]};
-let salesData={atm:[],hru:[]}, abaData={atm:[],hru:[]};
-let usersData=[], storeStats={atm:{},hru:{}};
-let togOn=true, pendingImg=null, selectedPay='cash';
-let delType=null, delIdx=-1, eMI=-1, eII=-1, eUI=-1, stkPh={};
+var menuData={atm:[],hru:[]}, invData={atm:[],hru:[]};
+var salesData={atm:[],hru:[]}, abaData={atm:[],hru:[]};
+var usersData=[], storeStats={atm:{},hru:{}};
+var togOn=true, pendingImg=null, selectedPay='cash';
+var delType=null, delIdx=-1, eMI=-1, eII=-1, eUI=-1, stkPh={};
 
 // ── HELPERS ──
 function fmt(u){return '$'+(parseFloat(u)||0).toFixed(2);}
@@ -618,7 +621,7 @@ function doLogout(){
 }
 
 // ── NAV PAGES ──
-const navDefs=[
+var navDefs=[
   {id:'dashboard',label:'Dashboard',always:true,sec:'Main',secLabel:'Main',
    ico:'<rect x="1.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="1.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>'},
   {id:'sales',label:'Record sale',always:true,sec:'Main',secLabel:'Main',

@@ -2,9 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -23,10 +20,10 @@
   --t1:#111;--t2:#6A7A6A;--t3:#9AAA9A;
   --red:#B03030;--rbg:#FDECEC;
   --amb:#8A5A00;--abg:#FFF3DC;
-  --aba:#1A4A8A;--aba-bg:#EBF2FF;--aba-lt:#0F3060;
+  --aba:#4A2C0E;--aba-bg:#F5E6D3;--aba-lt:#2C1A08;
   --cash-c:#8A5A00;--cash-bg:#FFF3DC;
   --atm-c:#7B3F1E;--atm-bg:#FDF0E6;--atm-lt:#5C2E0E;
-  --hru-c:#1A4A8A;--hru-bg:#EBF2FF;--hru-lt:#0F3060;
+  --hru-c:#4A2C0E;--hru-bg:#F5E6D3;--hru-lt:#2C1A08;
   --r:12px;--r-lg:16px;
   --shadow:0 1px 3px rgba(0,0,0,0.07);
 }
@@ -130,7 +127,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .gt-part-val{font-size:15px;font-weight:700;color:#fff;}
 .cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .cmp-card{border-radius:var(--r);padding:12px;border:1.5px solid transparent;}
-.cmp-card.atm{background:var(--atm-bg);border-color:#A8D5B8;}
+.cmp-card.atm{background:var(--atm-bg);border-color:#D4A882;}
 .cmp-card.hru{background:var(--hru-bg);border-color:#A8C0E0;}
 .cmp-store{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
 .cmp-dot{width:7px;height:7px;border-radius:50%;}
@@ -203,7 +200,6 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .aba-logo{width:36px;height:36px;border-radius:9px;background:var(--aba-bg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--aba-lt);flex-shrink:0;}
 .dot-pulse{width:8px;height:8px;border-radius:50%;background:var(--aba);animation:pulse 1.2s ease-in-out infinite;flex-shrink:0;}
 @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}
-@keyframes spin{to{transform:rotate(360deg)}}
 .aba-txn{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--bd);font-size:12px;}
 .aba-txn:last-child{border:none;}
 
@@ -226,7 +222,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:10px;}
 .perm-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--t2);padding:7px 9px;background:var(--bg);border-radius:8px;border:1.5px solid var(--bd);cursor:pointer;transition:all 0.15s;user-select:none;}
 .perm-item:hover{border-color:var(--g);}
-.perm-item.on{background:var(--gl);border-color:#A8D5B8;}
+.perm-item.on{background:var(--gl);border-color:#D4A882;}
 .perm-item.on span{color:var(--gt);font-weight:600;}
 .pchk{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--bd2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .pchk.on{background:var(--g);border-color:var(--g);}
@@ -248,11 +244,13 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .mfoot .btn{flex:1;padding:13px;font-size:14px;}
 
 /* ── LOGIN ── */
-.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;height:100dvh;background:#FBF5EF;padding:20px;}
-.login-card{background:#fff;border-radius:24px;padding:32px 24px;width:100%;max-width:360px;box-shadow:0 4px 24px rgba(123,63,30,0.12);border:0.5px solid #EAD8C8;}
-.login-logo-wrap{width:120px;height:120px;border-radius:50%;background:#7B3F1E;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;overflow:hidden;box-shadow:0 4px 16px rgba(123,63,30,0.35);}
-.login-title{font-size:21px;font-weight:700;text-align:center;color:#2C1A08;margin-bottom:3px;}
-.login-sub{font-size:12px;color:#9A8A7A;text-align:center;margin-bottom:22px;}
+.login-wrap{display:flex;flex-direction:column;height:100vh;background:var(--g);}
+.login-top{flex:0 0 42%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:#5C2E0E;}
+.login-logo{width:200px;height:80px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+.login-logo img{width:140px;height:140px;object-fit:contain;}
+.login-box{flex:1;background:var(--card);border-radius:28px 28px 0 0;padding:28px 22px 32px;width:100%;box-shadow:0 -4px 20px rgba(0,0,0,0.08);}
+.login-title{font-size:22px;font-weight:700;text-align:center;color:var(--t1);}
+.login-sub{font-size:12px;color:var(--t2);text-align:center;margin:3px 0 20px;}
 .lf{margin-bottom:12px;}
 .lf label{font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:4px;}
 .lf input{width:100%;font-size:15px;padding:11px 13px;border:1.5px solid var(--bd2);border-radius:12px;background:var(--bg);color:var(--t1);font-family:inherit;}
@@ -339,11 +337,155 @@ const API = 'https://nila-tea.onrender.com';
 const RATE = 4100;
 const STORES = {
   atm: { id:'atm', name:'Angtamin Store', short:'ATM', color:'#7B3F1E', bg:'#FDF0E6', lt:'#5C2E0E' },
-  hru: { id:'hru', name:'HRU Store', short:'HRU', color:'#1A4A8A', bg:'#EBF2FF', lt:'#0F3060' }
+  hru: { id:'hru', name:t('hruStore'), short:'HRU', color:'#4A2C0E', bg:'#F5E6D3', lt:'#2C1A08' }
 };
 
 // ── STATE ──
-let me=null, token=null, lang='en', currentStore='atm';
+let me=null, token=null, lang='en', currentStore='atm', logoUrl=null;
+
+const T={
+en:{
+  appName:'Nila Tea',appSub:'Multi-store POS',signIn:'Sign in to your store',
+  username:'Username',password:'Password',signInBtn:'Sign in',wrongPass:'Wrong username or password',
+  signingIn:'Signing in...',
+  dashboard:'Dashboard',sales:t('recordBtn'),closeday:t('closeDayTitle'),
+  menu:'Menu',inventory:'Inventory',endstock:'End-day stock',
+  revenue:t('revenueTitle'),settings:'Settings',logout:t('logoutBtn'),
+  main:'Main',manage:'Manage',account:'Account',reports:'Reports',
+  goodMorning:t('goodMorning'),bothStores:t('bothStores'),
+  combinedRevenue:t('combinedRevenue'),totalRevenue:t('totalRevenue'),
+  todayOrders:'Orders today',menuItems:'Menu items',lowStock:'Low stock',
+  needsRestock:'needs restock',recentSales:t('recentSales'),seeAll:t('seeAll'),
+  noSalesYet:t('noSalesYet'),jumpTo:'Jump to store',
+  atmSales:'ATM Sales →',hruSales:'HRU Sales →',
+  recordSale:t('recordSale'),amountReceived:t('amountReceived'),
+  payMethod:t('payMethod'),cash:'Cash',aba:'ABA',physicalMoney:t('physicalMoney'),
+  bankTransfer:t('bankTransfer'),noteOptional:t('noteOptional'),
+  notePlaceholder:'e.g. Milk Tea x2, Taro Latte',recordBtn:t('recordBtn'),
+  salesLog:t('salesLog'),totalLabel:'total',noSalesRecorded:t('noSalesRecorded'),
+  cashToday:t('cashToday'),abaToday:t('abaToday'),txns:'txns',
+  closeDayTitle:t('closeDayTitle'),grandTotal:t('grandTotal'),totalCollected:'Total collected',
+  cashCollected:'Cash collected',manuallyRecorded:'manually recorded',
+  abaTransactions:'ABA transactions',autoPulled:t('autoPulled'),
+  connected:t('connected'),
+  abaMore:'ABA shows more than recorded — check unmatched transactions',
+  abaLess:'in ABA sales not yet received in account',
+  abaMatched:t('abaMatched'),
+  submitClose:t('submitClose'),ownerNotifiedInstant:t('ownerNotifiedInstant'),
+  ownerNotifiedMsg:'Nila received the full closing report with Cash & ABA breakdown.',
+  dayClosed:t('dayClosed'),backToSales:t('backToSales'),
+  totalCash:t('totalCash'),totalABA:t('totalABA'),noABA:t('noABA'),
+  menuTitle:'Menu',addItem:t('addItem'),noPhoto:t('noPhoto'),
+  category:'Category',priceUSD:'Price (USD)',photo:'Photo',
+  tapUpload:'Tap to upload photo',saveItem:t('saveItem'),cancelBtn:t('cancelBtn'),
+  editItem:t('editItem'),addMenuItem:t('addMenuItem'),
+  inventoryTitle:'Inventory',addIngredient:t('addIngredient'),
+  countDaily:t('countDaily'),skip:'Skip',
+  editIngredient:t('editIngredient'),addIngredientTitle:t('addIngredientTitle'),
+  countInStock:t('countInStock'),staffCountsDaily:t('staffCountsDaily'),
+  endStockTitle:t('endStockTitle'),itemsToCount:'items to count · photo proof required',
+  openingLabel:'Opening',closingLabel:'Closing',statusLabel:'Status',okLabel:'OK',lowLabel:'Low',
+  noPhotoYet:t('noPhotoYet'),photoTaken:t('photoTaken'),
+  requiredBefore:t('requiredBefore'),readyToSubmit:t('readyToSubmit'),
+  submitStock:t('submitStock'),stockSubmitted:t('stockSubmitted'),
+  allItemsCounted:t('allItemsCounted'),
+  ownerNotifiedStock:'Nila received the closing stock count and photos.',
+  noItemsMarked:t('noItemsMarked'),
+  doneBtn:t('doneBtn'),
+  revenueTitle:t('revenueTitle'),bothStoresComp:t('bothStoresComp'),
+  todayTotal:'Today total',combinedTotalLabel:t('combinedTotalLabel'),
+  atmStore:t('atmStore'),hruStore:t('hruStore'),grandTotalLabel:t('grandTotalLabel'),
+  payBreakdown:t('payBreakdown'),
+  settingsTitle:t('settingsTitle'),languageLabel:'Language',
+  exchangeRate:'Exchange rate',usersPerms:'Users & permissions',
+  addUser:'+ Add user',ownerLabel2:'Owner',staffLabel:'Staff',
+  viewRevenue:'View revenue',manageMenu:'Manage menu',manageStock:'Manage stock',
+  endDayStock:'End-day stock',recordSales:'Record sales',closeday:'Close day',closeDayPerm:'Close day',
+  fullName:'Full name',usernameLbl:'Username',passwordLbl:'Password',
+  storeLbl:'Store',roleLbl:'Role',saveUser:t('saveUser'),
+  editUser:t('editUser'),addUserTitle:t('addUserTitle'),
+  signedInAs:'Signed in as',logoutBtn:t('logoutBtn'),
+  deleteQ:t('deleteQ'),permanentlyRemoved:t('permanentlyRemoved'),
+  yesDelete:t('yesDelete'),
+  currentStoreLbl:'Current store',atmBranch:'ATM branch',hruBranch:'HRU branch',
+  combinedView:'Combined view',allStoresLabel:'All stores',
+  matchedLabel:'matched',unmatchedLabel:'unmatched',liveLabel:'Live',
+  noPhotoLabel:t('noPhoto'),photoCheckLabel:'Photo ✓',
+  ownerAllStores:'Owner · All stores',transactions:'transactions',
+},
+km:{
+  appName:'នីឡា ទ',appSub:'ប្រព័ន្ធគ្រប់គ្រងហាង',signIn:'ចូលទៅគ្រប់គ្រងហាង',
+  username:'ឈ្មោះអ្នកប្រើ',password:'លេខសម្ងាត់',signInBtn:'ចូលប្រើ',wrongPass:'ឈ្មោះអ្នកប្រើ ឬ លេខសម្ងាត់មិនត្រឹមត្រូវ',
+  signingIn:'កំពុងចូល...',
+  dashboard:'ផ្ទាំងគ្រប់គ្រង',sales:'កត់ត្រាការលក់',closeday:'បិទថ្ងៃ',
+  menu:'មុខម្ហូប',inventory:'សារពើភ័ណ្ឌ',endstock:'ស្តុកបិទថ្ងៃ',
+  revenue:'ចំណូល',settings:'ការកំណត់',logout:'ចាកចេញ',
+  main:'មេ',manage:'គ្រប់គ្រង',account:'គណនី',reports:'របាយការណ៍',
+  goodMorning:'អរុណសួស្តី',bothStores:'ហាងទាំងពីរ',
+  combinedRevenue:'ចំណូលសរុបថ្ងៃនេះ',totalRevenue:'ចំណូលថ្ងៃនេះ',
+  todayOrders:'ការបញ្ជាទិញថ្ងៃនេះ',menuItems:'មុខទំនិញ',lowStock:'ស្តុកទាប',
+  needsRestock:'ត្រូវការបន្ថែម',recentSales:'ការលក់ថ្មីៗ',seeAll:'មើលទាំងអស់',
+  noSalesYet:'មិនទាន់មានការលក់ថ្ងៃនេះ',jumpTo:'ទៅហាង',
+  atmSales:'ការលក់ ATM →',hruSales:'ការលក់ HRU →',
+  recordSale:'កត់ត្រាការលក់ថ្មី',amountReceived:'ចំនួនទឹកប្រាក់ (ដុល្លារ)',
+  payMethod:'វិធីបង់ប្រាក់',cash:'សាច់ប្រាក់',aba:'ABA',physicalMoney:'ប្រាក់សាច់',
+  bankTransfer:'ផ្ទេរប្រាក់',noteOptional:'កំណត់ចំណាំ (ស្រេចចិត្ត)',
+  notePlaceholder:'ឧ. តែទឹកដោះគោ x2',recordBtn:'កត់ត្រា',
+  salesLog:'កំណត់ត្រាការលក់ថ្ងៃនេះ',totalLabel:'សរុប',noSalesRecorded:'មិនទាន់មានការលក់',
+  cashToday:'សាច់ប្រាក់ថ្ងៃនេះ',abaToday:'ABA ថ្ងៃនេះ',txns:'ប្រតិបត្តិការ',
+  closeDayTitle:'បិទថ្ងៃ',grandTotal:'ចំណូលសរុបថ្ងៃនេះ',totalCollected:'ចំនួនសរុបប្រមូលបាន',
+  cashCollected:'សាច់ប្រាក់ប្រមូលបាន',manuallyRecorded:'កត់ត្រាដោយដៃ',
+  abaTransactions:'ប្រតិបត្តិការ ABA',autoPulled:'ទាញពី ABA API ដោយស្វ័យប្រវត្តិ',
+  connected:'បានភ្ជាប់ · ABA webhook សកម្ម',
+  abaMore:'ABA បង្ហាញច្រើនជាងការកត់ត្រា — សូមពិនិត្យ',
+  abaLess:'ការលក់ ABA មិនទាន់ទទួលបាន',
+  abaMatched:'ប្រតិបត្តិការ ABA ទាំងអស់ត្រូវគ្នា',
+  submitClose:'ដាក់ស្នើរបាយការណ៍បិទថ្ងៃ',ownerNotifiedInstant:'ម្ចាស់ហាងនឹងទទួលការជូនដំណឹង',
+  ownerNotifiedMsg:'នីឡាទទួលបានរបាយការណ៍បិទថ្ងៃ Cash និង ABA',
+  dayClosed:'បិទថ្ងៃហើយ!',backToSales:'ត្រឡប់ទៅការលក់',
+  totalCash:'សាច់ប្រាក់សរុប',totalABA:'ABA សរុប',noABA:'មិនទាន់មានប្រតិបត្តិការ ABA',
+  menuTitle:'មុខម្ហូប',addItem:'+ បន្ថែមមុខទំនិញ',noPhoto:'គ្មានរូបភាព',
+  category:'ប្រភេទ',priceUSD:'តម្លៃ (ដុល្លារ)',photo:'រូបភាព',
+  tapUpload:'ចុចដើម្បីផ្ទុករូបភាព',saveItem:'រក្សាទុក',cancelBtn:'បោះបង់',
+  editItem:'កែសម្រួលមុខទំនិញ',addMenuItem:'បន្ថែមមុខទំនិញ',
+  inventoryTitle:'សារពើភ័ណ្ឌ',addIngredient:'+ បន្ថែម',
+  countDaily:'រាប់រាល់ថ្ងៃ',skip:'រំលង',
+  editIngredient:'កែសម្រួលគ្រឿងផ្សំ',addIngredientTitle:'បន្ថែមគ្រឿងផ្សំ',
+  countInStock:'រាប់នៅក្នុងស្តុកបិទថ្ងៃ',staffCountsDaily:'បុគ្គលិករាប់រាល់ថ្ងៃ',
+  endStockTitle:'ស្តុកបិទថ្ងៃ',itemsToCount:'មុខទំនិញត្រូវរាប់ · ត្រូវការរូបភាព',
+  openingLabel:'ការបើក',closingLabel:'ការបិទ',statusLabel:'ស្ថានភាព',okLabel:'ល្អ',lowLabel:'ទាប',
+  noPhotoYet:'មិនទាន់មានរូបភាព',photoTaken:'មានរូបភាពហើយ',
+  requiredBefore:'ត្រូវការមុនពេលដាក់ស្នើ',readyToSubmit:'រួចរាល់',
+  submitStock:'ដាក់ស្នើការរាប់ស្តុក',stockSubmitted:'ស្តុកបានដាក់ស្នើ!',
+  allItemsCounted:'មុខទំនិញទាំងអស់ត្រូវបានរាប់ជាមួយរូបភាព។',
+  ownerNotifiedStock:'នីឡាទទួលបានការរាប់ស្តុក និងរូបភាព។',
+  noItemsMarked:'មិនមានមុខទំនិញដែលសម្គាល់ជារាប់ប្រចាំថ្ងៃ។',
+  doneBtn:'រួចរាល់',
+  revenueTitle:'ចំណូល',bothStoresComp:'ប្រៀបធៀបហាងទាំងពីរ',
+  todayTotal:'សរុបថ្ងៃនេះ',combinedTotalLabel:'សរុបរួមថ្ងៃនេះ',
+  atmStore:'ហាង ATM',hruStore:'ហាង HRU',grandTotalLabel:'សរុបធំ',
+  payBreakdown:'ការបែងចែកការទូទាត់',
+  settingsTitle:'ការកំណត់ & ហាង',languageLabel:'ភាសា',
+  exchangeRate:'អត្រាប្តូរប្រាក់',usersPerms:'អ្នកប្រើ & សិទ្ធិ',
+  addUser:'+ បន្ថែមអ្នកប្រើ',ownerLabel2:'ម្ចាស់',staffLabel:'បុគ្គលិក',
+  viewRevenue:'មើលចំណូល',manageMenu:'គ្រប់គ្រងមុខម្ហូប',manageStock:'គ្រប់គ្រងស្តុក',
+  endDayStock:'ស្តុកបិទថ្ងៃ',recordSales:'កត់ត្រាការលក់',
+  fullName:'ឈ្មោះពេញ',usernameLbl:'ឈ្មោះអ្នកប្រើ',passwordLbl:'លេខសម្ងាត់',
+  storeLbl:'ហាង',roleLbl:'តួនាទី',saveUser:'រក្សាទុក',
+  editUser:'កែសម្រួលអ្នកប្រើ',addUserTitle:'បន្ថែមអ្នកប្រើ',
+  signedInAs:'បានចូលជា',logoutBtn:'ចាកចេញ',
+  deleteQ:'លុប?',permanentlyRemoved:'មុខទំនិញនេះនឹងត្រូវលុបចោល។',
+  yesDelete:'បាទ/ចាស លុប',
+  currentStoreLbl:'ហាងបច្ចុប្បន្ន',atmBranch:'សាខា ATM',hruBranch:'សាខា HRU',
+  combinedView:'មើលរួម',allStoresLabel:'ហាងទាំងអស់',
+  matchedLabel:'ត្រូវគ្នា',unmatchedLabel:'មិនត្រូវ',liveLabel:'រស់នៅ',
+  noPhotoLabel:'គ្មានរូបភាព',photoCheckLabel:'រូបភាព ✓',
+  ownerAllStores:'ម្ចាស់ · ហាងទាំងអស់',transactions:'ប្រតិបត្តិការ',
+}
+};
+function t(key){return(T[lang]&&T[lang][key])||T.en[key]||key;}
+function getLogo(){return logoUrl||'logo.svg';}
+function logoImg(w=40,h=40,style=''){return `<img src="${getLogo()}" style="width:${w}px;height:${h}px;object-fit:contain;${style}" onerror="this.src='logo.svg'">`;}
 let menuData={atm:[],hru:[]}, invData={atm:[],hru:[]};
 let salesData={atm:[],hru:[]}, abaData={atm:[],hru:[]};
 let usersData=[], storeStats={atm:{},hru:{}};
@@ -382,18 +524,14 @@ async function api(method,path,body){
 
 async function loadStoreData(s){
   try{
-    const [menu,inv,sales,aba,stats]=await Promise.allSettled([
+    const [menu,inv,sales,aba,stats]=await Promise.all([
       api('GET',`/api/stores/${s}/menu`),
       api('GET',`/api/stores/${s}/inventory`),
       api('GET',`/api/stores/${s}/sales`),
       api('GET',`/api/stores/${s}/aba`),
       api('GET',`/api/stores/${s}/revenue/today`),
     ]);
-    if(menu.status==='fulfilled') menuData[s]=menu.value;
-    if(inv.status==='fulfilled') invData[s]=inv.value;
-    if(sales.status==='fulfilled') salesData[s]=sales.value;
-    if(aba.status==='fulfilled') abaData[s]=aba.value;
-    if(stats.status==='fulfilled') storeStats[s]=stats.value;
+    menuData[s]=menu; invData[s]=inv; salesData[s]=sales; abaData[s]=aba; storeStats[s]=stats;
   }catch(e){console.warn('Could not load data for',s,e.message);}
 }
 
@@ -404,49 +542,71 @@ function render(){
 
 // ── LOGIN ──
 function buildLogin(){
-  return `<div class="login-wrap">
-    <div class="login-card">
-      <div class="login-logo-wrap">
-        <img src="logo.svg" style="width:110px;height:110px;object-fit:contain;filter:brightness(0) invert(1);" onerror="this.style.display='none'">
-      </div>
-      <div class="login-title">Nila Tea</div>
-      <div class="login-sub">នីឡា ធី · Sign in to your store</div>
-      <div class="lf" style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:600;color:#7A6A5A;display:block;margin-bottom:5px;">Username</label>
-        <input type="text" id="l-u" placeholder="admin" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;font-size:15px;padding:12px 14px;border:1.5px solid #E0D0C0;border-radius:12px;background:#FBF5EF;color:#2C1A08;font-family:inherit;-webkit-appearance:none;outline:none;">
-      </div>
-      <div class="lf" style="margin-bottom:16px;">
-        <label style="font-size:11px;font-weight:600;color:#7A6A5A;display:block;margin-bottom:5px;">Password</label>
-        <input type="password" id="l-p" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;font-size:15px;padding:12px 14px;border:1.5px solid #E0D0C0;border-radius:12px;background:#FBF5EF;color:#2C1A08;font-family:inherit;-webkit-appearance:none;outline:none;">
-      </div>
-      <div class="login-err" id="l-err" style="font-size:12px;color:#B03030;background:#FDECEC;padding:10px 13px;border-radius:10px;margin-bottom:12px;display:none;font-weight:500;">Wrong username or password</div>
-      <button onclick="doLogin()" style="width:100%;padding:14px;background:#7B3F1E;color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(123,63,30,0.4);letter-spacing:0.3px;">Sign in</button>
-    </div>
-  </div>`;
-}
+  return `<div class="login-wrap"><div class="login-box">
+    <div class="login-logo" style="background:transparent;padding:0;"><img src="Logo_Nila_Tea.png" style="width:52px;height:52px;object-fit:contain;border-radius:14px;"></div>
+    <div class="login-title">${t('appName')}</div>
+    <div class="login-sub">${t('signIn')}</div>
+    <div class="lf"><label>${t('username')}</label><input type="text" id="l-u" placeholder="admin" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="lf"><label>${t('password')}</label><input type="password" id="l-p" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-err" id="l-err">${t('wrongPass')}</div>
+    <button style="width:100%;padding:13px;background:var(--g);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;" onclick="doLogin()">${t('signInBtn')}</button>
 
+  </div></div>`;
+}
 
 async function doLogin(){
   const u=document.getElementById('l-u').value.trim(),p=document.getElementById('l-p').value;
+  const btn=document.querySelector('.login-box button');
+  if(btn){btn.textContent='Signing in...';btn.disabled=true;}
   try{
     const data=await api('POST','/api/login',{username:u,password:p});
     token=data.token; me=data.user;
     localStorage.setItem('nila_token',token);
     currentStore=me.store_id||'atm';
-    await loadAllData();
+    await loadLogo(true);
     render();
+    await loadAllData();
+    showPage('dashboard');
   }catch(e){
-    document.getElementById('l-err').style.display='block';
+    const err=document.getElementById('l-err');
+    if(err){err.textContent=t('wrongPass');err.style.display='block';}
+    if(btn){btn.textContent='Sign in';btn.disabled=false;}
   }
 }
 
+async function loadLogo(fetchFromDb=false){
+  try{
+    // Always use cache first for instant load
+    const cached=localStorage.getItem('nila_logo');
+    if(cached){logoUrl=cached;}
+    // Only fetch from DB if logged in and requested
+    if(fetchFromDb && token){
+      try{
+        const data=await api('GET','/api/logo');
+        if(data.logo){
+          logoUrl=data.logo;
+          localStorage.setItem('nila_logo',data.logo);
+        }
+      }catch(e){console.warn('Logo DB fetch:',e);}
+    }
+  }catch(e){console.warn('Logo load:',e);}
+}
+
 async function loadAllData(){
-  if(me.role==='owner'){
-    await Promise.all([loadStoreData('atm'),loadStoreData('hru')]);
-    try{usersData=await api('GET','/api/users');}catch(e){}
-  } else {
-    await loadStoreData(currentStore);
-  }
+  try{
+    if(me.role==='owner'){
+      await Promise.allSettled([loadStoreData('atm'),loadStoreData('hru')]);
+      try{usersData=await api('GET','/api/users');}catch(e){console.warn('Users load:',e);}
+    } else {
+      await loadStoreData(currentStore);
+    }
+    // Refresh current page with new data
+    const activePage=document.querySelector('.page.active');
+    if(activePage){
+      const id=activePage.id.replace('pg-','');
+      activePage.innerHTML=buildPage(id);
+    }
+  }catch(e){console.warn('loadAllData error:',e);}
 }
 
 function doLogout(){
@@ -459,21 +619,21 @@ function doLogout(){
 
 // ── NAV PAGES ──
 const navDefs=[
-  {id:'dashboard',label:'Dashboard',always:true,sec:'Main',
+  {id:'dashboard',label:'Dashboard',always:true,sec:'Main',secLabel:t('main'),
    ico:'<rect x="1.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="1.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="8.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>'},
-  {id:'sales',label:'Record sale',always:true,sec:'Main',
+  {id:'sales',label:t('recordBtn'),always:true,sec:'Main',secLabel:t('main'),
    ico:'<circle cx="7" cy="9" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M7 7v2l1.5 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M11 4h3M13 2v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'},
-  {id:'closeday',label:'Close day',always:true,sec:'Main',dot:true,
+  {id:'closeday',label:t('closeDayTitle'),always:true,sec:'Main',secLabel:t('main'),dot:true,
    ico:'<circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 7l2 2 3.5-3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>'},
-  {id:'menu',label:'Menu',perm:'menu',sec:'Manage',
+  {id:'menu',label:'Menu',perm:'menu',sec:'Manage',secLabel:t('manage'),
    ico:'<path d="M2 4h10M2 7h10M2 10h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'},
-  {id:'inventory',label:'Inventory',perm:'inv',sec:'Manage',
+  {id:'inventory',label:'Inventory',perm:'inv',sec:'Manage',secLabel:t('manage'),
    ico:'<path d="M7 1.5L2 4.5v6L7 13.5l5-3v-6L7 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M2 4.5l5 3m0 0l5-3m-5 3v6" stroke="currentColor" stroke-width="1.3"/>'},
-  {id:'endstock',label:'End-day stock',perm:'endstock',sec:'Manage',
+  {id:'endstock',label:'End-day stock',perm:'endstock',sec:'Manage',secLabel:t('manage'),
    ico:'<path d="M2 3h10v8a3 3 0 01-3 3H5a3 3 0 01-3-3V3z" stroke="currentColor" stroke-width="1.3"/><path d="M4 3V2a1 1 0 012 0v1M8 3V2a1 1 0 012 0v1" stroke="currentColor" stroke-width="1.3"/>'},
-  {id:'revenue',label:'Revenue',perm:'revenue',sec:'Reports',
+  {id:'revenue',label:t('revenueTitle'),perm:'revenue',sec:'Reports',secLabel:t('reports'),
    ico:'<path d="M1 10l3-4 3 3 3-5 3 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>'},
-  {id:'settings',label:'Settings',always:true,sec:'Account',
+  {id:'settings',label:'Settings',always:true,sec:'Account',secLabel:t('account'),
    ico:'<circle cx="7" cy="7" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 1v1.5M7 12.5V14M1 7h1.5M12.5 7H14M3 3l1 1M10 10l1 1M10 4l1-1M3 11l1-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'},
 ];
 
@@ -492,7 +652,7 @@ function buildApp(){
     <div class="drawer" id="drawer">
       <div class="d-top">
         <div class="d-logo-row">
-          <div class="d-logo-ico"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 5h12v7a4 4 0 01-4 4H8a4 4 0 01-4-4V5z" stroke="#fff" stroke-width="1.6"/><path d="M13 5c0-1.7-1.3-3-3-3S7 3.3 7 5" stroke="#fff" stroke-width="1.6"/><path d="M16 8h1.5a1.5 1.5 0 010 3H16" stroke="#fff" stroke-width="1.6"/></svg></div>
+          <div class="d-logo-ico" style="background:transparent;padding:0;">${logoImg(40,40,"border-radius:12px;")}</div>
           <div><div class="d-app-name">Nila Tea</div></div>
           <button class="d-close" onclick="closeDrawer()"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 1.5l8 8M9.5 1.5l-8 8" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round"/></svg></button>
         </div>
@@ -582,7 +742,7 @@ function showPage(id){
   const pg=document.getElementById('pg-'+id);
   if(pg){pg.classList.add('active');pg.innerHTML=buildPage(id);}
   const di=document.getElementById('di-'+id);if(di)di.classList.add('active');
-  const labels={dashboard:'Dashboard',sales:'Record sale',closeday:'Close day',menu:'Menu',inventory:'Inventory',endstock:'End-day stock',revenue:'Revenue',settings:'Settings'};
+  const labels={dashboard:t('dashboard'),sales:t('sales'),closeday:t('closeday'),menu:t('menu'),inventory:t('inventory'),endstock:t('endstock'),revenue:t('revenue'),settings:t('settings')};
   const lbl=document.getElementById('pg-lbl');if(lbl)lbl.textContent=labels[id]||id;
   document.getElementById('mc')?.scrollTo(0,0);
 }
@@ -639,7 +799,7 @@ function bDash(){
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <button class="btn" style="flex:1;background:var(--atm-bg);color:var(--atm-lt);border-color:#A8D5B8;" onclick="switchStore('atm');showPage('sales')">ATM Sales →</button>
+      <button class="btn" style="flex:1;background:var(--atm-bg);color:var(--atm-lt);border-color:#D4A882;" onclick="switchStore('atm');showPage('sales')">ATM Sales →</button>
       <button class="btn" style="flex:1;background:var(--hru-bg);color:var(--hru-lt);border-color:#A8C0E0;" onclick="switchStore('hru');showPage('sales')">HRU Sales →</button>
     </div>
     <div class="sh"><div class="sh-t">Recent sales — ${st.name}</div><button class="btn sm" onclick="showPage('sales')">See all</button></div>
@@ -657,7 +817,7 @@ function bDash(){
       <div class="gt-val">${fmt(total)}</div>
       <div class="gt-khr">${fmtK(total)}</div>
       <div class="gt-breakdown">
-        <div class="gt-part"><div class="gt-part-lbl">Cash</div><div class="gt-part-val">${fmt(cashT)}</div></div>
+        <div class="gt-part"><div class="gt-part-lbl">Cash</div><div class="gt-part-val" id="cd-cash-val">${fmt(cashT)}</div></div>
         <div class="gt-part" style="background:rgba(255,255,255,0.08);"><div class="gt-part-lbl">ABA</div><div class="gt-part-val">${fmt(abaT)}</div></div>
       </div>
     </div>
@@ -783,12 +943,15 @@ async function recordSale(){
 // ════════ CLOSE DAY ════════
 function bCloseDay(){
   const s=currentStore, st=STORES[s];
-  const sl=salesData[s]||[], abaL=abaData[s]||[];
-  const cashT=sl.filter(x=>x.payment_method==='cash').reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
-  const abaRecorded=sl.filter(x=>x.payment_method==='aba').reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
+  const abaL=abaData[s]||[];
   const abaAuto=abaL.reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
-  const grandTotal=cashT+abaAuto;
-  const diff=abaAuto-abaRecorded;
+  const isOwner=me.role==='owner';
+  // Get saved cash entry for today
+  const savedCash=parseFloat(localStorage.getItem('nila_cash_'+s+'_'+new Date().toDateString())||'0');
+  const savedNote=localStorage.getItem('nila_cashnote_'+s+'_'+new Date().toDateString())||'';
+  const grandTotal=savedCash+abaAuto;
+  const cashT=savedCash;
+  const diff=0;
 
   return `<div id="cd-form">
     <div style="font-size:18px;font-weight:700;margin-bottom:3px;">Close day</div>
@@ -796,10 +959,10 @@ function bCloseDay(){
 
     <div class="combined-card" style="background:${st.color};">
       <div class="gt-label">Grand total today</div>
-      <div class="gt-val">${fmt(grandTotal)}</div>
-      <div class="gt-khr">${fmtK(grandTotal)}</div>
+      <div class="gt-val" id="cd-grand">${fmt(grandTotal)}</div>
+      <div class="gt-khr" id="cd-grand-khr">${fmtK(grandTotal)}</div>
       <div class="gt-breakdown">
-        <div class="gt-part"><div class="gt-part-lbl">Cash</div><div class="gt-part-val">${fmt(cashT)}</div></div>
+        <div class="gt-part"><div class="gt-part-lbl">Cash</div><div class="gt-part-val" id="cd-cash-val">${fmt(cashT)}</div></div>
         <div class="gt-part" style="background:rgba(255,255,255,0.08);"><div class="gt-part-lbl">ABA</div><div class="gt-part-val">${fmt(abaAuto)}</div></div>
       </div>
     </div>
@@ -870,18 +1033,74 @@ function bCloseDay(){
   </div>`;
 }
 
+function saveCashDraft(){
+  const v=parseFloat(document.getElementById('cash-input')?.value||0);
+  const key='nila_cash_'+currentStore+'_'+new Date().toDateString();
+  localStorage.setItem(key, v||0);
+  const disp=document.getElementById('cash-display');
+  if(disp)disp.textContent=fmt(v||0);
+  // Update grand total display
+  const abaL=abaData[currentStore]||[];
+  const abaAuto=abaL.reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
+  const grand=document.getElementById('grand-total-val');
+  if(grand)grand.textContent=fmt((v||0)+abaAuto);
+  const grandK=document.getElementById('grand-total-khr');
+  if(grandK)grandK.textContent=fmtK((v||0)+abaAuto);
+}
+function saveCashNote(){
+  const v=document.getElementById('cash-note')?.value||'';
+  localStorage.setItem('nila_cashnote_'+currentStore+'_'+new Date().toDateString(),v);
+}
+
+function updateCashTotal(val){
+  const v=parseFloat(val)||0;
+  localStorage.setItem('nila_cash_'+currentStore+'_'+new Date().toDateString(),v);
+  const abaAuto=(abaData[currentStore]||[]).reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
+  const el1=document.getElementById('cd-cash-total');if(el1)el1.textContent=fmt(v);
+  const el2=document.getElementById('cd-cash-val');if(el2)el2.textContent=fmt(v);
+  const el3=document.getElementById('cd-grand');if(el3)el3.textContent=fmt(v+abaAuto);
+  const el4=document.getElementById('cd-grand-khr');if(el4)el4.textContent=fmtK(v+abaAuto);
+}
+function setCash(amt){
+  const inp=document.getElementById('cash-input');
+  if(inp){inp.value=amt;updateCashTotal(amt);}
+}
 async function submitClose(){
+  const cashAmt=parseFloat(document.getElementById('cash-input')?.value||0);
+  const cashNote=document.getElementById('cash-note')?.value||'';
   try{
-    await api('POST',`/api/stores/${currentStore}/close`,{submitted_by:me.username});
+    await api('POST',`/api/stores/${currentStore}/close`,{
+      submitted_by:me.username,
+      cash_total:cashAmt,
+      cash_note:cashNote
+    });
   }catch(e){console.warn('Close day API error:',e.message);}
+  // Clear draft
+  localStorage.removeItem('nila_cash_'+currentStore+'_'+new Date().toDateString());
+  localStorage.removeItem('nila_cashnote_'+currentStore+'_'+new Date().toDateString());
   document.getElementById('cd-form').style.display='none';
   document.getElementById('cd-success').style.display='block';
 }
 
 // ════════ MENU ════════
+
+function storeTabs(pg){
+  if(me.role!=='owner') return '';
+  return `<div style="display:flex;gap:6px;margin-bottom:12px;">
+    ${Object.values(STORES).map(st=>`
+      <button onclick="currentStore='${st.id}';showPage('${pg}')"
+        style="flex:1;padding:9px;border-radius:10px;border:2px solid ${currentStore===st.id?st.color:'var(--bd2)'};
+        background:${currentStore===st.id?st.bg:'transparent'};
+        color:${currentStore===st.id?st.lt:'var(--t2)'};
+        font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">
+        ${st.short} — ${st.name.split(' ')[0]}
+      </button>`).join('')}
+  </div>`;
+}
 function bMenu(){
   const s=currentStore, items=menuData[s]||[];
   return `
+  ${storeTabs('menu')}
   <div class="sh">
     <div><div class="pg-title" style="margin-bottom:0;">Menu</div><div style="font-size:11px;color:var(--t2);">${items.length} items · ${STORES[s].name}</div></div>
     <button class="btn p sm" onclick="openMM(-1)">+ Add</button>
@@ -895,7 +1114,7 @@ function bMenu(){
 }
 
 function openMM(i){eMI=i;pendingImg=null;const s=currentStore,e=i>=0,m=e?menuData[s][i]:{};
-  document.getElementById('mm-t').textContent=e?'Edit item':'Add menu item';
+  document.getElementById('mm-t').textContent=e?t('editItem'):t('addMenuItem');
   document.getElementById('mm-n').value=e?m.name:'';
   document.getElementById('mm-c').value=e?m.category:'Tea';
   document.getElementById('mm-p').value=e?m.price_usd:'';
@@ -905,7 +1124,7 @@ function openMM(i){eMI=i;pendingImg=null;const s=currentStore,e=i>=0,m=e?menuDat
 async function saveMI(){
   const s=currentStore;
   const n=document.getElementById('mm-n').value.trim(),c=document.getElementById('mm-c').value,p=parseFloat(document.getElementById('mm-p').value);
-  if(!n||isNaN(p)){alert('Fill name and price.');return;}
+  if(!n||isNaN(p)){alert(t('wrongPass'));return;}
   try{
     if(eMI>=0){await api('PUT',`/api/menu/${menuData[s][eMI].id}`,{name:n,category:c,price_usd:p,image_url:pendingImg||menuData[s][eMI].image_url});Object.assign(menuData[s][eMI],{name:n,category:c,price_usd:p});}
     else{const item=await api('POST',`/api/stores/${s}/menu`,{name:n,category:c,price_usd:p,image_url:pendingImg||null});menuData[s].push(item);}
@@ -920,6 +1139,7 @@ async function saveMI(){
 function bInv(){
   const s=currentStore, items=invData[s]||[];
   return `
+  ${storeTabs('inventory')}
   <div class="sh">
     <div><div class="pg-title" style="margin-bottom:0;">Inventory</div><div style="font-size:11px;color:var(--t2);">${items.length} ingredients</div></div>
     <button class="btn p sm" onclick="openII(-1)">+ Add</button>
@@ -929,14 +1149,14 @@ function bInv(){
     <div class="inv-th">${v.image_url?`<img src="${v.image_url}">`:`${icoSVG(16)}`}</div>
     <div style="flex:1;min-width:0;">
       <div style="font-size:13px;font-weight:600;">${v.name}</div>
-      <div style="font-size:11px;color:var(--t2);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${v.quantity} ${v.unit}<span class="badge ${v.status==='low'?'bg-a':'bg-g'}">${v.status==='low'?'Low':'OK'}</span><span class="badge ${v.count_daily?'bg-g':'bg-gr'}">${v.count_daily?'Count daily':'Skip'}</span></div>
+      <div style="font-size:11px;color:var(--t2);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${v.quantity} ${v.unit}<span class="badge ${v.status==='low'?'bg-a':'bg-g'}">${v.status==='low'?'Low':'OK'}</span><span class="badge ${v.count_daily?'bg-g':'bg-gr'}">${v.count_daily?t('countDaily'):'Skip'}</span></div>
     </div>
     <div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn sm" onclick="openII(${i})">Edit</button><button class="btn sm d" onclick="askDel('inv',${i})">Del</button></div>
   </div>`).join('')||`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No inventory items yet</div></div>`}`;
 }
 
 function openII(i){eII=i;pendingImg=null;const s=currentStore,e=i>=0,v=e?invData[s][i]:{};togOn=e?v.count_daily:true;
-  document.getElementById('mi-t').textContent=e?'Edit ingredient':'Add ingredient';
+  document.getElementById('mi-t').textContent=e?t('editIngredient'):t('addIngredientTitle');
   document.getElementById('mi-n').value=e?v.name:'';
   document.getElementById('mi-q').value=e?v.quantity:'';
   document.getElementById('mi-u').value=e?v.unit:'liters';
@@ -948,7 +1168,7 @@ function updTog(){const t=document.getElementById('ii-tog');if(t)t.className='to
 async function saveII(){
   const s=currentStore;
   const n=document.getElementById('mi-n').value.trim(),q=parseFloat(document.getElementById('mi-q').value),u=document.getElementById('mi-u').value;
-  if(!n||isNaN(q)){alert('Fill name and quantity.');return;}
+  if(!n||isNaN(q)){alert(t('wrongPass'));return;}
   try{
     if(eII>=0){await api('PUT',`/api/inventory/${invData[s][eII].id}`,{name:n,quantity:q,unit:u,status:invData[s][eII].status,count_daily:togOn,image_url:pendingImg||invData[s][eII].image_url});Object.assign(invData[s][eII],{name:n,quantity:q,unit:u,count_daily:togOn});}
     else{const item=await api('POST',`/api/stores/${s}/inventory`,{name:n,quantity:q,unit:u,status:'ok',count_daily:togOn,image_url:pendingImg||null});invData[s].push(item);}
@@ -992,8 +1212,8 @@ function bEndStock(){
           ${stkPh[i]?`<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="var(--g)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`:camSVG()}
           <div style="font-size:8px;color:${stkPh[i]?'var(--g)':'var(--t3)'};">${stkPh[i]?'done':'photo'}</div>
         </div>
-        <div><div style="font-size:12px;font-weight:600;">${stkPh[i]?'Photo taken':'No photo yet'}</div>
-          <div style="font-size:10px;margin-top:1px;color:${stkPh[i]?'var(--g)':'var(--red)'};">${stkPh[i]?'Ready to submit':'Required before submit'}</div></div>
+        <div><div style="font-size:12px;font-weight:600;">${stkPh[i]?t('photoTaken'):t('noPhotoYet')}</div>
+          <div style="font-size:10px;margin-top:1px;color:${stkPh[i]?'var(--g)':'var(--red)'};">${stkPh[i]?t('readyToSubmit'):t('requiredBefore')}</div></div>
       </div></div>`).join('')||`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No items marked for daily count. Go to Inventory to toggle items.</div></div>`}
     <div class="warn" id="es-warn"></div>
     ${total?`<button class="btn p full" onclick="submitES()">Submit stock count</button>
@@ -1038,69 +1258,190 @@ function bRevenue(){
   const s=currentStore, st=STORES[s];
   const isOwner=me.role==='owner';
   const atmS=storeStats.atm||{}, hruS=storeStats.hru||{};
-  const atmT=atmS.grand_total||0, hruT=hruS.grand_total||0;
   const stats=storeStats[s]||{};
   const cashT=stats.cash_total||0, abaT=stats.aba_total||0, total=stats.grand_total||0;
+  const now=new Date();
+  const curYear=now.getFullYear(), curMonth=now.getMonth()+1;
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   return `
-  <div class="pg-title">Revenue</div>
-  <div class="pg-sub">${isOwner?'Both stores comparison':''+st.name+' · Today'}</div>
+  <div style="display:flex;gap:6px;margin-bottom:12px;">
+    <button onclick="showRevTab('today')" id="rtab-today" style="flex:1;padding:8px;border-radius:10px;border:2px solid var(--g);background:var(--gl);color:var(--gt);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Today</button>
+    <button onclick="showRevTab('month')" id="rtab-month" style="flex:1;padding:8px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Monthly</button>
+    <button onclick="showRevTab('range')" id="rtab-range" style="flex:1;padding:8px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">By date</button>
+  </div>
 
-  ${isOwner?`
-  <div class="cmp-grid">
-    <div class="cmp-card atm">
-      <div class="cmp-store" style="color:var(--atm-lt);"><div class="cmp-dot" style="background:var(--atm-c);"></div>ATM</div>
-      <div class="cmp-lbl">Today total</div><div class="cmp-val">${fmt(atmT)}</div><div class="cmp-sub">${fmtK(atmT)}</div>
-      <div class="cmp-div"></div>
-      <div class="cmp-lbl">Cash</div><div style="font-size:14px;font-weight:700;">${fmt(atmS.cash_total||0)}</div>
-      <div class="cmp-div"></div>
-      <div class="cmp-lbl">ABA</div><div style="font-size:14px;font-weight:700;">${fmt(atmS.aba_total||0)}</div>
+  <!-- TODAY TAB -->
+  <div id="rev-today">
+    ${isOwner?`
+    <div class="cmp-grid">
+      <div class="cmp-card atm">
+        <div class="cmp-store" style="color:var(--atm-lt);"><div class="cmp-dot" style="background:var(--atm-c);"></div>ATM</div>
+        <div class="cmp-lbl">Today total</div><div class="cmp-val">${fmt(atmS.grand_total||0)}</div><div class="cmp-sub">${fmtK(atmS.grand_total||0)}</div>
+        <div class="cmp-div"></div>
+        <div class="cmp-lbl">Cash</div><div style="font-size:14px;font-weight:700;">${fmt(atmS.cash_total||0)}</div>
+        <div class="cmp-div"></div>
+        <div class="cmp-lbl">ABA</div><div style="font-size:14px;font-weight:700;">${fmt(atmS.aba_total||0)}</div>
+      </div>
+      <div class="cmp-card hru">
+        <div class="cmp-store" style="color:var(--hru-lt);"><div class="cmp-dot" style="background:var(--hru-c);"></div>HRU</div>
+        <div class="cmp-lbl">Today total</div><div class="cmp-val">${fmt(hruS.grand_total||0)}</div><div class="cmp-sub">${fmtK(hruS.grand_total||0)}</div>
+        <div class="cmp-div"></div>
+        <div class="cmp-lbl">Cash</div><div style="font-size:14px;font-weight:700;">${fmt(hruS.cash_total||0)}</div>
+        <div class="cmp-div"></div>
+        <div class="cmp-lbl">ABA</div><div style="font-size:14px;font-weight:700;">${fmt(hruS.aba_total||0)}</div>
+      </div>
     </div>
-    <div class="cmp-card hru">
-      <div class="cmp-store" style="color:var(--hru-lt);"><div class="cmp-dot" style="background:var(--hru-c);"></div>HRU</div>
-      <div class="cmp-lbl">Today total</div><div class="cmp-val">${fmt(hruT)}</div><div class="cmp-sub">${fmtK(hruT)}</div>
-      <div class="cmp-div"></div>
-      <div class="cmp-lbl">Cash</div><div style="font-size:14px;font-weight:700;">${fmt(hruS.cash_total||0)}</div>
-      <div class="cmp-div"></div>
-      <div class="cmp-lbl">ABA</div><div style="font-size:14px;font-weight:700;">${fmt(hruS.aba_total||0)}</div>
+    <div class="card"><div class="cb">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Combined total today</div>
+      <div class="row"><span style="color:var(--t2);">ATM Store</span><span style="font-weight:700;">${fmt(atmS.grand_total||0)}</span></div>
+      <div class="row"><span style="color:var(--t2);">HRU Store</span><span style="font-weight:700;">${fmt(hruS.grand_total||0)}</span></div>
+      <div class="row"><span style="font-size:14px;font-weight:700;">Grand total</span>
+        <div style="text-align:right;"><div style="font-size:18px;font-weight:700;color:var(--g);">${fmt((atmS.grand_total||0)+(hruS.grand_total||0))}</div>
+        <div style="font-size:11px;color:var(--t3);">${fmtK((atmS.grand_total||0)+(hruS.grand_total||0))}</div></div>
+      </div>
+    </div></div>`:`
+    <div class="combined-card" style="background:${st.color};">
+      <div class="gt-label">Today's revenue</div>
+      <div class="gt-val">${fmt(total)}</div>
+      <div class="gt-khr">${fmtK(total)}</div>
+      <div class="gt-breakdown">
+        <div class="gt-part"><div class="gt-part-lbl">Cash</div><div class="gt-part-val">${fmt(cashT)}</div></div>
+        <div class="gt-part" style="background:rgba(255,255,255,0.08);"><div class="gt-part-lbl">ABA</div><div class="gt-part-val">${fmt(abaT)}</div></div>
+      </div>
+    </div>`}
+  </div>
+
+  <!-- MONTHLY TAB -->
+  <div id="rev-month" style="display:none;">
+    <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+      <select id="rev-year" onchange="loadMonthly()" style="flex:1;font-size:13px;padding:9px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
+        ${[curYear,curYear-1].map(y=>`<option value="${y}" ${y===curYear?'selected':''}>${y}</option>`).join('')}
+      </select>
+      <select id="rev-month-sel" onchange="loadMonthly()" style="flex:2;font-size:13px;padding:9px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
+        ${months.map((m,i)=>`<option value="${i+1}" ${i+1===curMonth?'selected':''}>${m}</option>`).join('')}
+      </select>
+      ${isOwner?`<select id="rev-store-sel" onchange="loadMonthly()" style="flex:1;font-size:13px;padding:9px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
+        <option value="atm">ATM</option><option value="hru">HRU</option>
+      </select>`:''}
+    </div>
+    <div id="rev-month-data">
+      <div style="text-align:center;padding:20px;color:var(--t3);font-size:12px;">Tap a month to load report</div>
     </div>
   </div>
-  <div class="card"><div class="cb">
-    <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Combined total today</div>
-    <div class="row"><span style="color:var(--t2);">ATM Store</span><span style="font-weight:700;">${fmt(atmT)}</span></div>
-    <div class="row"><span style="color:var(--t2);">HRU Store</span><span style="font-weight:700;">${fmt(hruT)}</span></div>
-    <div class="row"><span style="font-size:14px;font-weight:700;">Grand total</span>
-      <div style="text-align:right;"><div style="font-size:18px;font-weight:700;color:var(--g);">${fmt(atmT+hruT)}</div><div style="font-size:11px;color:var(--t3);">${fmtK(atmT+hruT)}</div></div>
-    </div>
-  </div></div>`:
 
-  `<div class="combined-card" style="background:${st.color};">
-    <div class="gt-label">Today's revenue</div>
-    <div class="gt-val">${fmt(total)}</div>
-    <div class="gt-khr">${fmtK(total)}</div>
-    <div class="gt-breakdown">
-      <div class="gt-part"><div class="gt-part-lbl">Cash</div><div class="gt-part-val">${fmt(cashT)}</div></div>
-      <div class="gt-part" style="background:rgba(255,255,255,0.08);"><div class="gt-part-lbl">ABA</div><div class="gt-part-val">${fmt(abaT)}</div></div>
+  <!-- DATE RANGE TAB -->
+  <div id="rev-range" style="display:none;">
+    <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+      <div style="flex:1;"><div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:3px;">From</div>
+        <input type="date" id="rev-from" style="width:100%;font-size:13px;padding:9px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;" value="${new Date(now.getFullYear(),now.getMonth(),1).toISOString().split('T')[0]}">
+      </div>
+      <div style="flex:1;"><div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:3px;">To</div>
+        <input type="date" id="rev-to" style="width:100%;font-size:13px;padding:9px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;" value="${now.toISOString().split('T')[0]}">
+      </div>
     </div>
-  </div>
-  <div class="card"><div class="cb">
-    <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Payment breakdown</div>
-    <div class="row"><div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:2px;background:var(--cash-c);"></div>Cash</div>
-      <div style="text-align:right;"><div style="font-weight:700;">${fmt(cashT)}</div><div style="font-size:10px;color:var(--t3);">${total?Math.round(cashT/total*100):0}%</div></div>
-    </div>
-    <div class="row"><div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:2px;background:var(--aba);"></div>ABA</div>
-      <div style="text-align:right;"><div style="font-weight:700;">${fmt(abaT)}</div><div style="font-size:10px;color:var(--t3);">${total?Math.round(abaT/total*100):0}%</div></div>
-    </div>
-    <div style="margin-top:10px;background:var(--bg);border-radius:99px;height:8px;overflow:hidden;display:flex;">
-      <div style="height:8px;background:var(--cash-c);width:${total?Math.round(cashT/total*100):50}%;border-radius:99px 0 0 99px;"></div>
-      <div style="height:8px;background:var(--aba);flex:1;border-radius:0 99px 99px 0;"></div>
-    </div>
-  </div></div>`}`;
+    <button onclick="loadRange()" style="width:100%;padding:11px;background:var(--g);color:#fff;border:none;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:12px;">Load report</button>
+    <div id="rev-range-data"></div>
+  </div>`;
 }
 
-// ════════ SETTINGS ════════
+function showRevTab(tab){
+  ['today','month','range'].forEach(t=>{
+    const el=document.getElementById('rev-'+t);
+    const btn=document.getElementById('rtab-'+t);
+    if(el) el.style.display=t===tab?'block':'none';
+    if(btn){
+      btn.style.borderColor=t===tab?'var(--g)':'var(--bd2)';
+      btn.style.background=t===tab?'var(--gl)':'transparent';
+      btn.style.color=t===tab?'var(--gt)':'var(--t2)';
+    }
+  });
+  if(tab==='month') loadMonthly();
+}
+
+async function loadMonthly(){
+  const year=document.getElementById('rev-year')?.value||new Date().getFullYear();
+  const month=document.getElementById('rev-month-sel')?.value||new Date().getMonth()+1;
+  const storeId=document.getElementById('rev-store-sel')?.value||currentStore;
+  const el=document.getElementById('rev-month-data');
+  if(!el) return;
+  el.innerHTML='<div style="text-align:center;padding:16px;color:var(--t3);">Loading...</div>';
+  try{
+    const data=await api('GET',`/api/stores/${storeId}/revenue/monthly?year=${year}&month=${month}`);
+    const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    el.innerHTML=`
+    <div class="combined-card" style="background:var(--g);margin-bottom:12px;">
+      <div class="gt-label">${months[month-1]} ${year} · ${STORES[storeId]?.name||storeId}</div>
+      <div class="gt-val">${fmt(data.grand_total)}</div>
+      <div class="gt-khr">${fmtK(data.grand_total)}</div>
+      <div class="gt-breakdown">
+        <div class="gt-part"><div class="gt-part-lbl">Cash</div><div class="gt-part-val">${fmt(data.cash_total)}</div></div>
+        <div class="gt-part" style="background:rgba(255,255,255,0.08);"><div class="gt-part-lbl">ABA</div><div class="gt-part-val">${fmt(data.aba_total)}</div></div>
+      </div>
+    </div>
+    <div class="card"><div class="cb">
+      <div class="row"><span style="color:var(--t2);">Total revenue</span><span style="font-weight:700;">${fmt(data.grand_total)}</span></div>
+      <div class="row"><span style="color:var(--t2);">Cash collected</span><span style="font-weight:700;">${fmt(data.cash_total)}</span></div>
+      <div class="row"><span style="color:var(--t2);">ABA payments</span><span style="font-weight:700;">${fmt(data.aba_total)}</span></div>
+      <div class="row"><span style="color:var(--t2);">Total in KHR</span><span style="font-weight:700;">៛${data.khr_total.toLocaleString()}</span></div>
+      <div class="row"><span style="color:var(--t2);">Active days</span><span style="font-weight:700;">${data.active_days} days</span></div>
+      <div class="row"><span style="color:var(--t2);">Total sales</span><span style="font-weight:700;">${data.sale_count} orders</span></div>
+      <div class="row"><span style="color:var(--t2);">Daily average</span><span style="font-weight:700;">${data.active_days?fmt(data.grand_total/data.active_days):'$0.00'}</span></div>
+    </div></div>`;
+  }catch(e){
+    el.innerHTML='<div style="text-align:center;padding:16px;color:var(--red);font-size:12px;">Failed to load. Try again.</div>';
+  }
+}
+
+async function loadRange(){
+  const from=document.getElementById('rev-from')?.value;
+  const to=document.getElementById('rev-to')?.value;
+  const storeId=currentStore;
+  const el=document.getElementById('rev-range-data');
+  if(!el||!from||!to) return;
+  el.innerHTML='<div style="text-align:center;padding:16px;color:var(--t3);">Loading...</div>';
+  try{
+    const data=await api('GET',`/api/stores/${storeId}/revenue/range?from=${from}&to=${to}`);
+    const salesMap={};
+    data.sales.forEach(r=>salesMap[r.date]={cash:parseFloat(r.cash),total:parseFloat(r.total),count:parseInt(r.count)});
+    const abaMap={};
+    data.aba.forEach(r=>abaMap[r.date]={aba:parseFloat(r.aba_total)});
+    
+    // Combine all dates
+    const allDates=[...new Set([...Object.keys(salesMap),...Object.keys(abaMap)])].sort();
+    let grandTotal=0, cashTotal=0, abaTotal=0;
+    
+    const rows=allDates.map(d=>{
+      const s=salesMap[d]||{cash:0,total:0,count:0};
+      const a=abaMap[d]||{aba:0};
+      const dayTotal=s.total+a.aba;
+      grandTotal+=dayTotal; cashTotal+=s.cash; abaTotal+=a.aba;
+      return `<div class="row">
+        <div><div style="font-size:12px;font-weight:600;">${new Date(d+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+        <div style="font-size:10px;color:var(--t3);">${s.count} orders · Cash ${fmt(s.cash)} · ABA ${fmt(a.aba)}</div></div>
+        <span style="font-weight:700;color:var(--g);">${fmt(dayTotal)}</span>
+      </div>`;
+    }).join('');
+
+    el.innerHTML=`
+    <div class="combined-card" style="background:var(--g);margin-bottom:10px;">
+      <div class="gt-label">${from} → ${to}</div>
+      <div class="gt-val">${fmt(grandTotal)}</div>
+      <div class="gt-khr">${fmtK(grandTotal)}</div>
+      <div class="gt-breakdown">
+        <div class="gt-part"><div class="gt-part-lbl">Cash</div><div class="gt-part-val">${fmt(cashTotal)}</div></div>
+        <div class="gt-part" style="background:rgba(255,255,255,0.08);"><div class="gt-part-lbl">ABA</div><div class="gt-part-val">${fmt(abaTotal)}</div></div>
+      </div>
+    </div>
+    <div class="card"><div class="cb">${rows||'<div style="text-align:center;padding:12px;color:var(--t3);">No data in this range</div>'}</div></div>`;
+  }catch(e){
+    el.innerHTML='<div style="text-align:center;padding:16px;color:var(--red);font-size:12px;">Failed to load.</div>';
+  }
+}
+
+
 function bSettings(){
-  const perms=['revenue','menu','inv','endstock','sales'];
+  const perms=['revenue','menu','inv','endstock','sales','closeday'];
   const pl={revenue:'View revenue',menu:'Manage menu',inv:'Manage stock',endstock:'End-day stock',sales:'Record sales'};
   const isOwner=me.role==='owner';
   return `
@@ -1110,16 +1451,16 @@ function bSettings(){
     <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px;">@${me.username} · ${isOwner?'Owner (all stores)':'Staff · '+(STORES[me.store_id]?.name||'')}</div>
   </div>
   <div class="s-card">
-    <div class="s-row"><div><div class="s-l">Language</div><div class="s-sub">English / ភាសាខ្មែរ</div></div>
+    <div class="s-row"><div><div class="s-l">${t('languageLabel')}</div><div class="s-sub">English / ភាសាខ្មែរ</div></div>
       <div style="display:flex;gap:5px;">
         <button class="ltab ${lang==='en'?'active':''}" onclick="setLang('en')">EN</button>
         <button class="ltab ${lang==='km'?'active':''}" onclick="setLang('km')">ខ្មែរ</button>
       </div>
     </div>
-    <div class="s-row" style="border:none;"><div><div class="s-l">Exchange rate</div><div class="s-sub">$1 = ៛${RATE.toLocaleString()} KHR</div></div><span class="badge bg-g">Live</span></div>
+    <div class="s-row" style="border:none;"><div><div class="s-l">${t('exchangeRate')}</div><div class="s-sub">$1 = ៛${RATE.toLocaleString()} KHR</div></div><span class="badge bg-g">Live</span></div>
   </div>
   ${isOwner?`
-  <div class="sh" style="margin-top:4px;"><div class="sh-t">Users & permissions</div><button class="btn p sm" onclick="openUsr(-1)">+ Add user</button></div>
+  <div class="sh" style="margin-top:4px;"><div class="sh-t">${t('usersPerms')}</div><button class="btn p sm" onclick="openUsr(-1)">${t('addUser')}</button></div>
   ${(usersData||[]).map((u,i)=>`<div class="u-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${u.role!=='owner'?'10px':'0'};">
       <div style="display:flex;align-items:center;gap:10px;">
@@ -1142,7 +1483,38 @@ function bSettings(){
   <button class="btn full" style="margin-top:8px;color:var(--red);border-color:rgba(176,48,48,0.25);" onclick="doLogout()">Log out</button>`;
 }
 
-function setLang(l){lang=l;showPage('settings');}
+async function uploadLogo(input){
+  const file=input.files[0];if(!file)return;
+  if(file.size>2000000){alert('Image too large. Max 2MB.');return;}
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const base64=e.target.result;
+    try{
+      await api('POST','/api/logo',{logo:base64});
+      logoUrl=base64;
+      localStorage.setItem('nila_logo',base64);
+      showPage('settings');
+      // Update login logo if visible
+      const loginLogo=document.querySelector('.login-logo img');
+      if(loginLogo)loginLogo.src=base64;
+      // Update drawer logo
+      const drawerLogo=document.querySelector('.d-logo-ico img');
+      if(drawerLogo)drawerLogo.src=base64;
+      alert('Logo updated successfully!');
+    }catch(e){alert('Failed to save logo: '+e.message);}
+  };
+  reader.readAsDataURL(file);
+}
+
+function setLang(l){
+  lang=l;
+  localStorage.setItem('nila_lang',l);
+  if(me){
+    // Rebuild entire app with new language
+    render();
+    showPage('settings');
+  }
+}
 
 async function togglePerm(userIdx,perm,el){
   const u=usersData[userIdx];
@@ -1156,7 +1528,7 @@ async function togglePerm(userIdx,perm,el){
 
 // ════════ USERS MODAL ════════
 function openUsr(i){eUI=i;const e=i>=0,u=e?usersData[i]:{};
-  document.getElementById('usr-t').textContent=e?'Edit user':'Add user';
+  document.getElementById('usr-t').textContent=e?t('editUser'):t('addUserTitle');
   document.getElementById('usr-n').value=e?u.name:'';
   document.getElementById('usr-u').value=e?u.username:'';
   document.getElementById('usr-p').value='';
@@ -1167,7 +1539,7 @@ function openUsr(i){eUI=i;const e=i>=0,u=e?usersData[i]:{};
 async function saveUsr(){
   const n=document.getElementById('usr-n').value.trim(),u=document.getElementById('usr-u').value.trim(),p=document.getElementById('usr-p').value;
   const s=document.getElementById('usr-s').value,r=document.getElementById('usr-r').value;
-  if(!n||!u||(!p&&eUI<0)){alert('Fill all fields.');return;}
+  if(!n||!u||(!p&&eUI<0)){alert(t('wrongPass'));return;}
   try{
     const body={name:n,username:u,password:p||undefined,role:r,store_id:s,perms:{revenue:r==='owner',menu:r==='owner',inv:true,users:r==='owner',sales:true,endstock:true}};
     if(eUI>=0){await api('PUT',`/api/users/${usersData[eUI].id}`,body);Object.assign(usersData[eUI],{...body,perms:body.perms});}
@@ -1219,16 +1591,31 @@ if('serviceWorker' in navigator){
 }
 
 // ════════ AUTO-LOGIN ════════
+async function tryLoadData(attempt=0){
+  try{
+    await loadAllData();
+  }catch(e){
+    if(attempt<5){
+      const delay=[2000,3000,5000,8000,10000][attempt]||5000;
+      setTimeout(()=>tryLoadData(attempt+1), delay);
+    }
+  }
+}
+
 async function init(){
+  const savedLang=localStorage.getItem('nila_lang');if(savedLang)lang=savedLang;
+  const cachedLogo=localStorage.getItem('nila_logo');if(cachedLogo)logoUrl=cachedLogo;
+  await loadLogo(false);
   const saved=localStorage.getItem('nila_token');
   if(saved){
     try{
       const payload=JSON.parse(atob(saved.split('.')[1]));
       if(payload.exp*1000>Date.now()){
-        token=saved;me={id:payload.id,name:payload.name,username:payload.username,role:payload.role,store_id:payload.store_id,perms:payload.perms};
+        token=saved;
+        me={id:payload.id,name:payload.name,username:payload.username,role:payload.role,store_id:payload.store_id,perms:payload.perms};
         currentStore=me.store_id||'atm';
         render();
-        await loadAllData();
+        try{await loadLogo(true);await loadAllData();}catch(e){console.warn('Auto-login data load:',e);}
         showPage('dashboard');
         return;
       }

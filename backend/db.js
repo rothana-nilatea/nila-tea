@@ -96,6 +96,24 @@ async function initDB() {
         updated_at TIMESTAMP DEFAULT NOW()
       );
 
+      CREATE TABLE IF NOT EXISTS warehouse_stock (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) UNIQUE NOT NULL,
+        quantity DECIMAL(10,2) DEFAULT 0,
+        unit VARCHAR(30) DEFAULT 'pcs',
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS stock_transfers (
+        id SERIAL PRIMARY KEY,
+        item_name VARCHAR(100) NOT NULL,
+        from_location VARCHAR(20) DEFAULT 'warehouse',
+        to_store_id VARCHAR(10) REFERENCES stores(id),
+        quantity DECIMAL(10,2) NOT NULL,
+        transferred_by VARCHAR(50),
+        transferred_at TIMESTAMP DEFAULT NOW()
+      );
+
       CREATE TABLE IF NOT EXISTS closing_reports (
         id SERIAL PRIMARY KEY,
         store_id VARCHAR(10) REFERENCES stores(id),
@@ -159,6 +177,24 @@ async function initDB() {
             ($1, 'Cups & lids', 200, 'pcs', 'ok', false)
         `, [storeId]);
       }
+
+      // Seed warehouse with same ingredients
+      await client.query(`
+        INSERT INTO warehouse_stock (name, quantity, unit) VALUES
+          ('Milk (whole)', 50, 'liters'),
+          ('Tea leaves', 5000, 'grams'),
+          ('Taro powder', 1000, 'grams'),
+          ('Brown sugar syrup', 10, 'liters'),
+          ('Coffee beans', 3000, 'grams'),
+          ('Matcha powder', 500, 'grams'),
+          ('Mango puree', 20, 'packs'),
+          ('Lychee syrup', 5000, 'ml'),
+          ('Cream cheese', 20, 'packs'),
+          ('Tapioca pearls', 10, 'kg'),
+          ('Sugar syrup', 15, 'liters'),
+          ('Cups & lids', 1000, 'pcs')
+        ON CONFLICT (name) DO NOTHING
+      `);
 
       console.log('✅ Database seeded with ATM & HRU stores');
     }

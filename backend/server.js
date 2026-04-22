@@ -380,3 +380,152 @@ app.post('/api/logo', auth, ownerOnly, async (req, res) => {
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
+
+// ── MAIN WAREHOUSE ──
+app.get('/api/warehouse', auth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM warehouse_stock ORDER BY name`
+    );
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/warehouse', auth, ownerOnly, async (req, res) => {
+  try {
+    const { name, quantity, unit } = req.body;
+    const { rows } = await pool.query(
+      `INSERT INTO warehouse_stock (name, quantity, unit)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (name) DO UPDATE SET quantity = warehouse_stock.quantity + $2
+       RETURNING *`,
+      [name, quantity, unit]
+    );
+    res.json(rows[0]);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Transfer from warehouse to store
+app.post('/api/warehouse/transfer', auth, ownerOnly, async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { item_name, store_id, quantity } = req.body;
+
+    // Check warehouse has enough
+    const { rows: wRows } = await client.query(
+      `SELECT * FROM warehouse_stock WHERE name=$1`, [item_name]
+    );
+    if (!wRows.length) throw new Error('Item not found in warehouse');
+    if (parseFloat(wRows[0].quantity) < parseFloat(quantity)) {
+      throw new Error(`Not enough stock. Available: ${wRows[0].quantity} ${wRows[0].unit}`);
+    }
+
+    // Reduce from warehouse
+    await client.query(
+      `UPDATE warehouse_stock SET quantity = quantity - $1, updated_at = NOW() WHERE name = $2`,
+      [quantity, item_name]
+    );
+
+    // Add to store inventory
+    await client.query(
+      `UPDATE inventory SET quantity = quantity + $1, updated_at = NOW()
+       WHERE store_id = $2 AND name = $3`,
+      [quantity, store_id, item_name]
+    );
+
+    // Log transfer
+    await client.query(
+      `INSERT INTO stock_transfers (item_name, from_location, to_store_id, quantity, transferred_by)
+       VALUES ($1, 'warehouse', $2, $3, $4)`,
+      [item_name, store_id, quantity, req.user.username]
+    );
+
+    await client.query('COMMIT');
+
+    // Return updated warehouse
+    const { rows } = await client.query(`SELECT * FROM warehouse_stock ORDER BY name`);
+    res.json({ success: true, warehouse: rows });
+  } catch (e) {
+    await client.query('ROLLBACK');
+    res.status(400).json({ error: e.message });
+  } finally { client.release(); }
+});
+
+app.get('/api/warehouse/transfers', auth, ownerOnly, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM stock_transfers ORDER BY transferred_at DESC LIMIT 50`
+    );
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── REVENUE BY DATE RANGE ──
+app.get('/api/stores/:storeId/revenue/range', auth, async (req, res) => {
+  try {
+    const { from, to } = req.query;
+    const storeId = req.params.storeId;
+    const { rows } = await pool.query(
+      `SELECT 
+        DATE(created_at) as date,
+        SUM(CASE WHEN payment_method='cash' THEN amount_usd ELSE 0 END) as cash,
+        SUM(amount_usd) as total,
+        COUNT(*) as count
+       FROM sales 
+       WHERE store_id=$1 AND DATE(created_at) BETWEEN $2 AND $3
+       GROUP BY DATE(created_at) ORDER BY date`,
+      [storeId, from, to]
+    );
+    const { rows: abaRows } = await pool.query(
+      `SELECT 
+        DATE(txn_time) as date,
+        SUM(amount_usd) as aba_total,
+        COUNT(*) as count
+       FROM aba_transactions
+       WHERE store_id=$1 AND DATE(txn_time) BETWEEN $2 AND $3
+       GROUP BY DATE(txn_time) ORDER BY date`,
+      [storeId, from, to]
+    );
+    res.json({ sales: rows, aba: abaRows });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Monthly summary
+app.get('/api/stores/:storeId/revenue/monthly', auth, async (req, res) => {
+  try {
+    const { year, month } = req.query;
+    const storeId = req.params.storeId;
+    const { rows } = await pool.query(
+      `SELECT 
+        SUM(CASE WHEN payment_method='cash' THEN amount_usd ELSE 0 END) as cash_total,
+        SUM(amount_usd) as grand_total,
+        COUNT(*) as sale_count,
+        COUNT(DISTINCT DATE(created_at)) as active_days
+       FROM sales 
+       WHERE store_id=$1 
+       AND EXTRACT(YEAR FROM created_at)=$2 
+       AND EXTRACT(MONTH FROM created_at)=$3`,
+      [storeId, year, month]
+    );
+    const { rows: abaRows } = await pool.query(
+      `SELECT SUM(amount_usd) as aba_total, COUNT(*) as txn_count
+       FROM aba_transactions
+       WHERE store_id=$1 
+       AND EXTRACT(YEAR FROM txn_time)=$2 
+       AND EXTRACT(MONTH FROM txn_time)=$3`,
+      [storeId, year, month]
+    );
+    const cash = parseFloat(rows[0]?.cash_total||0);
+    const aba = parseFloat(abaRows[0]?.aba_total||0);
+    res.json({
+      cash_total: cash,
+      aba_total: aba, 
+      grand_total: cash + aba,
+      khr_total: Math.round((cash+aba)*4100),
+      sale_count: parseInt(rows[0]?.sale_count||0),
+      active_days: parseInt(rows[0]?.active_days||0),
+      txn_count: parseInt(abaRows[0]?.txn_count||0)
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});

@@ -25,8 +25,8 @@
   --amb:#8A5A00;--abg:#FFF3DC;
   --aba:#4A2C0E;--aba-bg:#F5E6D3;--aba-lt:#2C1A08;
   --cash-c:#8A5A00;--cash-bg:#FFF3DC;
-  --atm-c:#7B3F1E;--atm-bg:#FDF0E6;--atm-lt:#5C2E0E;
-  --hru-c:#4A2C0E;--hru-bg:#F5E6D3;--hru-lt:#2C1A08;
+  --atm-c:#C2692A;--atm-bg:#FEF3EA;--atm-lt:#8A3D10;
+  --hru-c:#1A7A5E;--hru-bg:#E6F7F2;--hru-lt:#0D5240;
   --r:12px;--r-lg:16px;
   --shadow:0 1px 3px rgba(0,0,0,0.07);
 }
@@ -34,7 +34,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:430px;margin:0 auto;background:var(--bg);position:relative;}
 
 /* ── TOPBAR ── */
-.topbar{background:var(--card);border-bottom:1px solid var(--bd);padding:0 14px;height:52px;display:flex;align-items:center;gap:10px;flex-shrink:0;z-index:10;position:relative;}
+.topbar{background:var(--card);border-bottom:1px solid var(--bd);padding:0 14px;height:52px;display:flex;align-items:center;gap:10px;flex-shrink:0;z-index:10;position:relative;border-top:4px solid var(--store-color,var(--g));}
 .ham{width:36px;height:36px;border-radius:10px;background:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .pg-lbl{font-size:15px;font-weight:700;color:var(--t1);flex:1;}
 .store-pill{font-size:10px;font-weight:700;padding:4px 10px;border-radius:99px;border:none;cursor:pointer;font-family:inherit;}
@@ -44,7 +44,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .ov.open{display:block;}
 .drawer{position:fixed;top:0;left:-280px;width:280px;height:100%;background:var(--card);z-index:50;display:flex;flex-direction:column;transition:left 0.25s cubic-bezier(0.4,0,0.2,1);box-shadow:4px 0 20px rgba(0,0,0,0.15);}
 .drawer.open{left:0;}
-.d-top{background:var(--g);padding:48px 16px 16px;}
+.d-top{background:var(--store-color,var(--g));padding:48px 16px 16px;}
 .d-logo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
 .d-logo-ico{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .d-app-name{font-size:16px;font-weight:700;color:#fff;}
@@ -94,7 +94,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .row:last-child{border:none;}
 .btn{font-size:12px;font-weight:600;padding:7px 13px;border-radius:9px;border:1.5px solid var(--bd2);background:transparent;color:var(--t1);cursor:pointer;font-family:inherit;transition:all 0.15s;}
 .btn:active{opacity:0.8;}
-.btn.p{background:var(--g);color:#fff;border-color:var(--g);}
+.btn.p{background:var(--store-color,var(--g));color:#fff;border-color:var(--store-color,var(--g));}
 .btn.d{color:var(--red);border-color:rgba(176,48,48,0.3);}
 .btn.sm{font-size:11px;padding:5px 10px;}
 .btn.full{width:100%;padding:13px;font-size:14px;border-radius:12px;}
@@ -113,9 +113,9 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .bar-row{margin-bottom:8px;}
 .bar-l{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-bottom:3px;}
 .bar-t{height:5px;background:var(--bg);border-radius:99px;overflow:hidden;}
-.bar-f{height:5px;background:var(--g);border-radius:99px;}
+.bar-f{height:5px;background:var(--store-color,var(--g));border-radius:99px;}
 .tog{width:40px;height:23px;border-radius:11.5px;border:none;cursor:pointer;position:relative;flex-shrink:0;}
-.tog.on{background:var(--g);}.tog.off{background:#CDD5CD;}
+.tog.on{background:var(--store-color,var(--g));}.tog.off{background:#CDD5CD;}
 .tog-k{position:absolute;top:2px;width:19px;height:19px;border-radius:50%;background:#fff;transition:left 0.18s;}
 .tog.on .tog-k{left:19px;}.tog.off .tog-k{left:2px;}
 
@@ -130,8 +130,8 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .gt-part-val{font-size:15px;font-weight:700;color:#fff;}
 .cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .cmp-card{border-radius:var(--r);padding:12px;border:1.5px solid transparent;}
-.cmp-card.atm{background:var(--atm-bg);border-color:#D4A882;}
-.cmp-card.hru{background:var(--hru-bg);border-color:#A8C0E0;}
+.cmp-card.atm{background:var(--atm-bg);border-color:#E8A87A;}
+.cmp-card.hru{background:var(--hru-bg);border-color:#7EC8B0;}
 .cmp-store{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
 .cmp-dot{width:7px;height:7px;border-radius:50%;}
 .cmp-lbl{font-size:10px;color:var(--t2);margin-bottom:2px;}
@@ -185,7 +185,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 
 /* ── END STOCK ── */
 .si{background:var(--card);border-radius:var(--r);border:0.5px solid var(--bd);padding:11px 12px;margin-bottom:7px;box-shadow:var(--shadow);}
-.prog-banner{background:var(--g);border-radius:var(--r-lg);padding:13px 14px;margin-bottom:10px;}
+.prog-banner{background:var(--store-color,var(--g));border-radius:var(--r-lg);padding:13px 14px;margin-bottom:10px;}
 .prog-t{font-size:14px;font-weight:700;color:#fff;}
 .prog-s{font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px;}
 .prog-track{background:rgba(255,255,255,0.2);border-radius:99px;height:4px;margin-top:8px;}
@@ -193,7 +193,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .prog-labs{display:flex;justify-content:space-between;margin-top:4px;}
 .prog-l{font-size:10px;color:rgba(255,255,255,0.6);}
 .cam-row{display:flex;align-items:center;gap:8px;padding-top:8px;border-top:0.5px solid var(--bd);}
-.cam-box{width:46px;height:46px;border-radius:9px;border:1.5px dashed #C8D8C8;background:#F8FAF8;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;cursor:pointer;flex-shrink:0;}
+.cam-box{width:46px;height:46px;border-radius:9px;border:1.5px dashed #C8D8C8;background:#F8FAF8;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;cursor:pointer;flex-shrink:0;display:none;}
 .cam-box.done{border-color:var(--g);background:var(--gl);}
 .si-sel{font-size:11px;font-weight:600;padding:7px 5px;border:1.5px solid var(--bd2);border-radius:9px;background:var(--bg);color:var(--t1);font-family:inherit;-webkit-appearance:none;text-align:center;width:68px;}
 .si-sel.ok{border-color:var(--g);color:var(--g);background:var(--gl);}
@@ -338,8 +338,8 @@ var API = 'https://nila-tea.onrender.com';
 
 var RATE = 4100;
 var STORES = {
-  atm: { id:'atm', name:'Angtamin Store', short:'ATM', color:'#7B3F1E', bg:'#FDF0E6', lt:'#5C2E0E' },
-  hru: { id:'hru', name:'HRU Store', short:'HRU', color:'#4A2C0E', bg:'#F5E6D3', lt:'#2C1A08' }
+  atm: { id:'atm', name:'Angtamin Store', short:'ATM', color:'#C2692A', bg:'#FEF3EA', lt:'#8A3D10', c:'#C2692A' },
+  hru: { id:'hru', name:'HRU Store',      short:'HRU', color:'#1A7A5E', bg:'#E6F7F2', lt:'#0D5240', c:'#1A7A5E' }
 };
 
 // ── STATE ──
@@ -495,7 +495,7 @@ var togOn=true, pendingImg=null, selectedPay='cash';
 var delType=null, delIdx=-1, eMI=-1, eII=-1, eUI=-1, stkPh={};
 
 // ── HELPERS ──
-function fmt(u){return '$'+(parseFloat(u)||0).toFixed(2);}
+function fmt(u){const v=parseFloat(u)||0;return '$'+(v%1===0?v.toFixed(0):v.toFixed(2));}
 function fmtK(u){return '៛'+(Math.round((parseFloat(u)||0)*RATE)).toLocaleString();}
 function can(p){return me&&(me.role==='owner'||me.perms?.[p]);}
 function ini(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
@@ -539,6 +539,13 @@ async function loadStoreData(s){
 
 // ── RENDER ──
 function render(){
+  // Apply store color CSS variables before rendering
+  if(me && STORES[currentStore]){
+    const sc=STORES[currentStore];
+    document.documentElement.style.setProperty('--store-color', sc.color);
+    document.documentElement.style.setProperty('--store-bg', sc.bg);
+    document.documentElement.style.setProperty('--store-lt', sc.lt);
+  }
   document.getElementById('root').innerHTML = me ? buildApp() : buildLogin();
 }
 
@@ -691,7 +698,7 @@ function buildApp(){
     <div class="topbar">
       <button class="ham" onclick="toggleDrawer()"><svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1 1h14M1 6h14M1 11h14" stroke="var(--t1)" stroke-width="1.6" stroke-linecap="round"/></svg></button>
       <div class="pg-lbl" id="pg-lbl">Dashboard</div>
-      <button class="store-pill" style="background:${s.bg};color:${s.lt};" onclick="toggleDrawer()">${s.short}</button>
+      <button class="store-pill" style="background:${s.color};color:#fff;font-weight:800;padding:5px 14px;border-radius:99px;font-size:12px;border:none;cursor:pointer;font-family:inherit;" onclick="toggleDrawer()">${s.short}</button>
     </div>
 
     <!-- PAGES -->
@@ -747,6 +754,12 @@ function showPage(id){
   const labels={dashboard:'Dashboard',sales:'Record sale',closeday:'Close day',menu:'Menu',inventory:'Inventory',endstock:'End-day stock',revenue:'Revenue',settings:'Settings'};
   const lbl=document.getElementById('pg-lbl');if(lbl)lbl.textContent=labels[id]||id;
   document.getElementById('mc')?.scrollTo(0,0);
+  // Update store color CSS var
+  if(STORES[currentStore]){
+    document.documentElement.style.setProperty('--store-color', STORES[currentStore].color);
+    document.documentElement.style.setProperty('--store-bg', STORES[currentStore].bg);
+    document.documentElement.style.setProperty('--store-lt', STORES[currentStore].lt);
+  }
 }
 
 function buildPage(id){
@@ -772,7 +785,7 @@ function bDash(){
       <div style="font-size:19px;font-weight:700;">Good morning, Nila!</div>
       <div style="font-size:12px;color:var(--t2);margin-top:3px;">${today()} · Both stores</div>
     </div>
-    <div class="combined-card" style="background:var(--g);">
+    <div class="combined-card" style="background:var(--store-color,var(--g));">
       <div class="gt-label">Combined revenue today</div>
       <div class="gt-val">${fmt(total)}</div>
       <div class="gt-khr">${fmtK(total)}</div>
@@ -801,30 +814,88 @@ function bDash(){
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <button class="btn" style="flex:1;background:var(--atm-bg);color:var(--atm-lt);border-color:#D4A882;" onclick="switchStore('atm');showPage('sales')">ATM Sales →</button>
-      <button class="btn" style="flex:1;background:var(--hru-bg);color:var(--hru-lt);border-color:#A8C0E0;" onclick="switchStore('hru');showPage('sales')">HRU Sales →</button>
+      <button class="btn" style="flex:1;background:var(--atm-bg);color:var(--atm-lt);border-color:#E8A87A;" onclick="switchStore('atm');showPage('sales')">ATM Sales →</button>
+      <button class="btn" style="flex:1;background:var(--hru-bg);color:var(--hru-lt);border-color:#7EC8B0;" onclick="switchStore('hru');showPage('sales')">HRU Sales →</button>
     </div>
     <div class="sh"><div class="sh-t">Recent sales — ${st.name}</div><button class="btn sm" onclick="showPage('sales')">See all</button></div>
     ${recentSalesList(s)}`;
   } else {
-    // Staff sees their store
-    const cashT=stats.cash_total||0, abaT=stats.aba_total||0, total=stats.grand_total||0;
+    // Staff sees stock-focused dashboard
+    const inv=invData[s]||[];
+    const lowItems=inv.filter(x=>x.status==='low'||x.status==='out');
+    const okItems=inv.filter(x=>x.status==='ok');
+    const dailyItems=inv.filter(x=>x.count_daily);
+    const hr=new Date().getHours();
+    const greeting=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
     return `
-    <div style="margin-bottom:12px;">
-      <div style="font-size:19px;font-weight:700;">${st.name}</div>
-      <div style="font-size:12px;color:var(--t2);margin-top:3px;">${today()}</div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:20px;font-weight:700;">${greeting}, ${me.name.split(' ')[0]}!</div>
+      <div style="font-size:12px;color:var(--t2);margin-top:3px;">${today()} · ${st.name}</div>
     </div>
-    <div class="combined-card" style="background:${st.color};">
-      <div class="gt-label">Total revenue today</div>
-      <div class="gt-val">${fmt(total)}</div>
-      <div class="gt-khr">${fmtK(total)}</div>
-      <div class="gt-breakdown">
-        <div class="gt-part"><div class="gt-part-lbl">Cash</div><div class="gt-part-val" id="cd-cash-val">${fmt(cashT)}</div></div>
-        <div class="gt-part" style="background:rgba(255,255,255,0.08);"><div class="gt-part-lbl">ABA</div><div class="gt-part-val">${fmt(abaT)}</div></div>
+
+    <!-- STOCK STATUS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div style="background:${lowItems.length>0?'#FFF3DC':'var(--gl)'};border-radius:14px;padding:14px;border:1.5px solid ${lowItems.length>0?'#F59F00':'#D4A882'};">
+        <div style="font-size:22px;margin-bottom:6px;">${lowItems.length>0?'⚠️':'✅'}</div>
+        <div style="font-size:20px;font-weight:700;color:${lowItems.length>0?'var(--amb)':'var(--gt)'};">${lowItems.length}</div>
+        <div style="font-size:11px;font-weight:600;color:var(--t2);margin-top:2px;">Low stock items</div>
+      </div>
+      <div style="background:var(--gl);border-radius:14px;padding:14px;border:1.5px solid #D4A882;">
+        <div style="font-size:22px;margin-bottom:6px;">📦</div>
+        <div style="font-size:20px;font-weight:700;color:var(--gt);">${dailyItems.length}</div>
+        <div style="font-size:11px;font-weight:600;color:var(--t2);margin-top:2px;">To count today</div>
       </div>
     </div>
-    <div class="sh"><div class="sh-t">Recent sales</div><button class="btn sm" onclick="showPage('sales')">See all</button></div>
-    ${recentSalesList(s)}`;
+
+    <!-- LOW STOCK ALERT -->
+    ${lowItems.length>0?`
+    <div style="background:#FFF3DC;border-radius:var(--r);padding:12px 13px;margin-bottom:12px;border:1.5px solid #F59F00;">
+      <div style="font-size:12px;font-weight:700;color:var(--amb);margin-bottom:8px;">⚠️ Low stock — needs restocking</div>
+      ${lowItems.slice(0,4).map(it=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid rgba(245,159,0,0.2);">
+          <span style="font-size:12px;font-weight:500;">${it.name}</span>
+          <span style="font-size:12px;font-weight:700;color:var(--amb);">${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)} ${it.unit}</span>
+        </div>`).join('')}
+      ${lowItems.length>4?`<div style="font-size:11px;color:var(--amb);margin-top:6px;text-align:center;">+${lowItems.length-4} more items</div>`:''}
+    </div>`:''}
+
+    <!-- QUICK ACTIONS -->
+    <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Quick actions</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <button onclick="showPage('endstock')" style="background:#fff;border:0.5px solid var(--bd);border-radius:14px;padding:14px;text-align:left;cursor:pointer;font-family:inherit;box-shadow:var(--shadow);">
+        <div style="font-size:20px;margin-bottom:6px;">📸</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">End-day stock</div>
+        <div style="font-size:11px;color:var(--t2);margin-top:2px;">${dailyItems.length} items to count</div>
+      </button>
+      <button onclick="showPage('inventory')" style="background:#fff;border:0.5px solid var(--bd);border-radius:14px;padding:14px;text-align:left;cursor:pointer;font-family:inherit;box-shadow:var(--shadow);">
+        <div style="font-size:20px;margin-bottom:6px;">🏪</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">Inventory</div>
+        <div style="font-size:11px;color:var(--t2);margin-top:2px;">${inv.length} items total</div>
+      </button>
+      <button onclick="showPage('sales')" style="background:#fff;border:0.5px solid var(--bd);border-radius:14px;padding:14px;text-align:left;cursor:pointer;font-family:inherit;box-shadow:var(--shadow);">
+        <div style="font-size:20px;margin-bottom:6px;">💰</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">Record sale</div>
+        <div style="font-size:11px;color:var(--t2);margin-top:2px;">Add new transaction</div>
+      </button>
+      <button onclick="showPage('closeday')" style="background:#fff;border:0.5px solid var(--bd);border-radius:14px;padding:14px;text-align:left;cursor:pointer;font-family:inherit;box-shadow:var(--shadow);">
+        <div style="font-size:20px;margin-bottom:6px;">📋</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">Close day</div>
+        <div style="font-size:11px;color:var(--t2);margin-top:2px;">Submit daily report</div>
+      </button>
+    </div>
+
+    <!-- STOCK LIST -->
+    <div class="sh"><div class="sh-t">Stock overview</div><button class="btn sm" onclick="showPage('inventory')">See all</button></div>
+    ${inv.filter(x=>x.count_daily).slice(0,5).map(it=>`
+      <div class="inv-item">
+        <div style="width:10px;height:10px;border-radius:50%;background:${it.status==='ok'?'var(--g)':it.status==='low'?'#F59F00':'var(--red)'};flex-shrink:0;margin-right:2px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:600;">${it.name}</div>
+          <div style="font-size:11px;color:var(--t2);">${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)} ${it.unit}</div>
+        </div>
+        <span class="badge ${it.status==='ok'?'bg-g':it.status==='low'?'bg-a':'bg-r'}">${it.status==='ok'?'OK':it.status==='low'?'Low':'Out'}</span>
+      </div>`).join('')||`<div style="font-size:12px;color:var(--t3);text-align:center;padding:12px;">No daily items set up yet</div>`}
+    `;
   }
 }
 
@@ -949,8 +1020,10 @@ function bCloseDay(){
   const abaAuto=abaL.reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
   const isOwner=me.role==='owner';
   // Get saved cash entry for today
-  const savedCash=parseFloat(localStorage.getItem('nila_cash_'+s+'_'+new Date().toDateString())||'0');
-  const savedNote=localStorage.getItem('nila_cashnote_'+s+'_'+new Date().toDateString())||'';
+  const savedCashUSD=parseFloat(localStorage.getItem('nila_cash_usd_'+s+'_'+new Date().toDateString())||'0');
+  const savedCashKHR=parseFloat(localStorage.getItem('nila_cash_khr_'+s+'_'+new Date().toDateString())||'0');
+  const savedCash=savedCashUSD+savedCashKHR/RATE;
+  const savedNote=localStorage.getItem('nila_note_'+s+'_'+new Date().toDateString())||'';
   const grandTotal=savedCash+abaAuto;
   const cashT=savedCash;
   const diff=0;
@@ -969,31 +1042,63 @@ function bCloseDay(){
       </div>
     </div>
 
-    <!-- CASH INPUT -->
+    <!-- CASH INPUT - DUAL CURRENCY -->
     <div class="card"><div class="cb">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <div style="width:36px;height:36px;border-radius:9px;background:var(--cash-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           <svg width="18" height="18" viewBox="0 0 22 22" fill="none"><rect x="2" y="6" width="18" height="12" rx="3" stroke="var(--cash-c)" stroke-width="1.5"/><circle cx="11" cy="12" r="2.5" stroke="var(--cash-c)" stroke-width="1.5"/></svg>
         </div>
         <div><div style="font-size:13px;font-weight:700;">Cash collected today</div>
-        <div style="font-size:11px;color:var(--t2);">Count your physical cash and enter total</div></div>
+        <div style="font-size:11px;color:var(--t2);">Count physical cash — enter both currencies</div></div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:12px;padding:10px 14px;border:2px solid var(--bd2);margin-bottom:10px;">
-        <span style="font-size:22px;font-weight:700;color:var(--t2);">$</span>
-        <input type="number" id="cash-input" value="${savedCash||''}" placeholder="0.00" step="0.25" min="0" inputmode="decimal"
-          style="flex:1;font-size:24px;font-weight:700;text-align:center;border:none;background:transparent;color:var(--t1);outline:none;font-family:inherit;"
-          oninput="updateCashTotal(this.value)">
+
+      <!-- USD INPUT -->
+      <div style="font-size:11px;font-weight:700;color:var(--cash-c);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">🇺🇸 US Dollar (USD)</div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:12px;padding:10px 14px;border:2px solid var(--bd2);margin-bottom:8px;">
+        <span style="font-size:20px;font-weight:700;color:var(--t2);">$</span>
+        <input type="number" id="cash-usd" value="${savedCashUSD||''}" placeholder="0.00" step="0.25" min="0" inputmode="decimal"
+          style="flex:1;font-size:22px;font-weight:700;text-align:center;border:none;background:transparent;color:var(--t1);outline:none;font-family:inherit;"
+          oninput="updateCashDual()">
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-        ${[5,10,20,50,100].map(a=>`<button onclick="setCash(${a})" style="font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:1.5px solid var(--bd2);background:var(--bg);color:var(--t1);cursor:pointer;font-family:inherit;">$${a}</button>`).join('')}
+        ${[1,5,10,20,50,100].map(a=>`<button onclick="addCashUSD(${a})" style="font-size:12px;font-weight:600;padding:5px 10px;border-radius:8px;border:1.5px solid var(--bd2);background:var(--bg);color:var(--t1);cursor:pointer;font-family:inherit;">+$${a}</button>`).join('')}
       </div>
+
+      <!-- KHR INPUT -->
+      <div style="font-size:11px;font-weight:700;color:#8B4513;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">🇰🇭 Khmer Riel (KHR)</div>
+      <div style="display:flex;align-items:center;gap:8px;background:#FDF5EE;border-radius:12px;padding:10px 14px;border:2px solid #E8C8A0;margin-bottom:8px;">
+        <span style="font-size:20px;font-weight:700;color:#8B4513;">៛</span>
+        <input type="number" id="cash-khr" value="${savedCashKHR||''}" placeholder="0" step="500" min="0" inputmode="numeric"
+          style="flex:1;font-size:22px;font-weight:700;text-align:center;border:none;background:transparent;color:var(--t1);outline:none;font-family:inherit;"
+          oninput="updateCashDual()">
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+        ${[1000,2000,5000,10000,20000].map(a=>`<button onclick="addCashKHR(${a})" style="font-size:11px;font-weight:600;padding:5px 8px;border-radius:8px;border:1.5px solid #E8C8A0;background:#FDF5EE;color:#8B4513;cursor:pointer;font-family:inherit;">+${a>=1000?a/1000+'k':a}</button>`).join('')}
+      </div>
+
+      <!-- NOTE -->
       <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:5px;">Note (optional)</div>
       <input type="text" id="cash-note" value="${savedNote}" placeholder="e.g. Busy day, 45 customers..."
         style="width:100%;font-size:13px;padding:9px 11px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);color:var(--t1);font-family:inherit;"
         oninput="localStorage.setItem('nila_note_'+currentStore+'_'+new Date().toDateString(),this.value)">
-      <div style="border-top:1.5px solid var(--bd);margin-top:12px;padding-top:10px;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:13px;font-weight:700;">Total cash</span>
-        <span style="font-size:16px;font-weight:700;color:var(--cash-c);" id="cd-cash-total">${fmt(savedCash)}</span>
+
+      <!-- TOTAL -->
+      <div style="border-top:1.5px solid var(--bd);margin-top:12px;padding-top:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <span style="font-size:12px;color:var(--t2);">USD cash</span>
+          <span style="font-size:13px;font-weight:600;" id="cd-usd-line">${fmt(savedCashUSD)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:12px;color:var(--t2);">KHR cash <span style="font-size:10px;">(÷${RATE})</span></span>
+          <span style="font-size:13px;font-weight:600;" id="cd-khr-line">${fmt(savedCashKHR/RATE)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:13px;font-weight:700;">Total cash</span>
+          <div style="text-align:right;">
+            <div style="font-size:16px;font-weight:700;color:var(--cash-c);" id="cd-cash-total">${fmt(savedCashUSD+savedCashKHR/RATE)}</div>
+            <div style="font-size:11px;color:var(--t3);" id="cd-cash-khr">= ៛${Math.round((savedCashUSD+savedCashKHR/RATE)*RATE).toLocaleString()} total</div>
+          </div>
+        </div>
       </div>
     </div></div>
 
@@ -1014,9 +1119,12 @@ function bCloseDay(){
           <div style="font-size:10px;color:var(--t3);">${txn.ref} · ${txn.txn_time?new Date(txn.txn_time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''} <span style="color:${txn.matched?'var(--gt)':'var(--red)'};font-weight:600;">${txn.matched?'✓ matched':'· unmatched'}</span></div></div>
           <div style="font-weight:700;color:var(--aba-lt);">${fmt(txn.amount_usd)}</div>
         </div>`).join(''):`<div style="font-size:12px;color:var(--t3);text-align:center;padding:8px 0;">No ABA transactions yet today</div>`}
-      <div style="border-top:1.5px solid var(--bd);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;">
+      <div style="border-top:1.5px solid var(--bd);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:13px;font-weight:700;">Total ABA</span>
-        <span style="font-size:15px;font-weight:700;color:var(--aba-lt);">${fmt(abaAuto)}</span>
+        <div style="text-align:right;">
+          <div style="font-size:15px;font-weight:700;color:var(--aba-lt);">${fmt(abaAuto)}</div>
+          <div style="font-size:11px;color:var(--t3);">${fmtK(abaAuto)}</div>
+        </div>
       </div>
       ${Math.abs(diff)>0.01?`
         <div style="background:${diff>0?'var(--abg)':'var(--rbg)'};border-radius:9px;padding:9px 11px;margin-top:8px;font-size:12px;color:${diff>0?'var(--amb)':'var(--red)'};font-weight:500;">
@@ -1069,9 +1177,15 @@ function updateCashTotal(val){
   localStorage.setItem('nila_cash_'+currentStore+'_'+new Date().toDateString(),v);
   const abaAuto=(abaData[currentStore]||[]).reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
   const el1=document.getElementById('cd-cash-total');if(el1)el1.textContent=fmt(v);
+  const el1k=document.getElementById('cd-cash-khr');if(el1k)el1k.textContent=fmtK(v);
   const el2=document.getElementById('cd-cash-val');if(el2)el2.textContent=fmt(v);
   const el3=document.getElementById('cd-grand');if(el3)el3.textContent=fmt(v+abaAuto);
   const el4=document.getElementById('cd-grand-khr');if(el4)el4.textContent=fmtK(v+abaAuto);
+}
+function editClose(){
+  // Allow editing - restore form with saved values
+  document.getElementById('cd-success').style.display='none';
+  document.getElementById('cd-form').style.display='block';
 }
 function setCash(amt){
   const inp=document.getElementById('cash-input');
@@ -1207,26 +1321,39 @@ function bEndStock(){
         <div style="width:36px;height:36px;border-radius:9px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
           ${it.image_url?`<img src="${it.image_url}" style="width:36px;height:36px;object-fit:cover;">`:`${icoSVG(15)}`}
         </div>
-        <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${it.name}</div><div style="font-size:10px;color:var(--t3);margin-top:1px;">Opening: ${it.quantity} ${it.unit}</div></div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${it.name}</div><div style="font-size:10px;color:var(--t3);margin-top:1px;">Opening: ${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)} ${it.unit}</div></div>
         <span id="esb-${i}" class="badge bg-gr">No photo</span>
       </div>
       <div style="display:flex;gap:7px;margin-bottom:8px;">
         <div style="flex:1;"><div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:3px;">Closing (${it.unit})</div>
-          <input style="width:100%;font-size:14px;font-weight:700;padding:8px 10px;border:1.5px solid var(--bd2);border-radius:9px;background:var(--bg);color:var(--t1);font-family:inherit;text-align:center;" type="number" value="${it.quantity}" min="0" id="esq-${i}" inputmode="decimal"></div>
+          <input style="width:100%;font-size:14px;font-weight:700;padding:8px 10px;border:1.5px solid var(--bd2);border-radius:9px;background:var(--bg);color:var(--t1);font-family:inherit;text-align:center;" type="number" value="${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)}" min="0" step="0.1" id="esq-${i}" inputmode="decimal"></div>
         <div><div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:3px;">Status</div>
           <select class="si-sel ${it.status}" id="esst-${i}" onchange="this.className='si-sel '+this.value">
             <option value="ok" ${it.status==='ok'?'selected':''}>OK</option>
             <option value="low" ${it.status==='low'?'selected':''}>Low</option>
           </select></div>
       </div>
-      <div class="cam-row">
-        <div class="cam-box ${stkPh[i]?'done':''}" id="escam-${i}" onclick="takePh(${i})">
-          ${stkPh[i]?`<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="var(--g)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`:camSVG()}
-          <div style="font-size:8px;color:${stkPh[i]?'var(--g)':'var(--t3)'};">${stkPh[i]?'done':'photo'}</div>
+      <!-- PHOTO SECTION -->
+      <div style="margin-top:8px;">
+        <input type="file" id="esfile-${i}" accept="image/*" capture="environment" style="display:none;" onchange="handleEsPhoto(${i}, this)">
+        ${stkPh[i]?`
+        <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;height:140px;">
+          <img src="${stkPh[i]}" style="width:100%;height:140px;object-fit:cover;display:block;">
+          <button onclick="document.getElementById('esfile-${i}').click()" style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">📷 Retake</button>
         </div>
-        <div><div style="font-size:12px;font-weight:600;">${stkPh[i]?'Photo taken':'No photo yet'}</div>
-          <div style="font-size:10px;margin-top:1px;color:${stkPh[i]?'var(--g)':'var(--red)'};">${stkPh[i]?'Ready to submit':'Required before submit'}</div></div>
-      </div></div>`).join('')||`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No items marked for daily count. Go to Inventory to toggle items.</div></div>`}
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="var(--store-color,var(--g))" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size:12px;font-weight:600;color:var(--store-color,var(--g));">Photo taken — ready to submit</span>
+        </div>`:`
+        <button onclick="document.getElementById('esfile-${i}').click()" style="width:100%;padding:14px;background:#F8F8F8;border:2px dashed #E0D0C0;border-radius:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#9A8A7A" stroke-width="1.5"/><circle cx="12" cy="13" r="4" stroke="#9A8A7A" stroke-width="1.5"/></svg>
+          <div style="text-align:left;">
+            <div style="font-size:13px;font-weight:700;color:#2C1A08;">Take Photo</div>
+            <div style="font-size:11px;color:var(--red);margin-top:1px;">⚠️ Required before submit</div>
+          </div>
+        </button>`}
+      </div>
+      </div>`).join('')||`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No items marked for daily count. Go to Inventory to toggle items.</div></div>`}
     <div class="warn" id="es-warn"></div>
     ${total?`<button class="btn p full" onclick="submitES()">Submit stock count</button>
     <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px;margin-bottom:16px;">Owner will be notified instantly</div>`:''}
@@ -1243,13 +1370,25 @@ function bEndStock(){
 }
 
 function takePh(i){
-  stkPh[i]=true;
-  const b=document.getElementById('esb-'+i);if(b){b.className='badge bg-g';b.textContent='Photo ✓';}
-  const c=document.getElementById('escam-'+i);if(c){c.className='cam-box done';c.innerHTML=`<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="var(--g)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><div style="font-size:8px;color:var(--g);">done</div>`;}
-  const total=(invData[currentStore]||[]).filter(it=>it.count_daily).length;
-  const done=Object.keys(stkPh).length,pct=Math.round(done/total*100);
-  const pf=document.querySelector('.prog-fill');if(pf)pf.style.width=pct+'%';
-  const pt=document.getElementById('prog-txt');if(pt)pt.textContent=`${done} of ${total} photos`;
+  document.getElementById('esfile-'+i)?.click();
+}
+function handleEsPhoto(i, input){
+  const file=input.files[0];
+  if(!file) return;
+  if(file.size>5000000){alert('Photo too large. Max 5MB.');return;}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    stkPh[i]=e.target.result; // store base64
+    // Re-render just this item's photo section
+    const total=(invData[currentStore]||[]).filter(it=>it.count_daily).length;
+    const done=Object.keys(stkPh).length;
+    const pct=Math.round(done/total*100);
+    const pf=document.querySelector('.prog-fill');if(pf)pf.style.width=pct+'%';
+    const pt=document.getElementById('prog-txt');if(pt)pt.textContent=`${done} of ${total} photos`;
+    // Refresh page to show photo preview
+    showPage('endstock');
+  };
+  reader.readAsDataURL(file);
 }
 
 async function submitES(){

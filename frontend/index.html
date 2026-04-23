@@ -1602,6 +1602,8 @@ async function submitClose(){
       aba_total:abaAuto,
       cash_note:cashNote
     });
+    // Reload store stats so close_report is up to date
+    try{const fresh=await api('GET',`/api/stores/${s}/revenue/today`);if(fresh)storeStats[s]=fresh;}catch(e){}
   }catch(e){console.warn('Close day submit:',e.message);}
 
   // Clear draft inputs

@@ -677,6 +677,23 @@ async function loadLogo(fetchFromDb=false){
   }catch(e){console.warn('Logo load:',e);}
 }
 
+let _refreshTimer=null;
+function startAutoRefresh(){
+  if(_refreshTimer)clearInterval(_refreshTimer);
+  _refreshTimer=setInterval(async()=>{
+    if(me && document.visibilityState==='visible'){
+      await loadAllData();
+    }
+  }, 60000); // refresh every 60 seconds
+}
+
+async function refreshDashboard(){
+  const btn=event?.target;
+  if(btn){btn.disabled=true;btn.textContent='...';}
+  await loadAllData();
+  if(btn){btn.disabled=false;btn.innerHTML='🔄 '+(lang==='km'?'ធ្វើបច្ចុប្បន្ន':'Refresh');}
+}
+
 async function loadAllData(){
   try{
     if(me.role==='owner'){
@@ -685,6 +702,9 @@ async function loadAllData(){
     } else {
       await loadStoreData(currentStore);
     }
+    // Update refresh timestamp
+    const rt=document.getElementById('dash-refresh-time');
+    if(rt)rt.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     // Refresh current page with new data
     const activePage=document.querySelector('.page.active');
     if(activePage){
@@ -865,7 +885,7 @@ function bDash(){
       <div style="font-size:12px;color:var(--t2);margin-top:3px;">${today()} · ${t('bothStoresTxt')}</div>
     </div>
     <div class="combined-card" style="background:var(--store-color,var(--g));">
-      <div class="gt-label">${t('combinedRevToday')}</div>
+      <div class="gt-label">${t('combinedRevToday')} <span id="dash-refresh-time" style="font-size:9px;opacity:0.6;"></span></div>
       <div class="gt-val">${fmt(total)}</div>
       <div class="gt-khr">${fmtK(total)}</div>
       <div class="gt-breakdown">
@@ -873,7 +893,7 @@ function bDash(){
         <div class="gt-part" style="background:rgba(255,255,255,0.08);"><div class="gt-part-lbl">${t('hruStoreTxt')}</div><div class="gt-part-val">${fmt(hruT)}</div></div>
       </div>
     </div>
-    <div class="sh"><div class="sh-t">${t('storeComparison')}</div></div>
+    <div class="sh"><div class="sh-t">${t('storeComparison')}</div><button class="btn sm" onclick="refreshDashboard()" style="display:flex;align-items:center;gap:4px;">🔄 ${lang==='km'?'ធ្វើបច្ចុប្បន្ន':'Refresh'}</button></div>
     <div class="cmp-grid">
       <div class="cmp-card atm">
         <div class="cmp-store" style="color:var(--atm-lt);"><div class="cmp-dot" style="background:var(--atm-c);"></div>ATM</div>
@@ -882,6 +902,10 @@ function bDash(){
         <div class="cmp-lbl">${t('cashLbl')}</div><div style="font-size:14px;font-weight:700;">${fmt(atmS.cash_total||0)}</div>
         <div class="cmp-div"></div>
         <div class="cmp-lbl">${t('abaLbl')}</div><div style="font-size:14px;font-weight:700;">${fmt(atmS.aba_total||0)}</div>
+        <div class="cmp-div"></div>
+        <div style="font-size:10px;padding:3px 7px;border-radius:6px;font-weight:700;background:${atmS.close_report?'#E8F5E9':'#FFF3E0'};color:${atmS.close_report?'#2E7D32':'#E65100'};">
+          ${atmS.close_report?'✓ '+(lang==='km'?'បានបិទ':'Closed'):'⏳ '+(lang==='km'?'មិនទាន់':'Pending')}
+        </div>
       </div>
       <div class="cmp-card hru">
         <div class="cmp-store" style="color:var(--hru-lt);"><div class="cmp-dot" style="background:var(--hru-c);"></div>HRU</div>
@@ -890,7 +914,10 @@ function bDash(){
         <div class="cmp-lbl">${t('cashLbl')}</div><div style="font-size:14px;font-weight:700;">${fmt(hruS.cash_total||0)}</div>
         <div class="cmp-div"></div>
         <div class="cmp-lbl">${t('abaLbl')}</div><div style="font-size:14px;font-weight:700;">${fmt(hruS.aba_total||0)}</div>
-      </div>
+        <div class="cmp-div"></div>
+        <div style="font-size:10px;padding:3px 7px;border-radius:6px;font-weight:700;background:${hruS.close_report?'#E8F5E9':'#FFF3E0'};color:${hruS.close_report?'#2E7D32':'#E65100'};">
+          ${hruS.close_report?'✓ '+(lang==='km'?'បានបិទ':'Closed'):'⏳ '+(lang==='km'?'មិនទាន់':'Pending')}
+        </div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <button class="btn" style="flex:1;background:var(--atm-bg);color:var(--atm-lt);border-color:#E8A87A;" onclick="switchStore('atm');showPage('sales')">${t('atmSalesBtn')}</button>
@@ -2035,7 +2062,7 @@ async function init(){
         me={id:payload.id,name:payload.name,username:payload.username,role:payload.role,store_id:payload.store_id,perms:payload.perms};
         currentStore=me.store_id||'atm';
         render();
-        try{await loadLogo(true);await loadAllData();}catch(e){console.warn('Auto-login data load:',e);}
+        try{await loadLogo(true);await loadAllData();startAutoRefresh();}catch(e){console.warn('Auto-login data load:',e);}
         showPage('dashboard');
         return;
       }

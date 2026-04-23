@@ -150,20 +150,20 @@ app.get('/api/stores/:storeId/menu', auth, async (req, res) => {
 
 app.post('/api/stores/:storeId/menu', auth, async (req, res) => {
   try {
-    const { name, name_km, category, category_km, price_usd, image_url } = req.body;
+    const { name, category, price_usd, image_url } = req.body;
     const { rows } = await pool.query(
-      'INSERT INTO menu_items (store_id,name,name_km,category,category_km,price_usd,image_url) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
-      [req.params.storeId, name, name_km||null, category, category_km||null, price_usd, image_url||null]
+      'INSERT INTO menu_items (store_id,name,category,price_usd,image_url) VALUES ($1,$2,$3,$4,$5) RETURNING *',
+      [req.params.storeId, name, category, price_usd, image_url||null]
     );
     res.json(rows[0]);
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.put('/api/menu/:id', auth, async (req, res) => {
-  const { name, name_km, category, category_km, price_usd, image_url } = req.body;
+  const { name, category, price_usd, image_url } = req.body;
   await pool.query(
-    'UPDATE menu_items SET name=$1,name_km=$2,category=$3,category_km=$4,price_usd=$5,image_url=$6 WHERE id=$7',
-    [name, name_km||null, category, category_km||null, price_usd, image_url||null, req.params.id]
+    'UPDATE menu_items SET name=$1,category=$2,price_usd=$3,image_url=$4 WHERE id=$5',
+    [name, category, price_usd, image_url||null, req.params.id]
   );
   res.json({ success: true });
 });
@@ -183,10 +183,10 @@ app.get('/api/stores/:storeId/inventory', auth, async (req, res) => {
 });
 
 app.post('/api/stores/:storeId/inventory', auth, async (req, res) => {
-  const { name, name_km, quantity, unit, unit_km, status, count_daily, image_url, item_type } = req.body;
+  const { name, quantity, unit, status, count_daily, image_url } = req.body;
   const { rows } = await pool.query(
-    'INSERT INTO inventory (store_id,name,name_km,quantity,unit,unit_km,status,count_daily,item_type,image_url) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *',
-    [req.params.storeId, name, name_km||null, quantity, unit, unit_km||null, status||'ok', count_daily!==false, item_type||'ingredient', image_url||null]
+    'INSERT INTO inventory (store_id,name,quantity,unit,status,count_daily,image_url) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
+    [req.params.storeId, name, quantity, unit, status||'ok', count_daily!==false, image_url||null]
   );
   res.json(rows[0]);
 });
@@ -311,14 +311,37 @@ app.get('/api/stores/:storeId/revenue/today', auth, async (req, res) => {
        FROM aba_transactions WHERE store_id=$1 AND DATE(txn_time)=CURRENT_DATE`,
       [storeId]
     );
-    const cash = parseFloat(salesRows[0].cash_total);
-    const aba = parseFloat(abaRows[0].aba_total);
+    // Also check closing_reports for today (staff close day submission)
+    const { rows: closeRows } = await pool.query(
+      `SELECT cash_total, aba_total, grand_total, submitted_by, created_at
+       FROM closing_reports WHERE store_id=$1 AND report_date=CURRENT_DATE
+       ORDER BY created_at DESC LIMIT 1`,
+      [storeId]
+    );
+
+    let cash = parseFloat(salesRows[0].cash_total);
+    let aba = parseFloat(abaRows[0].aba_total);
+
+    // If closing report exists and has more revenue, use it
+    const closeReport = closeRows[0];
+    if (closeReport) {
+      const closeCash = parseFloat(closeReport.cash_total);
+      const closeAba = parseFloat(closeReport.aba_total);
+      // Use whichever is higher (closing report is the authoritative source)
+      if (closeCash > cash) cash = closeCash;
+      if (closeAba > aba) aba = closeAba;
+    }
+
     const total = cash + aba;
     res.json({
       cash_total: cash, aba_total: aba, grand_total: total,
       khr_total: Math.round(total * KHR_RATE),
       sale_count: parseInt(salesRows[0].sale_count),
-      txn_count: parseInt(abaRows[0].txn_count)
+      txn_count: parseInt(abaRows[0].txn_count),
+      close_report: closeReport ? {
+        submitted_by: closeReport.submitted_by,
+        submitted_at: closeReport.created_at
+      } : null
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -334,7 +357,14 @@ app.get('/api/revenue/all-stores', auth, ownerOnly, async (req, res) => {
       const { rows: a } = await pool.query(
         `SELECT COALESCE(SUM(amount_usd),0) as t FROM aba_transactions WHERE store_id=$1 AND DATE(txn_time)=CURRENT_DATE`, [s]
       );
-      const cash = parseFloat(c[0].t), aba = parseFloat(a[0].t);
+      const { rows: cr } = await pool.query(
+        `SELECT cash_total, aba_total FROM closing_reports WHERE store_id=$1 AND report_date=CURRENT_DATE ORDER BY created_at DESC LIMIT 1`, [s]
+      );
+      let cash = parseFloat(c[0].t), aba = parseFloat(a[0].t);
+      if (cr[0]) {
+        if (parseFloat(cr[0].cash_total) > cash) cash = parseFloat(cr[0].cash_total);
+        if (parseFloat(cr[0].aba_total) > aba) aba = parseFloat(cr[0].aba_total);
+      }
       result[s] = { cash, aba, total: cash + aba };
     }
     res.json(result);

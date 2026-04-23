@@ -871,6 +871,54 @@ function buildPage(id){
 }
 
 // ════════ DASHBOARD ════════
+function buildStoreCards(atmS,hruS,atmT,hruT){
+  const pairs=[
+    {sid:'atm',s:atmS,total:atmT,dot:'var(--atm-c)',lt:'var(--atm-lt)'},
+    {sid:'hru',s:hruS,total:hruT,dot:'var(--hru-c)',lt:'var(--hru-lt)'},
+  ];
+  return '<div style="margin-bottom:10px;">'+pairs.map(function(p){
+    var sid=p.sid,s=p.s,total=p.total;
+    var closed=!!(s&&s.close_report);
+    var reqKey='nila_edit_request_'+sid+'_'+new Date().toDateString();
+    var hasReq=localStorage.getItem(reqKey);
+    var req=null;try{if(hasReq)req=JSON.parse(hasReq);}catch(e){}
+    var borderColor=closed?'#A5D6A7':'#FFD180';
+    var statusBg=closed?'#E8F5E9':'#FFF3E0';
+    var statusColor=closed?'#2E7D32':'#E65100';
+    var statusTxt=closed?'✓ '+(lang==='km'?'បានបិទ':'Closed'):'⏳ '+(lang==='km'?'មិនទាន់':'Pending');
+    var html='<div style="background:var(--card);border-radius:var(--r);border:1.5px solid '+borderColor+';padding:12px;margin-bottom:10px;">';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
+    html+='<div style="display:flex;align-items:center;gap:6px;">';
+    html+='<div style="width:8px;height:8px;border-radius:50%;background:'+p.dot+';"></div>';
+    html+='<span style="font-size:13px;font-weight:700;color:'+p.lt+';">'+sid.toUpperCase()+' — '+(STORES[sid]?STORES[sid].name:'')+'</span>';
+    html+='</div>';
+    html+='<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;background:'+statusBg+';color:'+statusColor+';">'+statusTxt+'</span>';
+    html+='</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:'+(closed?'10px':'0')+'">';
+    html+='<div style="text-align:center;"><div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">'+t('revenueLbl')+'</div><div style="font-size:15px;font-weight:700;">'+fmt(total)+'</div><div style="font-size:9px;color:var(--t3);">'+fmtK(total)+'</div></div>';
+    html+='<div style="text-align:center;"><div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">'+t('cashLbl')+'</div><div style="font-size:15px;font-weight:700;">'+fmt(s?s.cash_total||0:0)+'</div></div>';
+    html+='<div style="text-align:center;"><div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">'+t('abaLbl')+'</div><div style="font-size:15px;font-weight:700;">'+fmt(s?s.aba_total||0:0)+'</div></div>';
+    html+='</div>';
+    if(closed){
+      html+='<div style="border-top:0.5px solid var(--bd);padding-top:8px;">';
+      html+='<div style="font-size:10px;color:var(--t2);margin-bottom:6px;">'+(lang==='km'?'ដាក់ស្នើដោយ':'Submitted by')+' <b>'+(s&&s.close_report?s.close_report.submitted_by||'':'')+'</b></div>';
+      if(req){
+        html+='<div style="background:#FFF3DC;border-radius:8px;padding:8px 10px;margin-bottom:8px;border:1px solid #F59F00;">';
+        html+='<div style="font-size:11px;font-weight:700;color:#8A5A00;">📝 '+(lang==='km'?'សំណើកែប្រែពី':'Edit request from')+' '+req.by+'</div>';
+        html+='<div style="font-size:10px;color:#8A5A00;margin-top:2px;">'+new Date(req.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</div>';
+        html+='<div style="display:flex;gap:6px;margin-top:8px;">';
+        html+='<button onclick="approveEdit(''+sid+'')" class="btn sm p" style="flex:1;font-size:11px;padding:6px;">✓ '+(lang==='km'?'អនុញ្ញាត':'Approve')+'</button>';
+        html+='<button onclick="rejectEdit(''+sid+'')" class="btn sm d" style="flex:1;font-size:11px;padding:6px;">✗ '+(lang==='km'?'បដិសេធ':'Reject')+'</button>';
+        html+='</div></div>';
+      }
+      html+='<button onclick="adminUnlockEdit(''+sid+'')" class="btn sm full" style="font-size:11px;color:var(--t2);">🔓 '+(lang==='km'?'អ្នកគ្រប់គ្រងអនុញ្ញាតឱ្យកែ':'Admin unlock to edit')+'</button>';
+      html+='</div>';
+    }
+    html+='</div>';
+    return html;
+  }).join('')+'</div>';
+}
+
 function bDash(){
   const s=currentStore, st=STORES[s], stats=storeStats[s]||{};
   const isOwner=me.role==='owner';
@@ -894,64 +942,7 @@ function bDash(){
       </div>
     </div>
     <div class="sh"><div class="sh-t">${t('storeComparison')}</div><button class="btn sm" onclick="refreshDashboard()" style="display:flex;align-items:center;gap:4px;">🔄 ${lang==='km'?'ធ្វើបច្ចុប្បន្ន':'Refresh'}</button></div>
-    ${(()=>{
-      // Build store status cards with full close day management
-      const stores=[
-        {sid:'atm',s:atmS,t:atmT,lt:'var(--atm-lt)',c:'var(--atm-c)',bg:'var(--atm-bg)',name:'ATM'},
-        {sid:'hru',s:hruS,t:hruT,lt:'var(--hru-lt)',c:'var(--hru-c)',bg:'var(--hru-bg)',name:'HRU'},
-      ];
-      const cards=stores.map(({sid,s,t:total,lt,c,bg,name})=>{
-        const closed=!!s.close_report;
-        const reqKey='nila_edit_request_'+sid+'_'+new Date().toDateString();
-        const hasReq=localStorage.getItem(reqKey);
-        const req=hasReq?JSON.parse(hasReq):null;
-        return `<div style="background:var(--card);border-radius:var(--r);border:1.5px solid ${closed?'#A5D6A7':'#FFD180'};padding:12px;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <div style="width:8px;height:8px;border-radius:50%;background:${c};"></div>
-              <span style="font-size:13px;font-weight:700;color:${lt};">${name} — ${STORES[sid]?.name||''}</span>
-            </div>
-            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;background:${closed?'#E8F5E9':'#FFF3E0'};color:${closed?'#2E7D32':'#E65100'};">
-              ${closed?'✓ '+(lang==='km'?'បានបិទ':'Closed'):'⏳ '+(lang==='km'?'មិនទាន់':'Pending')}
-            </span>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:${closed?'10px':'0'};">
-            <div style="text-align:center;">
-              <div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">${t('revenueLbl')}</div>
-              <div style="font-size:15px;font-weight:700;color:var(--t1);">${fmt(total)}</div>
-              <div style="font-size:9px;color:var(--t3);">${fmtK(total)}</div>
-            </div>
-            <div style="text-align:center;">
-              <div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">${t('cashLbl')}</div>
-              <div style="font-size:15px;font-weight:700;">${fmt(s.cash_total||0)}</div>
-            </div>
-            <div style="text-align:center;">
-              <div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">${t('abaLbl')}</div>
-              <div style="font-size:15px;font-weight:700;">${fmt(s.aba_total||0)}</div>
-            </div>
-          </div>
-          ${closed?`
-          <div style="border-top:0.5px solid var(--bd);padding-top:8px;">
-            <div style="font-size:10px;color:var(--t2);margin-bottom:6px;">
-              ${lang==='km'?'ដាក់ស្នើដោយ':'Submitted by'} <b>${s.close_report?.submitted_by||''}</b>
-            </div>
-            ${req?`
-            <div style="background:#FFF3DC;border-radius:8px;padding:8px 10px;margin-bottom:8px;border:1px solid #F59F00;">
-              <div style="font-size:11px;font-weight:700;color:#8A5A00;">📝 ${lang==='km'?'សំណើកែប្រែពី':'Edit request from'} ${req.by}</div>
-              <div style="font-size:10px;color:#8A5A00;margin-top:2px;">${new Date(req.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
-              <div style="display:flex;gap:6px;margin-top:8px;">
-                <button onclick="approveEdit('${sid}')" class="btn sm p" style="flex:1;font-size:11px;padding:6px;">✓ ${lang==='km'?'អនុញ្ញាត':'Approve'}</button>
-                <button onclick="rejectEdit('${sid}')" class="btn sm d" style="flex:1;font-size:11px;padding:6px;">✗ ${lang==='km'?'បដិសេធ':'Reject'}</button>
-              </div>
-            </div>`:``}
-            <button onclick="adminUnlockEdit('${sid}')" class="btn sm full" style="font-size:11px;color:var(--t2);">
-              🔓 ${lang==='km'?'អ្នកគ្រប់គ្រងអនុញ្ញាតឱ្យកែ':'Admin unlock to edit'}
-            </button>
-          </div>`:``}
-        </div>`;
-      });
-      return `<div style="margin-bottom:10px;">${cards.join('')}</div>`;
-    })()}
+    ${buildStoreCards(atmS,hruS,atmT,hruT)}
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <button class="btn" style="flex:1;background:var(--atm-bg);color:var(--atm-lt);border-color:#E8A87A;" onclick="switchStore('atm');showPage('sales')">${t('atmSalesBtn')}</button>
       <button class="btn" style="flex:1;background:var(--hru-bg);color:var(--hru-lt);border-color:#7EC8B0;" onclick="switchStore('hru');showPage('sales')">${t('hruSalesBtn')}</button>

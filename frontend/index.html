@@ -289,6 +289,15 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 <div class="mbg" id="mod-ii"><div class="modal">
   <div class="mh"></div><div class="mt" id="mi-t">Add ingredient</div>
   <div class="mf"><div class="mf-l">Name</div><input type="text" id="mi-n" placeholder="e.g. Milk (whole)"></div>
+  <div class="mf" style="padding-bottom:12px;">
+    <div class="mf-l">Item type</div>
+    <div style="display:flex;gap:6px;">
+      <button id="itype-ingredient" onclick="setItemType('ingredient')" style="flex:1;padding:9px;border-radius:10px;border:2px solid var(--store-color,var(--g));background:var(--store-bg,var(--gl));color:var(--store-lt,var(--gt));font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🧪 Ingredient</button>
+      <button id="itype-supply" onclick="setItemType('supply')" style="flex:1;padding:9px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📦 Supply</button>
+      <button id="itype-product" onclick="setItemType('product')" style="flex:1;padding:9px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🧋 Product</button>
+    </div>
+    <input type="hidden" id="mi-type" value="ingredient">
+  </div>
   <div style="display:flex;gap:8px;padding:0 0 12px;">
     <div style="flex:1;"><div class="mf-l">Qty</div><input class="fi" type="number" id="mi-q" placeholder="12" inputmode="decimal"></div>
     <div style="flex:1;"><div class="mf-l">Unit</div><select class="fi" id="mi-u"><option>liters</option><option>ml</option><option>grams</option><option>kg</option><option>packs</option><option>pcs</option></select></div>
@@ -1192,20 +1201,71 @@ function setCash(amt){
   if(inp){inp.value=amt;updateCashTotal(amt);}
 }
 async function submitClose(){
-  const cashAmt=parseFloat(document.getElementById('cash-input')?.value||0);
+  const cashUSD=parseFloat(document.getElementById('cash-usd')?.value||0);
+  const cashKHR=parseFloat(document.getElementById('cash-khr')?.value||0);
+  const cashTotal=cashUSD + cashKHR/RATE;
   const cashNote=document.getElementById('cash-note')?.value||'';
+  const s=currentStore;
+  const abaAuto=(abaData[s]||[]).reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
+
+  // Save submitted values to localStorage so success screen can show them
+  const submitted={cashUSD,cashKHR,cashTotal,abaAuto,note:cashNote,time:new Date().toISOString()};
+  localStorage.setItem('nila_submitted_'+s+'_'+new Date().toDateString(), JSON.stringify(submitted));
+
   try{
-    await api('POST',`/api/stores/${currentStore}/close`,{
+    await api('POST',`/api/stores/${s}/close`,{
       submitted_by:me.username,
-      cash_total:cashAmt,
+      cash_total:cashTotal,
+      cash_usd:cashUSD,
+      cash_khr:cashKHR,
+      aba_total:abaAuto,
       cash_note:cashNote
     });
-  }catch(e){console.warn('Close day API error:',e.message);}
-  // Clear draft
-  localStorage.removeItem('nila_cash_'+currentStore+'_'+new Date().toDateString());
-  localStorage.removeItem('nila_cashnote_'+currentStore+'_'+new Date().toDateString());
-  document.getElementById('cd-form').style.display='none';
-  document.getElementById('cd-success').style.display='block';
+  }catch(e){console.warn('Close day submit:',e.message);}
+
+  // Clear draft inputs
+  localStorage.removeItem('nila_cash_usd_'+s+'_'+new Date().toDateString());
+  localStorage.removeItem('nila_cash_khr_'+s+'_'+new Date().toDateString());
+  localStorage.removeItem('nila_note_'+s+'_'+new Date().toDateString());
+
+  // Show success with correct numbers
+  const grandTotal=cashTotal+abaAuto;
+  const sf=document.getElementById('cd-form');
+  const ss=document.getElementById('cd-success');
+  if(sf) sf.style.display='none';
+  if(ss){
+    ss.style.display='block';
+    ss.innerHTML=`
+    <div class="success-card">
+      <div class="s-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 13l5.5 5.5 12-12" stroke="var(--store-color,var(--g))" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:5px;">Day closed! ✅</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:14px;">${STORES[s].name} · ${new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+      <div style="background:var(--store-color,var(--g));border-radius:14px;padding:14px;margin-bottom:12px;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-bottom:4px;">Grand total collected</div>
+        <div style="font-size:28px;font-weight:700;color:#fff;">${fmt(grandTotal)}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.55);">${fmtK(grandTotal)}</div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:8px;padding:8px;">
+            <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;">💵 Cash USD</div>
+            <div style="font-size:14px;font-weight:700;color:#fff;margin-top:2px;">$${cashUSD||0}</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:8px;padding:8px;">
+            <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;">🇰🇭 Cash KHR</div>
+            <div style="font-size:14px;font-weight:700;color:#fff;margin-top:2px;">៛${(cashKHR||0).toLocaleString()}</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:8px;padding:8px;">
+            <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;">🏦 ABA</div>
+            <div style="font-size:14px;font-weight:700;color:#fff;margin-top:2px;">${fmt(abaAuto)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="notif-box"><div class="notif-title">Owner notified ✓</div><div class="notif-sub">Nila received the daily closing report.</div></div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn full" onclick="editClose()" style="flex:1;">✏️ Edit</button>
+        <button class="btn p full" onclick="showPage('dashboard')" style="flex:1;">Done</button>
+      </div>
+    </div>`;
+  }
 }
 
 // ════════ MENU ════════
@@ -1264,27 +1324,45 @@ async function saveMI(){
 // ════════ INVENTORY ════════
 function bInv(){
   const s=currentStore, items=invData[s]||[];
+  const ft=window._invFilter||'all';
+  const filtered=ft==='all'?items:items.filter(x=>(x.item_type||'ingredient')===ft);
+  const typeInfo={all:{label:'All',icon:''},ingredient:{label:'Ingredient',icon:'🧪'},supply:{label:'Supply',icon:'📦'},product:{label:'Product',icon:'🧋'}};
   return `
   ${storeTabs('inventory')}
   <div class="sh">
-    <div><div class="pg-title" style="margin-bottom:0;">Inventory</div><div style="font-size:11px;color:var(--t2);">${items.length} ingredients</div></div>
+    <div><div class="pg-title" style="margin-bottom:0;">Inventory</div><div style="font-size:11px;color:var(--t2);">${filtered.length} items · ${STORES[s].name}</div></div>
     <button class="btn p sm" onclick="openII(-1)">+ Add</button>
   </div>
-  <div style="font-size:11px;color:var(--t2);margin-bottom:9px;"><span class="badge bg-g">Count daily</span> = in end-day stock &nbsp;<span class="badge bg-gr">Skip</span> = not counted</div>
-  ${items.map((v,i)=>`<div class="inv-item">
-    <div class="inv-th">${v.image_url?`<img src="${v.image_url}">`:`${icoSVG(16)}`}</div>
-    <div style="flex:1;min-width:0;">
-      <div style="font-size:13px;font-weight:600;">${v.name}</div>
-      <div style="font-size:11px;color:var(--t2);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${v.quantity} ${v.unit}<span class="badge ${v.status==='low'?'bg-a':'bg-g'}">${v.status==='low'?'Low':'OK'}</span><span class="badge ${v.count_daily?'bg-g':'bg-gr'}">${v.count_daily?'Count daily':'Skip'}</span></div>
+  <div style="display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px;">
+    ${Object.entries(typeInfo).map(([t,info])=>`
+      <button onclick="window._invFilter='${t}';showPage('inventory')" style="white-space:nowrap;padding:6px 12px;border-radius:99px;border:1.5px solid ${ft===t?'var(--store-color,var(--g))':'var(--bd2)'};background:${ft===t?'var(--store-bg,var(--gl))':'transparent'};color:${ft===t?'var(--store-lt,var(--gt))':'var(--t2)'};font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">
+        ${info.icon} ${info.label}
+      </button>`).join('')}
+  </div>
+  ${filtered.map(v=>`<div class="inv-item">
+    <div style="width:38px;height:38px;border-radius:9px;overflow:hidden;background:var(--bg);flex-shrink:0;">
+      ${v.image_url?`<img src="${v.image_url}" style="width:100%;height:100%;object-fit:cover;">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">${icoSVG()}</div>`}
     </div>
-    <div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn sm" onclick="openII(${i})">Edit</button><button class="btn sm d" onclick="askDel('inv',${i})">Del</button></div>
-  </div>`).join('')||`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No inventory items yet</div></div>`}`;
+    <div style="flex:1;min-width:0;">
+      <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+        <span style="font-size:13px;font-weight:600;">${v.name}</span>
+        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:${(v.item_type||'ingredient')==='product'?'#E8F5E9':(v.item_type)==='supply'?'#FFF3E0':'#F3E5F5'};color:${(v.item_type||'ingredient')==='product'?'#2E7D32':(v.item_type)==='supply'?'#E65100':'#6A1B9A'};">${(v.item_type||'ingredient')==='product'?'🧋 Product':(v.item_type)==='supply'?'📦 Supply':'🧪 Ingredient'}</span>
+      </div>
+      <div style="font-size:11px;color:var(--t2);">${parseFloat(v.quantity)%1===0?parseInt(v.quantity):parseFloat(v.quantity)} ${v.unit} · <span style="color:${v.status==='ok'?'var(--gt)':v.status==='low'?'var(--amb)':'var(--red)'}">${v.status}</span></div>
+    </div>
+    <div style="display:flex;gap:4px;flex-shrink:0;">
+      <button class="btn sm" onclick="openII(${items.indexOf(v)})">Edit</button>
+      <button class="btn sm d" onclick="askDel('inv',${items.indexOf(v)})">Del</button>
+    </div>
+  </div>`).join('')||`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No items yet. Tap + Add to create one.</div></div>`}`;
 }
+
 
 function openII(i){eII=i;pendingImg=null;const s=currentStore,e=i>=0,v=e?invData[s][i]:{};togOn=e?v.count_daily:true;
   document.getElementById('mi-t').textContent=e?'Edit ingredient':'Add ingredient';
   document.getElementById('mi-n').value=e?v.name:'';
   document.getElementById('mi-q').value=e?v.quantity:'';
+  setItemType(e?(v.item_type||'ingredient'):'ingredient');
   document.getElementById('mi-u').value=e?v.unit:'liters';
   document.getElementById('mi-ph').innerHTML=e&&v.image_url?`<img src="${v.image_url}" style="width:100%;height:88px;object-fit:cover;">`:`<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 7h16M2 7c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2v9c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V7z" stroke="#9AAA9A" stroke-width="1.3"/><circle cx="10" cy="11.5" r="2.5" stroke="#9AAA9A" stroke-width="1.3"/></svg><span style="font-size:10px;color:var(--t3);">Tap to upload</span>`;
   updTog();openM('mod-ii');}
@@ -1296,10 +1374,11 @@ async function saveII(){
   const n=document.getElementById('mi-n').value.trim(),q=parseFloat(document.getElementById('mi-q').value),u=document.getElementById('mi-u').value;
   if(!n||isNaN(q)){alert('Wrong username or password');return;}
   try{
-    if(eII>=0){await api('PUT',`/api/inventory/${invData[s][eII].id}`,{name:n,quantity:q,unit:u,status:invData[s][eII].status,count_daily:togOn,image_url:pendingImg||invData[s][eII].image_url});Object.assign(invData[s][eII],{name:n,quantity:q,unit:u,count_daily:togOn});}
+    const itype=document.getElementById('mi-type')?.value||'ingredient';
+    if(eII>=0){await api('PUT',`/api/inventory/${invData[s][eII].id}`,{name:n,quantity:q,unit:u,status:invData[s][eII].status,count_daily:togOn,item_type:itype,image_url:pendingImg||invData[s][eII].image_url});Object.assign(invData[s][eII],{name:n,quantity:q,unit:u,count_daily:togOn,item_type:itype});}
     else{const item=await api('POST',`/api/stores/${s}/inventory`,{name:n,quantity:q,unit:u,status:'ok',count_daily:togOn,image_url:pendingImg||null});invData[s].push(item);}
   }catch(e){
-    if(eII>=0)Object.assign(invData[s][eII],{name:n,quantity:q,unit:u,count_daily:togOn});
+    if(eII>=0)Object.assign(invData[s][eII],{name:n,quantity:q,unit:u,count_daily:togOn,item_type:itype});
     else invData[s].push({id:Date.now(),name:n,quantity:q,unit:u,status:'ok',count_daily:togOn});
   }
   closeM('mod-ii');showPage('inventory');
@@ -1307,67 +1386,92 @@ async function saveII(){
 
 // ════════ END STOCK ════════
 function bEndStock(){
-  const s=currentStore, items=(invData[s]||[]).filter(it=>it.count_daily);
-  const done=Object.keys(stkPh).length, total=items.length, pct=total?Math.round(done/total*100):0;
-  return `<div id="es-form">
-    <div class="prog-banner">
-      <div class="prog-t">End-of-day stock</div>
-      <div class="prog-s">${total} items to count · photo proof required</div>
-      <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
-      <div class="prog-labs"><span class="prog-l" id="prog-txt">${done} of ${total} photos</span><span class="prog-l">${pct}%</span></div>
-    </div>
-    ${items.map((it,i)=>`<div class="si">
+  const s=currentStore, allItems=(invData[s]||[]).filter(it=>it.count_daily);
+  const done=Object.keys(stkPh).length, total=allItems.length, pct=total?Math.round(done/total*100):0;
+
+  // Group by type
+  const groups=[
+    {key:'product', label:'🧋 Products for Sale', desc:'Items you sell directly to customers', items:allItems.filter(x=>(x.item_type||'ingredient')==='product')},
+    {key:'ingredient', label:'🧪 Ingredients', desc:'Items used to make drinks/food', items:allItems.filter(x=>(x.item_type||'ingredient')==='ingredient')},
+    {key:'supply', label:'📦 Supplies', desc:'Cups, lids, packaging etc.', items:allItems.filter(x=>(x.item_type||'ingredient')==='supply')},
+  ].filter(g=>g.items.length>0);
+
+  function itemCard(it, i){
+    return `<div class="si">
       <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;">
         <div style="width:36px;height:36px;border-radius:9px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
           ${it.image_url?`<img src="${it.image_url}" style="width:36px;height:36px;object-fit:cover;">`:`${icoSVG(15)}`}
         </div>
-        <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${it.name}</div><div style="font-size:10px;color:var(--t3);margin-top:1px;">Opening: ${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)} ${it.unit}</div></div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${it.name}</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:1px;">Opening: ${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)} ${it.unit}</div>
+        </div>
         <span id="esb-${i}" class="badge bg-gr">No photo</span>
       </div>
       <div style="display:flex;gap:7px;margin-bottom:8px;">
         <div style="flex:1;"><div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:3px;">Closing (${it.unit})</div>
-          <input style="width:100%;font-size:14px;font-weight:700;padding:8px 10px;border:1.5px solid var(--bd2);border-radius:9px;background:var(--bg);color:var(--t1);font-family:inherit;text-align:center;" type="number" value="${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)}" min="0" step="0.1" id="esq-${i}" inputmode="decimal"></div>
+          <input style="width:100%;font-size:16px;font-weight:700;padding:10px;border:1.5px solid var(--bd2);border-radius:9px;background:var(--bg);color:var(--t1);font-family:inherit;text-align:center;" type="number" value="${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)}" min="0" step="1" id="esq-${i}" inputmode="decimal">
+        </div>
         <div><div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:3px;">Status</div>
           <select class="si-sel ${it.status}" id="esst-${i}" onchange="this.className='si-sel '+this.value">
             <option value="ok" ${it.status==='ok'?'selected':''}>OK</option>
             <option value="low" ${it.status==='low'?'selected':''}>Low</option>
-          </select></div>
+          </select>
+        </div>
       </div>
-      <!-- PHOTO SECTION -->
-      <div style="margin-top:8px;">
-        <input type="file" id="esfile-${i}" accept="image/*" capture="environment" style="display:none;" onchange="handleEsPhoto(${i}, this)">
-        ${stkPh[i]?`
-        <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;height:140px;">
+      <input type="file" id="esfile-${i}" accept="image/*" capture="environment" style="display:none;" onchange="handleEsPhoto(${i}, this)">
+      ${stkPh[i]?`
+        <div style="position:relative;border-radius:12px;overflow:hidden;height:140px;">
           <img src="${stkPh[i]}" style="width:100%;height:140px;object-fit:cover;display:block;">
           <button onclick="document.getElementById('esfile-${i}').click()" style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">📷 Retake</button>
         </div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="var(--store-color,var(--g))" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span style="font-size:12px;font-weight:600;color:var(--store-color,var(--g));">Photo taken — ready to submit</span>
+          <span style="font-size:12px;font-weight:600;color:var(--store-color,var(--g));">Photo taken ✓</span>
         </div>`:`
-        <button onclick="document.getElementById('esfile-${i}').click()" style="width:100%;padding:14px;background:#F8F8F8;border:2px dashed #E0D0C0;border-radius:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#9A8A7A" stroke-width="1.5"/><circle cx="12" cy="13" r="4" stroke="#9A8A7A" stroke-width="1.5"/></svg>
+        <button onclick="document.getElementById('esfile-${i}').click()" style="width:100%;padding:13px;background:#F8F8F8;border:2px dashed #E0D0C0;border-radius:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#9A8A7A" stroke-width="1.5"/><circle cx="12" cy="13" r="4" stroke="#9A8A7A" stroke-width="1.5"/></svg>
           <div style="text-align:left;">
-            <div style="font-size:13px;font-weight:700;color:#2C1A08;">Take Photo</div>
-            <div style="font-size:11px;color:var(--red);margin-top:1px;">⚠️ Required before submit</div>
+            <div style="font-size:13px;font-weight:700;color:#2C1A08;">📷 Take Photo</div>
+            <div style="font-size:11px;color:var(--red);">⚠️ Required before submit</div>
           </div>
         </button>`}
+    </div>`;
+  }
+
+  return `<div id="es-form">
+    <div class="prog-banner">
+      <div class="prog-t">End-of-day stock count</div>
+      <div class="prog-s">${total} items to count · photo proof required</div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <div class="prog-labs"><span class="prog-l" id="prog-txt">${done} of ${total} photos</span><span class="prog-l">${pct}%</span></div>
+    </div>
+
+    ${groups.length===0?`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No items marked for daily count.<br>Go to Inventory → Edit item → turn on "Count daily"</div></div>`:''}
+
+    ${groups.map(g=>`
+      <div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px;">
+        <div style="font-size:14px;font-weight:700;">${g.label}</div>
+        <div style="font-size:11px;color:var(--t2);">${g.items.length} items</div>
       </div>
-      </div>`).join('')||`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No items marked for daily count. Go to Inventory to toggle items.</div></div>`}
+      <div style="font-size:11px;color:var(--t3);margin-bottom:8px;">${g.desc}</div>
+      ${g.items.map(it=>itemCard(it, allItems.indexOf(it))).join('')}
+    `).join('')}
+
     <div class="warn" id="es-warn"></div>
-    ${total?`<button class="btn p full" onclick="submitES()">Submit stock count</button>
+    ${total?`<button class="btn p full" onclick="submitES()" style="margin-top:8px;">Submit stock count</button>
     <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px;margin-bottom:16px;">Owner will be notified instantly</div>`:''}
   </div>
   <div id="es-suc" style="display:none;padding:8px 0 16px;">
     <div class="success-card">
-      <div class="s-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 13l5.5 5.5 12-12" stroke="var(--g)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div style="font-size:17px;font-weight:700;margin-bottom:5px;">Stock submitted!</div>
+      <div class="s-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 13l5.5 5.5 12-12" stroke="var(--store-color,var(--g))" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:5px;">Stock submitted! ✅</div>
       <div style="font-size:12px;color:var(--t2);margin-bottom:12px;">All daily items counted with photo proof.</div>
-      <div class="notif-box"><div class="notif-title">Owner notified</div><div class="notif-sub">Nila received the closing stock count and photos.</div></div>
+      <div class="notif-box"><div class="notif-title">Owner notified ✓</div><div class="notif-sub">Nila received the closing stock count and photos.</div></div>
       <button class="btn p full" onclick="resetES()">Done</button>
     </div>
   </div>`;
 }
+
 
 function takePh(i){
   document.getElementById('esfile-'+i)?.click();

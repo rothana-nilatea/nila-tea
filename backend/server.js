@@ -410,6 +410,24 @@ app.get('/api/stores/:storeId/revenue/week', auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+
+// ── CLOSING REPORTS HISTORY ──
+app.get('/api/closing-reports', auth, ownerOnly, async (req, res) => {
+  try {
+    const { days = 30 } = req.query;
+    const { rows } = await pool.query(
+      `SELECT cr.store_id, cr.report_date, cr.cash_total, cr.aba_total, 
+              cr.grand_total, cr.submitted_by, cr.created_at,
+              s.name as store_name, s.short as store_short, s.color as store_color
+       FROM closing_reports cr
+       JOIN stores s ON cr.store_id = s.id
+       WHERE cr.report_date >= CURRENT_DATE - INTERVAL '${parseInt(days)} days'
+       ORDER BY cr.report_date DESC, cr.store_id`
+    );
+    res.json(rows);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── START ──
 initDB().then(() => {
   app.listen(PORT, () => console.log(`🍵 Nila Tea API on port ${PORT}`));

@@ -1874,6 +1874,77 @@ async function submitES(){
 function resetES(){stkPh={};showPage('endstock');}
 
 // ════════ REVENUE ════════
+async function loadDailyReports(){
+  const days=document.getElementById('rev-daily-days')?.value||30;
+  const el=document.getElementById('rev-daily-data');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px;">Loading...</div>';
+  try{
+    const rows=await api('GET','/api/closing-reports?days='+days);
+    if(!rows||!rows.length){
+      el.innerHTML='<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px;">No reports found</div>';
+      return;
+    }
+    // Group by date
+    const byDate={};
+    rows.forEach(r=>{
+      const d=r.report_date.split('T')[0];
+      if(!byDate[d])byDate[d]={};
+      byDate[d][r.store_id]=r;
+    });
+    const dates=Object.keys(byDate).sort().reverse();
+    var html='';
+    var totalATM=0,totalHRU=0;
+    dates.forEach(function(d){
+      var day=byDate[d];
+      var atm=day.atm, hru=day.hru;
+      var atmAmt=atm?parseFloat(atm.grand_total)||0:null;
+      var hruAmt=hru?parseFloat(hru.grand_total)||0:null;
+      var dayTotal=(atmAmt||0)+(hruAmt||0);
+      totalATM+=atmAmt||0; totalHRU+=hruAmt||0;
+      var dateObj=new Date(d+'T00:00:00');
+      var dateStr=dateObj.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      html+='<div style="background:var(--card);border-radius:var(--r);padding:12px 13px;margin-bottom:8px;border:0.5px solid var(--bd);">';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
+      html+='<span style="font-size:12px;font-weight:700;color:var(--t1);">'+dateStr+'</span>';
+      html+='<span style="font-size:14px;font-weight:700;color:var(--g);">'+fmt(dayTotal)+'</span>';
+      html+='</div>';
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">';
+      // ATM
+      html+='<div style="background:var(--atm-bg);border-radius:8px;padding:8px;border:0.5px solid rgba(194,105,42,0.2);">';
+      html+='<div style="font-size:9px;font-weight:700;color:var(--atm-lt);margin-bottom:3px;">ATM</div>';
+      if(atmAmt!==null){
+        html+='<div style="font-size:14px;font-weight:700;color:var(--atm-lt);">'+fmt(atmAmt)+'</div>';
+        html+='<div style="font-size:9px;color:var(--atm-lt);opacity:0.7;">by '+atm.submitted_by+'</div>';
+      }else{
+        html+='<div style="font-size:11px;color:var(--t3);">⏳ No report</div>';
+      }
+      html+='</div>';
+      // HRU
+      html+='<div style="background:var(--hru-bg);border-radius:8px;padding:8px;border:0.5px solid rgba(26,122,94,0.2);">';
+      html+='<div style="font-size:9px;font-weight:700;color:var(--hru-lt);margin-bottom:3px;">HRU</div>';
+      if(hruAmt!==null){
+        html+='<div style="font-size:14px;font-weight:700;color:var(--hru-lt);">'+fmt(hruAmt)+'</div>';
+        html+='<div style="font-size:9px;color:var(--hru-lt);opacity:0.7;">by '+hru.submitted_by+'</div>';
+      }else{
+        html+='<div style="font-size:11px;color:var(--t3);">⏳ No report</div>';
+      }
+      html+='</div>';
+      html+='</div></div>';
+    });
+    // Summary
+    html+='<div style="background:var(--gl);border-radius:var(--r);padding:12px 13px;margin-top:4px;border:0.5px solid var(--g);">';
+    html+='<div style="font-size:12px;font-weight:700;color:var(--gt);margin-bottom:8px;">'+days+' Day Summary</div>';
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;color:var(--t2);">ATM Total</span><span style="font-size:13px;font-weight:700;">'+fmt(totalATM)+'</span></div>';
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;color:var(--t2);">HRU Total</span><span style="font-size:13px;font-weight:700;">'+fmt(totalHRU)+'</span></div>';
+    html+='<div style="display:flex;justify-content:space-between;border-top:0.5px solid var(--g);padding-top:8px;margin-top:4px;"><span style="font-size:13px;font-weight:700;">Grand Total</span><div style="text-align:right;"><div style="font-size:16px;font-weight:700;color:var(--g);">'+fmt(totalATM+totalHRU)+'</div><div style="font-size:10px;color:var(--t3);">'+fmtK(totalATM+totalHRU)+'</div></div></div>';
+    html+='</div>';
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML='<div style="text-align:center;padding:20px;color:var(--red);font-size:12px;">Error loading reports</div>';
+  }
+}
+
 function bRevenue(){
   const s=currentStore, st=STORES[s];
   const isOwner=me.role==='owner';
@@ -1885,10 +1956,25 @@ function bRevenue(){
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   return `
-  <div style="display:flex;gap:6px;margin-bottom:12px;">
-    <button onclick="showRevTab('today')" id="rtab-today" style="flex:1;padding:8px;border-radius:10px;border:2px solid var(--g);background:var(--gl);color:var(--gt);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Today</button>
-    <button onclick="showRevTab('month')" id="rtab-month" style="flex:1;padding:8px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Monthly</button>
-    <button onclick="showRevTab('range')" id="rtab-range" style="flex:1;padding:8px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">By date</button>
+  <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;">
+    <button onclick="showRevTab('today')" id="rtab-today" style="flex:1;white-space:nowrap;padding:8px;border-radius:10px;border:2px solid var(--g);background:var(--gl);color:var(--gt);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Today</button>
+    <button onclick="showRevTab('daily')" id="rtab-daily" style="flex:1;white-space:nowrap;padding:8px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📅 Daily</button>
+    <button onclick="showRevTab('month')" id="rtab-month" style="flex:1;white-space:nowrap;padding:8px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Monthly</button>
+    <button onclick="showRevTab('range')" id="rtab-range" style="flex:1;white-space:nowrap;padding:8px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">By date</button>
+  </div>
+  
+  <!-- DAILY TAB -->
+  <div id="rev-daily" style="display:none;">
+    <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+      <select id="rev-daily-days" onchange="loadDailyReports()" style="flex:1;font-size:13px;padding:9px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
+        <option value="7">Last 7 days</option>
+        <option value="14">Last 14 days</option>
+        <option value="30" selected>Last 30 days</option>
+      </select>
+    </div>
+    <div id="rev-daily-data">
+      <div style="text-align:center;padding:20px;color:var(--t3);font-size:12px;">Loading...</div>
+    </div>
   </div>
 
   <!-- TODAY TAB -->
@@ -1966,6 +2052,7 @@ function bRevenue(){
 }
 
 function showRevTab(tab){
+  if(tab==='daily'){loadDailyReports();}
   ['today','month','range'].forEach(t=>{
     const el=document.getElementById('rev-'+t);
     const btn=document.getElementById('rtab-'+t);

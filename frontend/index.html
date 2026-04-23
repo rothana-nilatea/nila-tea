@@ -421,6 +421,16 @@ en:{
   matchedLabel:'matched',unmatchedLabel:'unmatched',liveLabel:'Live',
   noPhotoLabel:'No photo',photoCheckLabel:'Photo ✓',
   ownerAllStores:'Owner · All stores',transactions:'transactions',
+  itemsToCountShort:'items to count',photosLabel:'photos',ofLabel:'of',
+  retakePhoto:'Retake',takePhoto:'Take Photo',requiredBeforeSubmit:'Required before submit',
+  openingLabel2:'Opening',closingLabel2:'Closing',statusLabel2:'Status',
+  noItemsYet:'No items yet. Tap + Add to create one.',
+  ownerNotifiedTitle:'Owner notified ✓',ownerNotifiedClose:'Nila received the full closing report with Cash & ABA breakdown.',
+  ownerNotifiedDaily:'Nila received the daily closing report.',
+  ownerNotifiedStock2:'Nila received the closing stock count and photos.',
+  ingredientLabel:'🧪 Ingredient',supplyLabel:'📦 Supply',foodLabel:'🍞 Food',
+  noItemsMarked2:'No items marked for daily count. Go to Inventory → Edit item → turn on Count daily',
+  photosOf:'photos',
 },
 km:{
   appName:'នីឡា ទ',appSub:'ប្រព័ន្ធគ្រប់គ្រងហាង',signIn:'ចូលទៅគ្រប់គ្រងហាង',
@@ -490,6 +500,16 @@ km:{
   matchedLabel:'ត្រូវគ្នា',unmatchedLabel:'មិនត្រូវ',liveLabel:'រស់នៅ',
   noPhotoLabel:'គ្មានរូបភាព',photoCheckLabel:'រូបភាព ✓',
   ownerAllStores:'ម្ចាស់ · ហាងទាំងអស់',transactions:'ប្រតិបត្តិការ',
+  itemsToCountShort:'មុខទំនិញត្រូវរាប់',photosLabel:'រូបភាព',ofLabel:'នៃ',
+  retakePhoto:'ថតម្តងទៀត',takePhoto:'ថតរូប',requiredBeforeSubmit:'ត្រូវការមុនដាក់ស្នើ',
+  openingLabel2:'ការបើក',closingLabel2:'ការបិទ',statusLabel2:'ស្ថានភាព',
+  noItemsYet:'មិនទាន់មានមុខទំនិញ។ ចុច + បន្ថែម',
+  ownerNotifiedTitle:'ម្ចាស់ហាងបានទទួល ✓',ownerNotifiedClose:'នីឡាទទួលបានរបាយការណ៍បិទថ្ងៃ Cash និង ABA',
+  ownerNotifiedDaily:'នីឡាទទួលបានរបាយការណ៍បិទថ្ងៃ',
+  ownerNotifiedStock2:'នីឡាទទួលបានការរាប់ស្តុក និងរូបភាព',
+  ingredientLabel:'🧪 គ្រឿងផ្សំ',supplyLabel:'📦 វត្ថុផ្គត់ផ្គង់',foodLabel:'🍞 អាហារ',
+  noItemsMarked2:'មិនមានមុខទំនិញដែលសម្គាល់ · ទៅ សារពើភ័ណ្ឌ → កែ → បើក រាប់រាល់ថ្ងៃ',
+  photosOf:'រូបភាព',
 }
 };
 function t(key){return(T[lang]&&T[lang][key])||T.en[key]||key;}
@@ -876,7 +896,7 @@ function bDash(){
       <button onclick="showPage('endstock')" style="background:#fff;border:0.5px solid var(--bd);border-radius:14px;padding:14px;text-align:left;cursor:pointer;font-family:inherit;box-shadow:var(--shadow);">
         <div style="font-size:20px;margin-bottom:6px;">📸</div>
         <div style="font-size:13px;font-weight:700;color:var(--t1);">End-day stock</div>
-        <div style="font-size:11px;color:var(--t2);margin-top:2px;">${dailyItems.length} items to count</div>
+        <div style="font-size:11px;color:var(--t2);margin-top:2px;">${dailyItems.length} ${t('itemsToCountShort')}</div>
       </button>
       <button onclick="showPage('inventory')" style="background:#fff;border:0.5px solid var(--bd);border-radius:14px;padding:14px;text-align:left;cursor:pointer;font-family:inherit;box-shadow:var(--shadow);">
         <div style="font-size:20px;margin-bottom:6px;">🏪</div>
@@ -1158,7 +1178,7 @@ function bCloseDay(){
         <div class="gt-val">${fmt(grandTotal)}</div>
         <div class="gt-khr">${fmtK(grandTotal)}</div>
       </div>
-      <div class="notif-box"><div class="notif-title">Owner notified</div><div class="notif-sub">Nila received the full closing report with Cash & ABA breakdown.</div></div>
+      <div class="notif-box"><div class="notif-title">${t('ownerNotifiedTitle')}</div><div class="notif-sub">${t('ownerNotifiedClose')}</div></div>
       <button class="btn p full" onclick="showPage('sales')">Back to sales</button>
     </div>
   </div>`;
@@ -1261,7 +1281,7 @@ async function submitClose(){
           </div>
         </div>
       </div>
-      <div class="notif-box"><div class="notif-title">Owner notified ✓</div><div class="notif-sub">Nila received the daily closing report.</div></div>
+      <div class="notif-box"><div class="notif-title">${t('ownerNotifiedTitle')}</div><div class="notif-sub">${t('ownerNotifiedDaily')}</div></div>
       <div style="display:flex;gap:8px;margin-top:12px;">
         <button class="btn full" onclick="editClose()" style="flex:1;">✏️ Edit</button>
         <button class="btn p full" onclick="showPage('dashboard')" style="flex:1;">Done</button>
@@ -1294,7 +1314,7 @@ function bMenu(){
     <button class="btn p sm" onclick="openMM(-1)">+ Add</button>
   </div>
   <div class="mg">${items.map((m,i)=>`<div class="mc2">
-    <div class="mc2-img">${m.image_url?`<img src="${m.image_url}">`:`${icoSVG(22)}<div style="font-size:9px;color:var(--t3);margin-top:2px;">No photo</div>`}</div>
+    <div class="mc2-img">${m.image_url?`<img src="${m.image_url}">`:`${icoSVG(22)}<div style="font-size:9px;color:var(--t3);margin-top:2px;">${t('noPhoto')}</div>`}</div>
     <div class="mc2-bd"><div class="mc2-cat">${m.category}</div><div class="mc2-name">${m.name}</div><div class="mc2-price">${fmt(m.price_usd)} · ${fmtK(m.price_usd)}</div>
     <div style="display:flex;gap:4px;margin-top:7px;"><button class="btn sm" style="flex:1;" onclick="openMM(${i})">Edit</button><button class="btn sm d" onclick="askDel('menu',${i})">Del</button></div>
     </div></div>`).join('')||`<div style="font-size:12px;color:var(--t3);padding:20px;text-align:center;grid-column:1/-1;">No menu items yet</div>`}
@@ -1348,7 +1368,7 @@ function bInv(){
     <div style="flex:1;min-width:0;">
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
         <span style="font-size:13px;font-weight:600;">${v.name}</span>
-        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:${(v.item_type)==='food'?'#FFF8E1':(v.item_type)==='supply'?'#FFF3E0':'#F3E5F5'};color:${(v.item_type)==='food'?'#F57F17':(v.item_type)==='supply'?'#E65100':'#6A1B9A'};">${(v.item_type)==='food'?'🍞 Food':(v.item_type)==='supply'?'📦 Supply':'🧪 Ingredient'}</span>
+        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:${(v.item_type)==='food'?'#FFF8E1':(v.item_type)==='supply'?'#FFF3E0':'#F3E5F5'};color:${(v.item_type)==='food'?'#F57F17':(v.item_type)==='supply'?'#E65100':'#6A1B9A'};">${(v.item_type)==='food'?t('foodLabel'):(v.item_type)==='supply'?t('supplyLabel'):t('ingredientLabel')}</span>
       </div>
       <div style="font-size:11px;color:var(--t2);">${parseFloat(v.quantity)%1===0?parseInt(v.quantity):parseFloat(v.quantity)} ${v.unit} · <span style="color:${v.status==='ok'?'var(--gt)':v.status==='low'?'var(--amb)':'var(--red)'}">${v.status}</span></div>
     </div>
@@ -1356,7 +1376,7 @@ function bInv(){
       <button class="btn sm" onclick="openII(${items.indexOf(v)})">Edit</button>
       <button class="btn sm d" onclick="askDel('inv',${items.indexOf(v)})">Del</button>
     </div>
-  </div>`).join('')||`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No items yet. Tap + Add to create one.</div></div>`}`;
+  </div>`).join('')||`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">${t('noItemsYet')}</div></div>`}`;
 }
 
 
@@ -1404,9 +1424,9 @@ function bEndStock(){
 
   // Group by type
   const groups=[
-    {key:'ingredient', label:'🧪 Ingredients', desc:'Items used to make drinks/food', items:allItems.filter(x=>(x.item_type||'ingredient')==='ingredient')},
-    {key:'supply', label:'📦 Supplies', desc:'Cups, lids, straws, packaging', items:allItems.filter(x=>x.item_type==='supply')},
-    {key:'food', label:'🍞 Food & Snacks', desc:'Bread, snacks, ready-made food', items:allItems.filter(x=>x.item_type==='food')},
+    {key:'ingredient', label:t('ingredientLabel').replace('🧪 ','🧪 ')+'s', desc:t('staffCountsDaily'), items:allItems.filter(x=>(x.item_type||'ingredient')==='ingredient')},
+    {key:'supply', label:t('supplyLabel')+'s', desc:t('staffCountsDaily'), items:allItems.filter(x=>x.item_type==='supply')},
+    {key:'food', label:t('foodLabel'), desc:t('staffCountsDaily'), items:allItems.filter(x=>x.item_type==='food')},
   ].filter(g=>g.items.length>0);
 
   function itemCard(it, i){
@@ -1416,18 +1436,18 @@ function bEndStock(){
           ${it.image_url?`<img src="${it.image_url}" style="width:36px;height:36px;object-fit:cover;">`:`${icoSVG(15)}`}
         </div>
         <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${it.name}</div>
-          <div style="font-size:10px;color:var(--t3);margin-top:1px;">Opening: ${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)} ${it.unit}</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:1px;">${t('openingLabel2')}: ${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)} ${it.unit}</div>
         </div>
-        <span id="esb-${i}" class="badge bg-gr">No photo</span>
+        <span id="esb-${i}" class="badge bg-gr">${t('noPhotoLabel')}</span>
       </div>
       <div style="display:flex;gap:7px;margin-bottom:8px;">
-        <div style="flex:1;"><div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:3px;">Closing (${it.unit})</div>
+        <div style="flex:1;"><div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:3px;">${t('closingLabel2')} (${it.unit})</div>
           <input style="width:100%;font-size:16px;font-weight:700;padding:10px;border:1.5px solid var(--bd2);border-radius:9px;background:var(--bg);color:var(--t1);font-family:inherit;text-align:center;" type="number" value="${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)}" min="0" step="1" id="esq-${i}" inputmode="decimal">
         </div>
-        <div><div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:3px;">Status</div>
+        <div><div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:3px;">${t('statusLabel2')}</div>
           <select class="si-sel ${it.status}" id="esst-${i}" onchange="this.className='si-sel '+this.value">
-            <option value="ok" ${it.status==='ok'?'selected':''}>OK</option>
-            <option value="low" ${it.status==='low'?'selected':''}>Low</option>
+            <option value="ok" id="opt-ok-${i}" ${it.status==='ok'?'selected':''}>${t("okLabel")}</option>
+            <option value="low" ${it.status==='low'?'selected':''}>${t("lowLabel")}</option>
           </select>
         </div>
       </div>
@@ -1435,7 +1455,7 @@ function bEndStock(){
       ${stkPh[i]?`
         <div style="position:relative;border-radius:12px;overflow:hidden;height:140px;">
           <img src="${stkPh[i]}" style="width:100%;height:140px;object-fit:cover;display:block;">
-          <button onclick="document.getElementById('esfile-${i}').click()" style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">📷 Retake</button>
+          <button onclick="document.getElementById('esfile-${i}').click()" style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">${t('retakePhoto')}</button>
         </div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="var(--store-color,var(--g))" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1444,8 +1464,8 @@ function bEndStock(){
         <button onclick="document.getElementById('esfile-${i}').click()" style="width:100%;padding:13px;background:#F8F8F8;border:2px dashed #E0D0C0;border-radius:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#9A8A7A" stroke-width="1.5"/><circle cx="12" cy="13" r="4" stroke="#9A8A7A" stroke-width="1.5"/></svg>
           <div style="text-align:left;">
-            <div style="font-size:13px;font-weight:700;color:#2C1A08;">📷 Take Photo</div>
-            <div style="font-size:11px;color:var(--red);">⚠️ Required before submit</div>
+            <div style="font-size:13px;font-weight:700;color:#2C1A08;">${t('takePhoto')}</div>
+            <div style="font-size:11px;color:var(--red);">⚠️ ${t('requiredBeforeSubmit')}</div>
           </div>
         </button>`}
     </div>`;
@@ -1453,13 +1473,13 @@ function bEndStock(){
 
   return `<div id="es-form">
     <div class="prog-banner">
-      <div class="prog-t">End-of-day stock count</div>
-      <div class="prog-s">${total} items to count · photo proof required</div>
+      <div class="prog-t">${t('endStockTitle')}</div>
+      <div class="prog-s">${total} ${t('itemsToCountShort')} · ${t('itemsToCount').split('·')[1]?.trim()||'photo proof required'}</div>
       <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
-      <div class="prog-labs"><span class="prog-l" id="prog-txt">${done} of ${total} photos</span><span class="prog-l">${pct}%</span></div>
+      <div class="prog-labs"><span class="prog-l" id="prog-txt">${done} ${t('ofLabel')} ${total} ${t('photosLabel')}</span><span class="prog-l">${pct}%</span></div>
     </div>
 
-    ${groups.length===0?`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No items marked for daily count.<br>Go to Inventory → Edit item → turn on "Count daily"</div></div>`:''}
+    ${groups.length===0?`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">${t('noItemsMarked2')}</div></div>`:''}
 
     ${groups.map(g=>`
       <div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px;">
@@ -1471,15 +1491,15 @@ function bEndStock(){
     `).join('')}
 
     <div class="warn" id="es-warn"></div>
-    ${total?`<button class="btn p full" onclick="submitES()" style="margin-top:8px;">Submit stock count</button>
-    <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px;margin-bottom:16px;">Owner will be notified instantly</div>`:''}
+    ${total?`<button class="btn p full" onclick="submitES()" style="margin-top:8px;">${t('submitStock')}</button>
+    <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px;margin-bottom:16px;">${t('ownerNotifiedInstant')}</div>`:''}
   </div>
   <div id="es-suc" style="display:none;padding:8px 0 16px;">
     <div class="success-card">
       <div class="s-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 13l5.5 5.5 12-12" stroke="var(--store-color,var(--g))" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div style="font-size:17px;font-weight:700;margin-bottom:5px;">Stock submitted! ✅</div>
-      <div style="font-size:12px;color:var(--t2);margin-bottom:12px;">All daily items counted with photo proof.</div>
-      <div class="notif-box"><div class="notif-title">Owner notified ✓</div><div class="notif-sub">Nila received the closing stock count and photos.</div></div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:5px;">${t('stockSubmitted')} ✅</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:12px;">${t('allItemsCounted')}</div>
+      <div class="notif-box"><div class="notif-title">${t('ownerNotifiedTitle')}</div><div class="notif-sub">${t('ownerNotifiedStock2')}</div></div>
       <button class="btn p full" onclick="resetES()">Done</button>
     </div>
   </div>`;
@@ -1501,7 +1521,7 @@ function handleEsPhoto(i, input){
     const done=Object.keys(stkPh).length;
     const pct=Math.round(done/total*100);
     const pf=document.querySelector('.prog-fill');if(pf)pf.style.width=pct+'%';
-    const pt=document.getElementById('prog-txt');if(pt)pt.textContent=`${done} of ${total} photos`;
+    const pt=document.getElementById('prog-txt');if(pt)pt.textContent=`${done} ${t('ofLabel')} ${total} ${t('photosLabel')}`;
     // Refresh page to show photo preview
     showPage('endstock');
   };

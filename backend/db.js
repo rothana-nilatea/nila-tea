@@ -147,8 +147,18 @@ async function initDB() {
         aba_total DECIMAL(10,2) DEFAULT 0,
         grand_total DECIMAL(10,2) DEFAULT 0,
         submitted_by VARCHAR(50),
-        created_at TIMESTAMP DEFAULT NOW()
+        created_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(store_id, report_date)
       );
+
+      -- Migration: add unique constraint if not exists
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname='closing_reports_store_id_report_date_key'
+        ) THEN
+          ALTER TABLE closing_reports ADD CONSTRAINT closing_reports_store_id_report_date_key UNIQUE(store_id, report_date);
+        END IF;
+      END $$;
     `);
 
     // Seed stores

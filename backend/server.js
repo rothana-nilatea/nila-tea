@@ -273,23 +273,36 @@ app.post('/api/stores/:storeId/close', auth, async (req, res) => {
     const { submitted_by } = req.body;
     const storeId = req.params.storeId;
     const date = new Date().toISOString().split('T')[0];
+    const { cash_total, cash_usd, cash_khr, aba_total, submitted_by } = req.body;
 
-    const { rows: cashRows } = await pool.query(
-      `SELECT COALESCE(SUM(amount_usd),0) as total FROM sales WHERE store_id=$1 AND sale_date=$2 AND payment_method='cash'`,
-      [storeId, date]
-    );
-    const { rows: abaRows } = await pool.query(
-      `SELECT COALESCE(SUM(amount_usd),0) as total FROM aba_transactions WHERE store_id=$1 AND DATE(txn_time)=$2`,
-      [storeId, date]
-    );
+    // Use submitted amounts from frontend (staff counted cash physically)
+    // Fall back to querying DB only if not provided
+    let cashTotal = parseFloat(cash_total) || 0;
+    let abaTotal = parseFloat(aba_total) || 0;
 
-    const cashTotal = parseFloat(cashRows[0].total);
-    const abaTotal = parseFloat(abaRows[0].total);
+    // If not provided by frontend, query from DB
+    if (!cash_total) {
+      const { rows: cashRows } = await pool.query(
+        `SELECT COALESCE(SUM(amount_usd),0) as total FROM sales WHERE store_id=$1 AND sale_date=$2 AND payment_method='cash'`,
+        [storeId, date]
+      );
+      cashTotal = parseFloat(cashRows[0].total);
+    }
+    if (!aba_total) {
+      const { rows: abaRows } = await pool.query(
+        `SELECT COALESCE(SUM(amount_usd),0) as total FROM aba_transactions WHERE store_id=$1 AND DATE(txn_time)=$2`,
+        [storeId, date]
+      );
+      abaTotal = parseFloat(abaRows[0].total);
+    }
+
     const grandTotal = cashTotal + abaTotal;
 
     await pool.query(
       `INSERT INTO closing_reports (store_id,report_date,cash_total,aba_total,grand_total,submitted_by)
-       VALUES ($1,$2,$3,$4,$5,$6)`,
+       VALUES ($1,$2,$3,$4,$5,$6)
+       ON CONFLICT (store_id, report_date) DO UPDATE
+       SET cash_total=$3, aba_total=$4, grand_total=$5, submitted_by=$6, created_at=NOW()`,
       [storeId, date, cashTotal, abaTotal, grandTotal, submitted_by]
     );
 

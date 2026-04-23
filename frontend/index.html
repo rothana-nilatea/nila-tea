@@ -872,27 +872,30 @@ function buildPage(id){
 
 // ════════ DASHBOARD ════════
 function buildStoreCards(atmS,hruS,atmT,hruT){
-  const pairs=[
+  var html='<div style="margin-bottom:10px;">';
+  var stores=[
     {sid:'atm',s:atmS,total:atmT,dot:'var(--atm-c)',lt:'var(--atm-lt)'},
-    {sid:'hru',s:hruS,total:hruT,dot:'var(--hru-c)',lt:'var(--hru-lt)'},
+    {sid:'hru',s:hruS,total:hruT,dot:'var(--hru-c)',lt:'var(--hru-lt)'}
   ];
-  return '<div style="margin-bottom:10px;">'+pairs.map(function(p){
-    var sid=p.sid,s=p.s,total=p.total;
+  for(var i=0;i<stores.length;i++){
+    var p=stores[i];
+    var sid=p.sid, s=p.s, total=p.total;
     var closed=!!(s&&s.close_report);
     var reqKey='nila_edit_request_'+sid+'_'+new Date().toDateString();
     var hasReq=localStorage.getItem(reqKey);
-    var req=null;try{if(hasReq)req=JSON.parse(hasReq);}catch(e){}
-    var borderColor=closed?'#A5D6A7':'#FFD180';
-    var statusBg=closed?'#E8F5E9':'#FFF3E0';
-    var statusColor=closed?'#2E7D32':'#E65100';
-    var statusTxt=closed?'✓ '+(lang==='km'?'បានបិទ':'Closed'):'⏳ '+(lang==='km'?'មិនទាន់':'Pending');
-    var html='<div style="background:var(--card);border-radius:var(--r);border:1.5px solid '+borderColor+';padding:12px;margin-bottom:10px;">';
+    var req=null;
+    try{if(hasReq)req=JSON.parse(hasReq);}catch(e){}
+    var bc=closed?'#A5D6A7':'#FFD180';
+    var sbg=closed?'#E8F5E9':'#FFF3E0';
+    var sc=closed?'#2E7D32':'#E65100';
+    var stxt=closed?('✓ '+(lang==='km'?'បានបិទ':'Closed')):('⏳ '+(lang==='km'?'មិនទាន់':'Pending'));
+    html+='<div style="background:var(--card);border-radius:var(--r);border:1.5px solid '+bc+';padding:12px;margin-bottom:10px;">';
     html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
     html+='<div style="display:flex;align-items:center;gap:6px;">';
     html+='<div style="width:8px;height:8px;border-radius:50%;background:'+p.dot+';"></div>';
     html+='<span style="font-size:13px;font-weight:700;color:'+p.lt+';">'+sid.toUpperCase()+' — '+(STORES[sid]?STORES[sid].name:'')+'</span>';
     html+='</div>';
-    html+='<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;background:'+statusBg+';color:'+statusColor+';">'+statusTxt+'</span>';
+    html+='<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;background:'+sbg+';color:'+sc+';">'+stxt+'</span>';
     html+='</div>';
     html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:'+(closed?'10px':'0')+'">';
     html+='<div style="text-align:center;"><div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">'+t('revenueLbl')+'</div><div style="font-size:15px;font-weight:700;">'+fmt(total)+'</div><div style="font-size:9px;color:var(--t3);">'+fmtK(total)+'</div></div>';
@@ -907,17 +910,19 @@ function buildStoreCards(atmS,hruS,atmT,hruT){
         html+='<div style="font-size:11px;font-weight:700;color:#8A5A00;">📝 '+(lang==='km'?'សំណើកែប្រែពី':'Edit request from')+' '+req.by+'</div>';
         html+='<div style="font-size:10px;color:#8A5A00;margin-top:2px;">'+new Date(req.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</div>';
         html+='<div style="display:flex;gap:6px;margin-top:8px;">';
-        html+='<button onclick="approveEdit(''+sid+'')" class="btn sm p" style="flex:1;font-size:11px;padding:6px;">✓ '+(lang==='km'?'អនុញ្ញាត':'Approve')+'</button>';
-        html+='<button onclick="rejectEdit(''+sid+'')" class="btn sm d" style="flex:1;font-size:11px;padding:6px;">✗ '+(lang==='km'?'បដិសេធ':'Reject')+'</button>';
+        html+='<button class="btn sm p" data-sid="'+sid+'" data-act="approve" onclick="handleStoreAction(this)" style="flex:1;font-size:11px;padding:6px;">✓ '+(lang==='km'?'អនុញ្ញាត':'Approve')+'</button>';
+        html+='<button class="btn sm d" data-sid="'+sid+'" data-act="reject" onclick="handleStoreAction(this)" style="flex:1;font-size:11px;padding:6px;">✗ '+(lang==='km'?'បដិសេធ':'Reject')+'</button>';
         html+='</div></div>';
       }
-      html+='<button onclick="adminUnlockEdit(''+sid+'')" class="btn sm full" style="font-size:11px;color:var(--t2);">🔓 '+(lang==='km'?'អ្នកគ្រប់គ្រងអនុញ្ញាតឱ្យកែ':'Admin unlock to edit')+'</button>';
+      html+='<button class="btn sm full" data-sid="'+sid+'" data-act="unlock" onclick="handleStoreAction(this)" style="font-size:11px;color:var(--t2);">🔓 '+(lang==='km'?'អ្នកគ្រប់គ្រងអនុញ្ញាតឱ្យកែ':'Admin unlock to edit')+'</button>';
       html+='</div>';
     }
     html+='</div>';
-    return html;
-  }).join('')+'</div>';
+  }
+  html+='</div>';
+  return html;
 }
+
 
 function bDash(){
   const s=currentStore, st=STORES[s], stats=storeStats[s]||{};
@@ -1376,6 +1381,14 @@ function doSelfEdit(s){
   localStorage.removeItem(adminKey);
   showPage('closeday');
 }
+function handleStoreAction(btn){
+  var sid=btn.getAttribute('data-sid');
+  var act=btn.getAttribute('data-act');
+  if(act==='approve') approveEdit(sid);
+  else if(act==='reject') rejectEdit(sid);
+  else if(act==='unlock') adminUnlockEdit(sid);
+}
+
 function rejectEdit(sid){
   const reqKey='nila_edit_request_'+sid+'_'+new Date().toDateString();
   localStorage.removeItem(reqKey);
@@ -1383,7 +1396,7 @@ function rejectEdit(sid){
   showPage('dashboard');
 }
 function adminUnlockEdit(sid){
-  const msg=lang==='km'?'អ្នកគ្រប់គ្រងអនុញ្ញាតឱ្យ '+STORES[sid]?.name+' កែប្រែ?':'Allow '+STORES[sid]?.name+' staff to edit today's report?';
+  const msg=lang==='km'?'អ្នកគ្រប់គ្រងអនុញ្ញាតឱ្យ '+(STORES[sid]?STORES[sid].name:sid)+' កែប្រែ?':'Allow '+(STORES[sid]?STORES[sid].name:sid)+' staff to edit today report?';
   if(confirm(msg)){
     const adminKey='nila_admin_unlock_'+sid+'_'+new Date().toDateString();
     const selfKey='nila_self_edited_'+sid+'_'+new Date().toDateString();

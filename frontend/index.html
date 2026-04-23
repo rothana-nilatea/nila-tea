@@ -1470,31 +1470,43 @@ async function submitClose(){
     ss.innerHTML=`
     <div class="success-card">
       <div class="s-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 13l5.5 5.5 12-12" stroke="var(--store-color,var(--g))" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div style="font-size:17px;font-weight:700;margin-bottom:5px;">${t('dayClosedTxt')} ✅</div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:4px;">${t('dayClosedTxt')} ✅</div>
       <div style="font-size:12px;color:var(--t2);margin-bottom:14px;">${STORES[s].name} · ${new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+      
       <div style="background:var(--store-color,var(--g));border-radius:14px;padding:14px;margin-bottom:12px;">
-        <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-bottom:4px;">Grand total collected</div>
-        <div style="font-size:28px;font-weight:700;color:#fff;">${fmt(grandTotal)}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.55);">${fmtK(grandTotal)}</div>
-        <div style="display:flex;gap:8px;margin-top:10px;">
-          <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:8px;padding:8px;">
-            <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;">💵 Cash USD</div>
-            <div style="font-size:14px;font-weight:700;color:#fff;margin-top:2px;">$${cashUSD||0}</div>
-          </div>
-          <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:8px;padding:8px;">
-            <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;">${t('cashKHRlbl')}</div>
-            <div style="font-size:14px;font-weight:700;color:#fff;margin-top:2px;">៛${(cashKHR||0).toLocaleString()}</div>
-          </div>
-          <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:8px;padding:8px;">
-            <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;">🏦 ABA</div>
-            <div style="font-size:14px;font-weight:700;color:#fff;margin-top:2px;">${fmt(abaAuto)}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.65);font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">💰 ${lang==='km'?'ប្រាក់សាច់ប្រមូលបាន':'Cash Collected'}</div>
+        
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+          <span style="font-size:12px;color:rgba(255,255,255,0.75);">💵 ${lang==='km'?'ប្រាក់ដុល្លារ (USD)':'US Dollar (USD)'}</span>
+          <span style="font-size:16px;font-weight:700;color:#fff;">$${cashUSD.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+        </div>
+        
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+          <span style="font-size:12px;color:rgba(255,255,255,0.75);">🇰🇭 ${lang==='km'?'ប្រាក់រៀល (KHR)':'Khmer Riel (KHR)'}</span>
+          <span style="font-size:16px;font-weight:700;color:#fff;">៛${cashKHR.toLocaleString('en-US')}</span>
+        </div>
+        
+        ${abaAuto>0?`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+          <span style="font-size:12px;color:rgba(255,255,255,0.75);">🏦 ABA</span>
+          <span style="font-size:16px;font-weight:700;color:#fff;">${fmt(abaAuto)}</span>
+        </div>`:''}
+        
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;">
+          <span style="font-size:13px;color:rgba(255,255,255,0.9);font-weight:700;">${lang==='km'?'សរុបសរុប':'Grand Total'}</span>
+          <div style="text-align:right;">
+            <div style="font-size:20px;font-weight:700;color:#fff;">${fmt(grandTotal)}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.6);">${fmtK(grandTotal)}</div>
           </div>
         </div>
       </div>
-      <div class="notif-box"><div class="notif-title">${t('ownerNotifiedTitle')}</div><div class="notif-sub">${t('ownerNotifiedDaily')}</div></div>
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button class="btn full" onclick="editClose()" style="flex:1;">✏️ Edit</button>
-        <button class="btn p full" onclick="showPage('dashboard')" style="flex:1;">Done</button>
+      
+      <div class="notif-box" style="margin-bottom:12px;">
+        <div class="notif-title">${t('ownerNotifiedTitle')}</div>
+        <div class="notif-sub">${t('ownerNotifiedDaily')}</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn full" onclick="editClose()" style="flex:1;">✏️ ${lang==='km'?'កែប្រែ':'Edit'}</button>
+        <button class="btn p full" onclick="showPage('dashboard')" style="flex:1;">${lang==='km'?'រួចរាល់':'Done'}</button>
       </div>
     </div>`;
   }

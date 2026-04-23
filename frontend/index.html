@@ -885,7 +885,7 @@ function bDash(){
       <div style="font-size:12px;color:var(--t2);margin-top:3px;">${today()} · ${t('bothStoresTxt')}</div>
     </div>
     <div class="combined-card" style="background:var(--store-color,var(--g));">
-      <div class="gt-label">${t('combinedRevToday')} <span id="dash-refresh-time" style="font-size:9px;opacity:0.6;"></span></div>
+      <div class="gt-label">${t('combinedRevToday')} <span id="dash-refresh-time" style="font-size:9px;opacity:0.6;font-style:italic;"></span></div>
       <div class="gt-val">${fmt(total)}</div>
       <div class="gt-khr">${fmtK(total)}</div>
       <div class="gt-breakdown">
@@ -923,6 +923,26 @@ function bDash(){
       <button class="btn" style="flex:1;background:var(--atm-bg);color:var(--atm-lt);border-color:#E8A87A;" onclick="switchStore('atm');showPage('sales')">${t('atmSalesBtn')}</button>
       <button class="btn" style="flex:1;background:var(--hru-bg);color:var(--hru-lt);border-color:#7EC8B0;" onclick="switchStore('hru');showPage('sales')">${t('hruSalesBtn')}</button>
     </div>
+    ${(()=>{
+      const reqs=[];
+      ['atm','hru'].forEach(sid=>{
+        const reqKey='nila_edit_request_'+sid+'_'+new Date().toDateString();
+        const req=localStorage.getItem(reqKey);
+        if(req){try{const r=JSON.parse(req);reqs.push({...r,sid});}catch(e){}}
+      });
+      if(!reqs.length) return '';
+      return `<div style="background:#FFF3DC;border-radius:var(--r);padding:12px 13px;margin-bottom:12px;border:1.5px solid #F59F00;">
+        <div style="font-size:13px;font-weight:700;color:#8A5A00;margin-bottom:8px;">📋 ${lang==='km'?'សំណើកែប្រែ':'Edit Requests'}</div>
+        ${reqs.map(r=>`
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid rgba(245,159,0,0.2);">
+            <div>
+              <div style="font-size:12px;font-weight:600;">${r.by} · ${STORES[r.sid]?.name||r.sid}</div>
+              <div style="font-size:10px;color:#8A5A00;">${new Date(r.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+            </div>
+            <button onclick="approveEdit('${r.sid}')" class="btn sm p" style="font-size:11px;">✓ ${lang==='km'?'អនុញ្ញាត':'Approve'}</button>
+          </div>`).join('')}
+      </div>`;
+    })()}
     <div class="sh"><div class="sh-t">${t('recentSalesTxt')} — ${st.name}</div><button class="btn sm" onclick="showPage('sales')">${t('seeAllTxt')}</button></div>
     ${recentSalesList(s)}`;
   } else {
@@ -1126,25 +1146,48 @@ function bCloseDay(){
   const alreadySubmitted=localStorage.getItem(todayKey);
   if(alreadySubmitted && me.role!=='owner'){
     const sub=JSON.parse(alreadySubmitted);
+    const selfEditKey='nila_self_edited_'+s+'_'+new Date().toDateString();
+    const adminUnlockKey='nila_admin_unlock_'+s+'_'+new Date().toDateString();
+    const hasSelfEdited=localStorage.getItem(selfEditKey);
+    const adminUnlocked=localStorage.getItem(adminUnlockKey);
+    const isLocked=hasSelfEdited && !adminUnlocked;
     return `<div style="padding:8px 0 16px;">
       <div class="success-card">
         <div class="s-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 13l5.5 5.5 12-12" stroke="var(--store-color,var(--g))" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div style="font-size:17px;font-weight:700;margin-bottom:5px;">${t('dayClosedTxt')} ✅</div>
         <div style="font-size:12px;color:var(--t2);margin-bottom:14px;">${st.name} · ${today()}</div>
         <div style="background:var(--store-color,var(--g));border-radius:14px;padding:14px;margin-bottom:12px;color:#fff;">
-          <div style="font-size:11px;opacity:0.7;margin-bottom:4px;">${t('grandTotalToday')}</div>
-          <div style="font-size:26px;font-weight:700;">${fmt(sub.cashTotal+sub.abaAuto)}</div>
-          <div style="font-size:12px;opacity:0.6;">${fmtK(sub.cashTotal+sub.abaAuto)}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+            <span style="font-size:12px;opacity:0.75;">💵 USD</span>
+            <span style="font-size:15px;font-weight:700;">$${(sub.cashUSD||0).toLocaleString('en-US',{minimumFractionDigits:2})}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.15);">
+            <span style="font-size:12px;opacity:0.75;">🇰🇭 KHR</span>
+            <span style="font-size:15px;font-weight:700;">៛${(sub.cashKHR||0).toLocaleString('en-US')}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 2px;">
+            <span style="font-size:12px;opacity:0.75;font-weight:700;">${lang==='km'?'សរុប':'Total'}</span>
+            <div style="text-align:right;">
+              <div style="font-size:18px;font-weight:700;">${fmt(sub.cashTotal+sub.abaAuto)}</div>
+              <div style="font-size:10px;opacity:0.6;">${fmtK(sub.cashTotal+sub.abaAuto)}</div>
+            </div>
+          </div>
         </div>
-        <div class="notif-box" style="margin-bottom:14px;">
+        <div class="notif-box" style="margin-bottom:12px;">
           <div class="notif-title">${t('ownerNotifiedTitle')}</div>
           <div class="notif-sub">${t('ownerNotifiedClose')}</div>
         </div>
-        <div style="font-size:12px;color:var(--t2);margin-bottom:10px;text-align:center;">
-          ${lang==='km'?'បានដាក់ស្នើម្តងហើយ':'Already submitted today'}
-        </div>
-        <button class="btn full" onclick="requestEdit()" style="border-color:var(--store-color,var(--g));color:var(--store-color,var(--g));">
-          ${lang==='km'?'📝 សុំច្នៃប្រឌិតឡើងវិញ':'📝 Request to edit'}
+        ${isLocked ? `
+        <div style="background:#FFF3DC;border-radius:10px;padding:10px 12px;margin-bottom:10px;border:1px solid #F59F00;">
+          <div style="font-size:12px;font-weight:700;color:#8A5A00;">⏳ ${lang==='km'?'រង់ចាំការអនុញ្ញាតពីម្ចាស់ហាង':'Waiting for admin approval'}</div>
+          <div style="font-size:11px;color:#8A5A00;margin-top:3px;">${lang==='km'?'បានកែម្តងហើយ។ ត្រូវការការអនុញ្ញាតពីម្ចាស់ ដើម្បីកែម្ដងទៀត':'Already self-edited once. Admin must approve to edit again.'}</div>
+        </div>` : `
+        <button class="btn full" onclick="doSelfEdit('${s}')" style="border-color:var(--store-color,var(--g));color:var(--store-color,var(--g));margin-bottom:8px;">
+          ✏️ ${lang==='km'?'កែប្រែ (១ដង)':'Edit (1 time only)'}
+        </button>`}
+        ${!isLocked && hasSelfEdited===null ? '' : ''}
+        <button class="btn full" onclick="requestAdminEdit('${s}')" style="font-size:12px;color:var(--t2);border-color:var(--bd2);">
+          📋 ${lang==='km'?'ស្នើសុំការអនុញ្ញាតពីម្ចាស់':'Request admin approval'}
         </button>
       </div>
     </div>`;
@@ -1316,9 +1359,38 @@ function updateCashTotal(val){
   const el4=document.getElementById('cd-grand-khr');if(el4)el4.textContent=fmtK(v+abaAuto);
 }
 function editClose(){
-  // Allow editing - restore form with saved values
   document.getElementById('cd-success').style.display='none';
   document.getElementById('cd-form').style.display='block';
+}
+function doSelfEdit(s){
+  // Mark as self-edited so second edit requires admin
+  const selfEditKey='nila_self_edited_'+(s||currentStore)+'_'+new Date().toDateString();
+  const todayKey='nila_submitted_'+(s||currentStore)+'_'+new Date().toDateString();
+  const adminKey='nila_admin_unlock_'+(s||currentStore)+'_'+new Date().toDateString();
+  localStorage.setItem(selfEditKey,'1');
+  localStorage.removeItem(todayKey);
+  localStorage.removeItem(adminKey);
+  showPage('closeday');
+}
+function approveEdit(sid){
+  const adminKey='nila_admin_unlock_'+sid+'_'+new Date().toDateString();
+  const reqKey='nila_edit_request_'+sid+'_'+new Date().toDateString();
+  const selfKey='nila_self_edited_'+sid+'_'+new Date().toDateString();
+  localStorage.setItem(adminKey,'1');
+  localStorage.removeItem(reqKey);
+  localStorage.removeItem(selfKey);
+  showPage('dashboard');
+  alert(lang==='km'?'✅ បានអនุញ្ញាត។ បុគ្គលិកអាចកែប្រែឥឡូវ':'✅ Approved. Staff can now edit.');
+}
+
+function requestAdminEdit(s){
+  const msg=lang==='km'?'ផ្ញើសំណើកែប្រែទៅម្ចាស់ហាង?':'Send edit request to admin?';
+  if(confirm(msg)){
+    // Save edit request to localStorage for admin to see
+    const reqKey='nila_edit_request_'+(s||currentStore)+'_'+new Date().toDateString();
+    localStorage.setItem(reqKey,JSON.stringify({by:me.username,store:s||currentStore,time:new Date().toISOString()}));
+    alert(lang==='km'?'✅ បានផ្ញើសំណើ។ រង់ចាំការអនុញ្ញាត':'✅ Request sent. Waiting for admin approval.');
+  }
 }
 function setCash(amt){
   const inp=document.getElementById('cash-input');
@@ -1357,16 +1429,7 @@ function formatKHRLive(el){
   try{el.setSelectionRange(formatted.length,formatted.length);}catch(e){}
 }
 
-function requestEdit(){
-  if(confirm(lang==='km'?'សុំច្នៃប្រឌិតឡើងវិញ? ម្ចាស់ហាងនឹងទទួលដំណឹង':'Request to edit today\'s report? Owner will be notified.')){
-    const s=currentStore;
-    const todayKey='nila_submitted_'+s+'_'+new Date().toDateString();
-    localStorage.removeItem(todayKey);
-    // Notify via console (in real app would send API notification)
-    console.log('Edit requested by '+me.username+' for '+s+' on '+new Date().toDateString());
-    showPage('closeday');
-  }
-}
+// requestEdit replaced by doSelfEdit and requestAdminEdit
 
 function updateCashDual(){
   const rawUSD=(document.getElementById('cash-usd')?.value||'0').replace(/,/g,'');
@@ -1505,7 +1568,7 @@ async function submitClose(){
         <div class="notif-sub">${t('ownerNotifiedDaily')}</div>
       </div>
       <div style="display:flex;gap:8px;">
-        <button class="btn full" onclick="editClose()" style="flex:1;">✏️ ${lang==='km'?'កែប្រែ':'Edit'}</button>
+        <button class="btn full" onclick="doSelfEdit(currentStore)" style="flex:1;">✏️ ${lang==='km'?'កែប្រែ (១ដង)':'Edit (1 time)'}</button>
         <button class="btn p full" onclick="showPage('dashboard')" style="flex:1;">${lang==='km'?'រួចរាល់':'Done'}</button>
       </div>
     </div>`;

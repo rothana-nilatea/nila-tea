@@ -583,6 +583,7 @@ var menuData={atm:[],hru:[]}, invData={atm:[],hru:[]};
 var salesData={atm:[],hru:[]}, abaData={atm:[],hru:[]};
 var usersData=[], storeStats={atm:{},hru:{}};
 var togOn=true, pendingImg=null, selectedPay='cash';
+var editRequests=[];
 var delType=null, delIdx=-1, eMI=-1, eII=-1, eUI=-1, stkPh={};
 
 // ── HELPERS ──
@@ -716,8 +717,10 @@ async function loadAllData(){
     if(me.role==='owner'||me.role==='manager'){
       await Promise.allSettled([loadStoreData('atm'),loadStoreData('hru')]);
       try{usersData=await api('GET','/api/users');}catch(e){console.warn('Users load:',e);}
+      try{editRequests=await api('GET','/api/edit-requests');}catch(e){editRequests=[];}
     } else {
       await loadStoreData(currentStore);
+      try{editRequests=await api('GET','/api/edit-requests');}catch(e){editRequests=[];}
     }
     // If on closeday, re-render to sync with server state
     const activeId=currentPage||'dashboard';
@@ -910,10 +913,7 @@ function buildStoreCards(atmS,hruS,atmT,hruT){
     var p=stores[i];
     var sid=p.sid, s=p.s, total=p.total;
     var closed=!!(s&&s.close_report);
-    var reqKey='nila_edit_request_'+sid+'_'+new Date().toDateString();
-    var hasReq=localStorage.getItem(reqKey);
-    var req=null;
-    try{if(hasReq)req=JSON.parse(hasReq);}catch(e){}
+    var req=(editRequests||[]).find(function(r){return r.store_id===sid;})||null;
     var bc=closed?'#A5D6A7':'#FFD180';
     var sbg=closed?'#E8F5E9':'#FFF3E0';
     var sc=closed?'#2E7D32':'#E65100';
@@ -937,8 +937,8 @@ function buildStoreCards(atmS,hruS,atmT,hruT){
       if(req){
         // Staff requested edit - show Approve/Reject
         html+='<div style="background:#FFF3DC;border-radius:10px;padding:10px;margin-bottom:8px;border:1.5px solid #F59F00;">';
-        html+='<div style="font-size:11px;font-weight:700;color:#8A5A00;margin-bottom:2px;">📝 '+(lang==='km'?'សំណើកែប្រែពី':'Edit request from')+' <b>'+req.by+'</b></div>';
-        html+='<div style="font-size:10px;color:#8A5A00;margin-bottom:8px;">'+new Date(req.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</div>';
+        html+='<div style="font-size:11px;font-weight:700;color:#8A5A00;margin-bottom:2px;">📝 '+(lang==='km'?'សំណើកែប្រែពី':'Edit request from')+' <b>'+(req.requested_by||req.by||'')+'</b></div>';
+        html+='<div style="font-size:10px;color:#8A5A00;margin-bottom:8px;">'+new Date(req.created_at||req.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</div>';
         html+='<div style="display:flex;gap:6px;">';
         html+='<button class="btn p" data-sid="'+sid+'" data-act="approve" onclick="handleStoreAction(this)" style="flex:1;font-size:12px;padding:8px;">✓ '+(lang==='km'?'អនុញ្ញាត':'Approve')+'</button>';
         html+='<button class="btn d" data-sid="'+sid+'" data-act="reject" onclick="handleStoreAction(this)" style="flex:1;font-size:12px;padding:8px;">✗ '+(lang==='km'?'បដិសេធ':'Reject')+'</button>';
@@ -1191,10 +1191,16 @@ function bCloseDay(){
   // Sync with server - if admin deleted report, clear local storage
   const serverStats=storeStats[s]||{};
   if(!serverStats.close_report){
-    // Server has no report for today - clear any stale localStorage
     localStorage.removeItem(todayKey);
     localStorage.removeItem('nila_self_edited_'+s+'_'+new Date().toDateString());
     localStorage.removeItem('nila_admin_unlock_'+s+'_'+new Date().toDateString());
+  }
+  // Check if admin approved edit request on server
+  const myReq=(editRequests||[]).find(function(r){return r.store_id===s&&r.status==='approved';});
+  if(myReq){
+    localStorage.setItem('nila_admin_unlock_'+s+'_'+new Date().toDateString(),'1');
+    localStorage.removeItem('nila_self_edited_'+s+'_'+new Date().toDateString());
+    localStorage.removeItem(todayKey);
   }
   const alreadySubmitted=localStorage.getItem(todayKey);
   if(alreadySubmitted && me.role!=='owner'&&me.role!=='manager'){
@@ -1463,11 +1469,13 @@ function handleStoreAction(btn){
   else if(act==='delete') deleteCloseReport(sid);
 }
 
-function rejectEdit(sid){
-  const reqKey='nila_edit_request_'+sid+'_'+new Date().toDateString();
-  localStorage.removeItem(reqKey);
-  showAlert('❌',lang==='km'?'បានបដិសេធ':'Rejected',lang==='km'?'សំណើត្រូវបានបដិសេធ':'Edit request has been rejected.');
-  showPage('dashboard');
+async function rejectEdit(sid){
+  try{
+    await api('PUT','/api/stores/'+sid+'/edit-request',{status:'rejected'});
+    editRequests=editRequests.filter(function(r){return r.store_id!==sid;});
+    showAlert('❌',lang==='km'?'បានបដិសេធ':'Rejected',lang==='km'?'សំណើត្រូវបានបដិសេធ':'Edit request has been rejected.');
+    await loadAllData();
+  }catch(e){showAlert('❌','Error',e.message);}
 }
 function adminUnlockEdit(sid){
   const msg=lang==='km'?'អ្នកគ្រប់គ្រងអនុញ្ញាតឱ្យ '+(STORES[sid]?STORES[sid].name:sid)+' កែប្រែ?':'Allow '+(STORES[sid]?STORES[sid].name:sid)+' staff to edit today report?';
@@ -1519,10 +1527,12 @@ function requestAdminEdit(s){
     lang==='km'?'ផ្ញើសំណើកែប្រែទៅម្ចាស់ហាង?':'Send edit request to admin?',
     lang==='km'?'ផ្ញើ':'Send Request',
     'primary',
-    function(){
-      const reqKey='nila_edit_request_'+(s||currentStore)+'_'+new Date().toDateString();
-      localStorage.setItem(reqKey,JSON.stringify({by:me.username,store:s||currentStore,time:new Date().toISOString()}));
-      showAlert('✅',lang==='km'?'បានផ្ញើ':'Sent!',lang==='km'?'រង់ចាំការអនុញ្ញាតពីម្ចាស់ហាង':'Waiting for admin approval.');
+    async function(){
+      try{
+        await api('POST','/api/stores/'+(s||currentStore)+'/edit-request',{requested_by:me.username});
+        showAlert('✅',lang==='km'?'បានផ្ញើ':'Sent!',lang==='km'?'រង់ចាំការអនុញ្ញាតពីម្ចាស់ហាង':'Waiting for admin approval.');
+        await loadAllData();
+      }catch(e){showAlert('❌','Error',e.message);}
     }
   );
 }

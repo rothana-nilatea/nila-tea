@@ -139,6 +139,16 @@ async function initDB() {
         transferred_at TIMESTAMP DEFAULT NOW()
       );
 
+      CREATE TABLE IF NOT EXISTS edit_requests (
+        id SERIAL PRIMARY KEY,
+        store_id VARCHAR(10) REFERENCES stores(id),
+        requested_by VARCHAR(50),
+        request_date DATE DEFAULT CURRENT_DATE,
+        status VARCHAR(20) DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(store_id, request_date)
+      );
+
       CREATE TABLE IF NOT EXISTS closing_reports (
         id SERIAL PRIMARY KEY,
         store_id VARCHAR(10) REFERENCES stores(id),

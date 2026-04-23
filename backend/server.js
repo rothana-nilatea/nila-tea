@@ -10,6 +10,13 @@ const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'nila-tea-secret-2024';
 const KHR_RATE = 4100;
 
+// Cambodia is UTC+7 - get today's date in Cambodia time
+function cambodiaDate() {
+  const now = new Date();
+  const cambodia = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+  return cambodia.toISOString().split('T')[0];
+}
+
 app.use(cors({
   origin: '*',
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
@@ -271,7 +278,7 @@ app.get('/api/stores/:storeId/aba', auth, async (req, res) => {
 app.post('/api/stores/:storeId/close', auth, async (req, res) => {
   try {
     const storeId = req.params.storeId;
-    const date = new Date().toISOString().split('T')[0];
+    const date = cambodiaDate();
     const { cash_total, cash_usd, cash_khr, aba_total, submitted_by } = req.body;
 
     // Use submitted amounts from frontend (staff counted cash physically)
@@ -317,22 +324,23 @@ app.post('/api/stores/:storeId/close', auth, async (req, res) => {
 app.get('/api/stores/:storeId/revenue/today', auth, async (req, res) => {
   try {
     const storeId = req.params.storeId;
+    const today = cambodiaDate();
     const { rows: salesRows } = await pool.query(
       `SELECT COALESCE(SUM(amount_usd),0) as cash_total, COUNT(*) as sale_count
-       FROM sales WHERE store_id=$1 AND sale_date=CURRENT_DATE AND payment_method='cash'`,
-      [storeId]
+       FROM sales WHERE store_id=$1 AND sale_date=$2 AND payment_method='cash'`,
+      [storeId, today]
     );
     const { rows: abaRows } = await pool.query(
       `SELECT COALESCE(SUM(amount_usd),0) as aba_total, COUNT(*) as txn_count
-       FROM aba_transactions WHERE store_id=$1 AND DATE(txn_time)=CURRENT_DATE`,
-      [storeId]
+       FROM aba_transactions WHERE store_id=$1 AND DATE(txn_time AT TIME ZONE 'Asia/Phnom_Penh')=$2`,
+      [storeId, today]
     );
     // Also check closing_reports for today (staff close day submission)
     const { rows: closeRows } = await pool.query(
       `SELECT cash_total, aba_total, grand_total, submitted_by, created_at
-       FROM closing_reports WHERE store_id=$1 AND report_date=CURRENT_DATE
+       FROM closing_reports WHERE store_id=$1 AND report_date=$2
        ORDER BY created_at DESC LIMIT 1`,
-      [storeId]
+      [storeId, today]
     );
 
     let cash = parseFloat(salesRows[0].cash_total);
@@ -367,14 +375,15 @@ app.get('/api/revenue/all-stores', auth, ownerOnly, async (req, res) => {
     const stores = ['atm', 'hru'];
     const result = {};
     for (const s of stores) {
+      const today = cambodiaDate();
       const { rows: c } = await pool.query(
-        `SELECT COALESCE(SUM(amount_usd),0) as t FROM sales WHERE store_id=$1 AND sale_date=CURRENT_DATE`, [s]
+        `SELECT COALESCE(SUM(amount_usd),0) as t FROM sales WHERE store_id=$1 AND sale_date=$2`, [s, today]
       );
       const { rows: a } = await pool.query(
-        `SELECT COALESCE(SUM(amount_usd),0) as t FROM aba_transactions WHERE store_id=$1 AND DATE(txn_time)=CURRENT_DATE`, [s]
+        `SELECT COALESCE(SUM(amount_usd),0) as t FROM aba_transactions WHERE store_id=$1 AND DATE(txn_time AT TIME ZONE 'Asia/Phnom_Penh')=$2`, [s, today]
       );
       const { rows: cr } = await pool.query(
-        `SELECT cash_total, aba_total FROM closing_reports WHERE store_id=$1 AND report_date=CURRENT_DATE ORDER BY created_at DESC LIMIT 1`, [s]
+        `SELECT cash_total, aba_total FROM closing_reports WHERE store_id=$1 AND report_date=$2 ORDER BY created_at DESC LIMIT 1`, [s, today]
       );
       let cash = parseFloat(c[0].t), aba = parseFloat(a[0].t);
       if (cr[0]) {

@@ -908,15 +908,18 @@ function buildStoreCards(atmS,hruS,atmT,hruT){
       html+='<div style="border-top:0.5px solid var(--bd);padding-top:8px;">';
       html+='<div style="font-size:10px;color:var(--t2);margin-bottom:6px;">'+(lang==='km'?'ដាក់ស្នើដោយ':'Submitted by')+' <b>'+(s&&s.close_report?s.close_report.submitted_by||'':'')+'</b></div>';
       if(req){
-        html+='<div style="background:#FFF3DC;border-radius:8px;padding:8px 10px;margin-bottom:8px;border:1px solid #F59F00;">';
-        html+='<div style="font-size:11px;font-weight:700;color:#8A5A00;">📝 '+(lang==='km'?'សំណើកែប្រែពី':'Edit request from')+' '+req.by+'</div>';
-        html+='<div style="font-size:10px;color:#8A5A00;margin-top:2px;">'+new Date(req.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</div>';
-        html+='<div style="display:flex;gap:6px;margin-top:8px;">';
-        html+='<button class="btn sm p" data-sid="'+sid+'" data-act="approve" onclick="handleStoreAction(this)" style="flex:1;font-size:11px;padding:6px;">✓ '+(lang==='km'?'អនុញ្ញាត':'Approve')+'</button>';
-        html+='<button class="btn sm d" data-sid="'+sid+'" data-act="reject" onclick="handleStoreAction(this)" style="flex:1;font-size:11px;padding:6px;">✗ '+(lang==='km'?'បដិសេធ':'Reject')+'</button>';
+        // Staff requested edit - show Approve/Reject
+        html+='<div style="background:#FFF3DC;border-radius:10px;padding:10px;margin-bottom:8px;border:1.5px solid #F59F00;">';
+        html+='<div style="font-size:11px;font-weight:700;color:#8A5A00;margin-bottom:2px;">📝 '+(lang==='km'?'សំណើកែប្រែពី':'Edit request from')+' <b>'+req.by+'</b></div>';
+        html+='<div style="font-size:10px;color:#8A5A00;margin-bottom:8px;">'+new Date(req.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</div>';
+        html+='<div style="display:flex;gap:6px;">';
+        html+='<button class="btn p" data-sid="'+sid+'" data-act="approve" onclick="handleStoreAction(this)" style="flex:1;font-size:12px;padding:8px;">✓ '+(lang==='km'?'អនុញ្ញាត':'Approve')+'</button>';
+        html+='<button class="btn d" data-sid="'+sid+'" data-act="reject" onclick="handleStoreAction(this)" style="flex:1;font-size:12px;padding:8px;">✗ '+(lang==='km'?'បដិសេធ':'Reject')+'</button>';
         html+='</div></div>';
+      } else {
+        // No request - show Admin unlock button
+        html+='<button class="btn sm full" data-sid="'+sid+'" data-act="unlock" onclick="handleStoreAction(this)" style="font-size:11px;color:var(--t2);margin-bottom:4px;">🔓 '+(lang==='km'?'អ្នកគ្រប់គ្រងអនុញ្ញាតឱ្យកែ':'Admin unlock to edit')+'</button>';
       }
-      html+='<button class="btn sm full" data-sid="'+sid+'" data-act="unlock" onclick="handleStoreAction(this)" style="font-size:11px;color:var(--t2);margin-bottom:4px;">🔓 '+(lang==='km'?'អ្នកគ្រប់គ្រងអនុញ្ញាតឱ្យកែ':'Admin unlock to edit')+'</button>';
       if(isSuperAdmin())html+='<button class="btn sm full" data-sid="'+sid+'" data-act="delete" onclick="handleStoreAction(this)" style="font-size:11px;color:var(--red);border-color:rgba(176,48,48,0.3);">🗑️ '+(lang==='km'?'លុបរបាយការណ៍':'Delete report')+'</button>';
       html+='</div>';
     }

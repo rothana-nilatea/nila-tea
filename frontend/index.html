@@ -266,6 +266,21 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .notif-box{background:var(--gl);border-radius:11px;padding:11px 13px;text-align:left;margin:12px 0;}
 .notif-title{font-size:12px;font-weight:700;color:var(--gt);}
 .notif-sub{font-size:11px;color:#4A7A5A;margin-top:2px;}
+
+/* ── CUSTOM MODAL DIALOG ── */
+.cdlg-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.15s ease;}
+.cdlg{background:#fff;border-radius:20px;padding:24px;max-width:320px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp 0.2s ease;}
+.cdlg-icon{font-size:36px;text-align:center;margin-bottom:12px;}
+.cdlg-title{font-size:16px;font-weight:700;color:var(--t1);text-align:center;margin-bottom:8px;}
+.cdlg-msg{font-size:13px;color:var(--t2);text-align:center;margin-bottom:20px;line-height:1.5;}
+.cdlg-btns{display:flex;gap:8px;}
+.cdlg-btn{flex:1;padding:12px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity 0.15s;}
+.cdlg-btn:active{opacity:0.8;}
+.cdlg-btn.primary{background:var(--store-color,var(--g));color:#fff;}
+.cdlg-btn.danger{background:#B03030;color:#fff;}
+.cdlg-btn.cancel{background:var(--bg);color:var(--t2);border:1.5px solid var(--bd2);}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 </style>
 </head>
 <body>
@@ -1410,6 +1425,35 @@ function doSelfEdit(s){
   localStorage.removeItem(adminKey);
   showPage('closeday');
 }
+
+// ── CUSTOM DIALOG SYSTEM ──
+function showDialog({icon='', title='', message='', confirmText='OK', cancelText='', confirmClass='primary', onConfirm=null, onCancel=null}){
+  const existing=document.getElementById('cdlg-root');
+  if(existing) existing.remove();
+  const div=document.createElement('div');
+  div.id='cdlg-root';
+  div.className='cdlg-bg';
+  div.innerHTML=`<div class="cdlg">
+    ${icon?`<div class="cdlg-icon">${icon}</div>`:''}
+    ${title?`<div class="cdlg-title">${title}</div>`:''}
+    ${message?`<div class="cdlg-msg">${message}</div>`:''}
+    <div class="cdlg-btns">
+      ${cancelText?`<button class="cdlg-btn cancel" id="cdlg-cancel">${cancelText}</button>`:''}
+      <button class="cdlg-btn ${confirmClass}" id="cdlg-ok">${confirmText}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+  document.getElementById('cdlg-ok').onclick=function(){div.remove();if(onConfirm)onConfirm();};
+  const cancelBtn=document.getElementById('cdlg-cancel');
+  if(cancelBtn)cancelBtn.onclick=function(){div.remove();if(onCancel)onCancel();};
+}
+function showAlert(icon, title, message, onDone){
+  showDialog({icon,title,message,confirmText:'OK',onConfirm:onDone});
+}
+function showConfirm(icon, title, message, confirmText, confirmClass, onConfirm){
+  showDialog({icon,title,message,confirmText,cancelText:lang==='km'?'បោះបង់':'Cancel',confirmClass,onConfirm});
+}
+
 function handleStoreAction(btn){
   var sid=btn.getAttribute('data-sid');
   var act=btn.getAttribute('data-act');
@@ -1422,7 +1466,7 @@ function handleStoreAction(btn){
 function rejectEdit(sid){
   const reqKey='nila_edit_request_'+sid+'_'+new Date().toDateString();
   localStorage.removeItem(reqKey);
-  alert(lang==='km'?'❌ បានបដិសេធសំណើ':'❌ Edit request rejected.');
+  showAlert('❌',lang==='km'?'បានបដិសេធ':'Rejected',lang==='km'?'សំណើត្រូវបានបដិសេធ':'Edit request has been rejected.');
   showPage('dashboard');
 }
 function adminUnlockEdit(sid){
@@ -1441,21 +1485,21 @@ function adminUnlockEdit(sid){
 async function deleteCloseReport(sid){
   const storeName=STORES[sid]?STORES[sid].name:sid;
   const msg=lang==='km'?'លុបរបាយការណ៍បិទថ្ងៃនេះសម្រាប់ '+storeName+'?':'Delete today closing report for '+storeName+'?';
-  if(!confirm(msg)) return;
-  try{
-    await api('DELETE','/api/stores/'+sid+'/close');
-    // Clear localStorage
-    const todayKey='nila_submitted_'+sid+'_'+new Date().toDateString();
-    const selfKey='nila_self_edited_'+sid+'_'+new Date().toDateString();
-    const adminKey='nila_admin_unlock_'+sid+'_'+new Date().toDateString();
-    localStorage.removeItem(todayKey);
-    localStorage.removeItem(selfKey);
-    localStorage.removeItem(adminKey);
-    await loadAllData();
-    alert(lang==='km'?'✅ បានលុបរបាយការណ៍':'✅ Report deleted');
-  }catch(e){
-    alert('Error: '+e.message);
-  }
+  showConfirm('🗑️',lang==='km'?'លុបរបាយការណ៍':'Delete Report',msg,lang==='km'?'លុប':'Delete','danger',async function(){
+    try{
+      await api('DELETE','/api/stores/'+sid+'/close');
+      const todayKey='nila_submitted_'+sid+'_'+new Date().toDateString();
+      const selfKey='nila_self_edited_'+sid+'_'+new Date().toDateString();
+      const adminKey='nila_admin_unlock_'+sid+'_'+new Date().toDateString();
+      localStorage.removeItem(todayKey);
+      localStorage.removeItem(selfKey);
+      localStorage.removeItem(adminKey);
+      await loadAllData();
+      showAlert('✅',lang==='km'?'បានលុប':'Deleted!',lang==='km'?'បានលុបរបាយការណ៍':'Report has been deleted.');
+    }catch(e){
+      showAlert('❌','Error',e.message);
+    }
+  });
 }
 
 function approveEdit(sid){
@@ -1470,13 +1514,17 @@ function approveEdit(sid){
 }
 
 function requestAdminEdit(s){
-  const msg=lang==='km'?'ផ្ញើសំណើកែប្រែទៅម្ចាស់ហាង?':'Send edit request to admin?';
-  if(confirm(msg)){
-    // Save edit request to localStorage for admin to see
-    const reqKey='nila_edit_request_'+(s||currentStore)+'_'+new Date().toDateString();
-    localStorage.setItem(reqKey,JSON.stringify({by:me.username,store:s||currentStore,time:new Date().toISOString()}));
-    alert(lang==='km'?'✅ បានផ្ញើសំណើ។ រង់ចាំការអនុញ្ញាត':'✅ Request sent. Waiting for admin approval.');
-  }
+  showConfirm('📝',
+    lang==='km'?'សុំការអនុញ្ញាត':'Request Edit',
+    lang==='km'?'ផ្ញើសំណើកែប្រែទៅម្ចាស់ហាង?':'Send edit request to admin?',
+    lang==='km'?'ផ្ញើ':'Send Request',
+    'primary',
+    function(){
+      const reqKey='nila_edit_request_'+(s||currentStore)+'_'+new Date().toDateString();
+      localStorage.setItem(reqKey,JSON.stringify({by:me.username,store:s||currentStore,time:new Date().toISOString()}));
+      showAlert('✅',lang==='km'?'បានផ្ញើ':'Sent!',lang==='km'?'រង់ចាំការអនុញ្ញាតពីម្ចាស់ហាង':'Waiting for admin approval.');
+    }
+  );
 }
 function setCash(amt){
   const inp=document.getElementById('cash-input');
@@ -1578,7 +1626,14 @@ function confirmClose(){
 🎯 Grand Total: ${fmt(grand)} (${fmtK(grand)})
 
 After submitting you will need to request to edit.`;
-  if(confirm(msg)) submitClose();
+  showConfirm(
+    '💰',
+    lang==='km'?'ផ្ទៀងផ្ទាត់':'Please Confirm',
+    msg.replace(/\n/g,'<br>'),
+    lang==='km'?'ដាក់ស្នើ':'Submit',
+    'primary',
+    submitClose
+  );
 }
 
 async function submitClose(){

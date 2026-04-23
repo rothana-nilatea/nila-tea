@@ -150,20 +150,20 @@ app.get('/api/stores/:storeId/menu', auth, async (req, res) => {
 
 app.post('/api/stores/:storeId/menu', auth, async (req, res) => {
   try {
-    const { name, category, price_usd, image_url } = req.body;
+    const { name, name_km, category, category_km, price_usd, image_url } = req.body;
     const { rows } = await pool.query(
-      'INSERT INTO menu_items (store_id,name,category,price_usd,image_url) VALUES ($1,$2,$3,$4,$5) RETURNING *',
-      [req.params.storeId, name, category, price_usd, image_url||null]
+      'INSERT INTO menu_items (store_id,name,name_km,category,category_km,price_usd,image_url) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
+      [req.params.storeId, name, name_km||null, category, category_km||null, price_usd, image_url||null]
     );
     res.json(rows[0]);
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 app.put('/api/menu/:id', auth, async (req, res) => {
-  const { name, category, price_usd, image_url } = req.body;
+  const { name, name_km, category, category_km, price_usd, image_url } = req.body;
   await pool.query(
-    'UPDATE menu_items SET name=$1,category=$2,price_usd=$3,image_url=$4 WHERE id=$5',
-    [name, category, price_usd, image_url||null, req.params.id]
+    'UPDATE menu_items SET name=$1,name_km=$2,category=$3,category_km=$4,price_usd=$5,image_url=$6 WHERE id=$7',
+    [name, name_km||null, category, category_km||null, price_usd, image_url||null, req.params.id]
   );
   res.json({ success: true });
 });
@@ -183,19 +183,19 @@ app.get('/api/stores/:storeId/inventory', auth, async (req, res) => {
 });
 
 app.post('/api/stores/:storeId/inventory', auth, async (req, res) => {
-  const { name, quantity, unit, status, count_daily, image_url, item_type } = req.body;
+  const { name, name_km, quantity, unit, unit_km, status, count_daily, image_url, item_type } = req.body;
   const { rows } = await pool.query(
-    'INSERT INTO inventory (store_id,name,quantity,unit,status,count_daily,item_type,image_url) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
-    [req.params.storeId, name, quantity, unit, status||'ok', count_daily!==false, item_type||'ingredient', image_url||null]
+    'INSERT INTO inventory (store_id,name,name_km,quantity,unit,unit_km,status,count_daily,item_type,image_url) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *',
+    [req.params.storeId, name, name_km||null, quantity, unit, unit_km||null, status||'ok', count_daily!==false, item_type||'ingredient', image_url||null]
   );
   res.json(rows[0]);
 });
 
 app.put('/api/inventory/:id', auth, async (req, res) => {
-  const { name, quantity, unit, status, count_daily, image_url, item_type } = req.body;
+  const { name, quantity, unit, status, count_daily, image_url } = req.body;
   await pool.query(
-    'UPDATE inventory SET name=$1,quantity=$2,unit=$3,status=$4,count_daily=$5,item_type=$6,image_url=$7,updated_at=NOW() WHERE id=$8',
-    [name, quantity, unit, status, count_daily!==false, item_type||'ingredient', image_url||null, req.params.id]
+    'UPDATE inventory SET name=$1,quantity=$2,unit=$3,status=$4,count_daily=$5,image_url=$6,updated_at=NOW() WHERE id=$7',
+    [name, quantity, unit, status, count_daily!==false, image_url||null, req.params.id]
   );
   res.json({ success: true });
 });

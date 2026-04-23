@@ -38,19 +38,33 @@ async function initDB() {
         id SERIAL PRIMARY KEY,
         store_id VARCHAR(10) REFERENCES stores(id),
         name VARCHAR(100) NOT NULL,
+        name_km VARCHAR(100),
         category VARCHAR(50) DEFAULT 'Tea',
+        category_km VARCHAR(50),
         price_usd DECIMAL(10,2) NOT NULL,
         image_url TEXT,
         active BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT NOW()
       );
 
+      -- Migration: add name_km to menu_items
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='menu_items' AND column_name='name_km')
+        THEN ALTER TABLE menu_items ADD COLUMN name_km VARCHAR(100);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='menu_items' AND column_name='category_km')
+        THEN ALTER TABLE menu_items ADD COLUMN category_km VARCHAR(50);
+        END IF;
+      END $$;
+
       CREATE TABLE IF NOT EXISTS inventory (
         id SERIAL PRIMARY KEY,
         store_id VARCHAR(10) REFERENCES stores(id),
         name VARCHAR(100) NOT NULL,
+        name_km VARCHAR(100),
         quantity DECIMAL(10,2) DEFAULT 0,
         unit VARCHAR(30) DEFAULT 'pcs',
+        unit_km VARCHAR(30),
         status VARCHAR(20) DEFAULT 'ok',
         item_type VARCHAR(20) DEFAULT 'ingredient',
         count_daily BOOLEAN DEFAULT true,
@@ -58,13 +72,13 @@ async function initDB() {
         updated_at TIMESTAMP DEFAULT NOW()
       );
 
-      -- Migration: add item_type if it doesn't exist yet
+      -- Migration: add name_km/unit_km if not exists
       DO $$ BEGIN
-        IF NOT EXISTS (
-          SELECT 1 FROM information_schema.columns
-          WHERE table_name='inventory' AND column_name='item_type'
-        ) THEN
-          ALTER TABLE inventory ADD COLUMN item_type VARCHAR(20) DEFAULT 'ingredient';
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='inventory' AND column_name='name_km')
+        THEN ALTER TABLE inventory ADD COLUMN name_km VARCHAR(100);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='inventory' AND column_name='unit_km')
+        THEN ALTER TABLE inventory ADD COLUMN unit_km VARCHAR(30);
         END IF;
       END $$;
 
@@ -160,63 +174,50 @@ async function initDB() {
       // Seed menu for both stores
       for (const storeId of ['atm', 'hru']) {
         await client.query(`
-          INSERT INTO menu_items (store_id, name, category, price_usd) VALUES
-            ($1, 'Milk Tea', 'Tea', 1.50),
-            ($1, 'Taro Latte', 'Tea', 2.00),
-            ($1, 'Brown Sugar Milk', 'Tea', 1.75),
-            ($1, 'Matcha Latte', 'Coffee', 2.00),
-            ($1, 'Americano', 'Coffee', 1.25),
-            ($1, 'Cappuccino', 'Coffee', 1.50),
-            ($1, 'Cheese Tea', 'Tea', 2.50),
-            ($1, 'Lychee Tea', 'Tea', 1.75),
-            ($1, 'Mango Smoothie', 'Smoothie', 2.25)
+          INSERT INTO menu_items (store_id, name, name_km, category, category_km, price_usd) VALUES
+            ($1, 'Milk Tea',       'តែទឹកដោះគោ',     'Tea',      'តែ',       1.50),
+            ($1, 'Taro Latte',     'តេអ៊ីត្រាវ',      'Tea',      'តែ',       2.00),
+            ($1, 'Brown Sugar Milk','ទឹកដោះគោស្ករត្នោត','Tea',   'តែ',       1.75),
+            ($1, 'Matcha Latte',   'តែជៀក',           'Coffee',   'កាហ្វេ',   2.00),
+            ($1, 'Americano',      'អាមេរីកាណូ',       'Coffee',   'កាហ្វេ',   1.25),
+            ($1, 'Cappuccino',     'កាពូស៊ីណូ',        'Coffee',   'កាហ្វេ',   1.50),
+            ($1, 'Cheese Tea',     'តែឈីស',            'Tea',      'តែ',       2.50),
+            ($1, 'Lychee Tea',     'តែលីហ្ស៊ី',        'Tea',      'តែ',       1.75),
+            ($1, 'Mango Smoothie', 'ស្មូស៊ីម៉ាងហ្គោ',  'Smoothie', 'ស្មូស៊ី',  2.25)
         `, [storeId]);
 
         await client.query(`
-          INSERT INTO inventory (store_id, name, quantity, unit, status, count_daily, item_type) VALUES
-            ($1, 'Milk (whole)',      12,  'liters', 'ok',  true,  'ingredient'),
-            ($1, 'Tea leaves',        800, 'grams',  'ok',  true,  'ingredient'),
-            ($1, 'Taro powder',       150, 'grams',  'low', true,  'ingredient'),
-            ($1, 'Brown sugar syrup', 1.2, 'liters', 'ok',  true,  'ingredient'),
-            ($1, 'Coffee beans',      400, 'grams',  'ok',  true,  'ingredient'),
-            ($1, 'Matcha powder',     80,  'grams',  'low', true,  'ingredient'),
-            ($1, 'Mango puree',       6,   'packs',  'ok',  false, 'ingredient'),
-            ($1, 'Lychee syrup',      900, 'ml',     'ok',  false, 'ingredient'),
-            ($1, 'Cream cheese',      5,   'packs',  'ok',  false, 'ingredient'),
-            ($1, 'Tapioca pearls',    2,   'kg',     'ok',  false, 'ingredient'),
-            ($1, 'Sugar syrup',       3,   'liters', 'ok',  false, 'ingredient'),
-            ($1, 'Cups (S)',          200, 'pcs',    'ok',  true,  'supply'),
-            ($1, 'Cups (M)',          200, 'pcs',    'ok',  true,  'supply'),
-            ($1, 'Cups (L)',          150, 'pcs',    'ok',  true,  'supply'),
-            ($1, 'Lids',              400, 'pcs',    'ok',  true,  'supply'),
-            ($1, 'Straws',            500, 'pcs',    'ok',  false, 'supply'),
-            ($1, 'Plastic bags',      100, 'pcs',    'ok',  false, 'supply'),
-            ($1, 'Milk Tea',          0,   'cups',   'ok',  true,  'product'),
-            ($1, 'Taro Latte',        0,   'cups',   'ok',  true,  'product'),
-            ($1, 'Brown Sugar Milk',  0,   'cups',   'ok',  true,  'product')
+          INSERT INTO inventory (store_id, name, quantity, unit, status, count_daily) VALUES
+            ($1, 'Milk (whole)', 12, 'liters', 'ok', true),
+            ($1, 'Tea leaves', 800, 'grams', 'ok', true),
+            ($1, 'Taro powder', 150, 'grams', 'low', true),
+            ($1, 'Brown sugar syrup', 1.2, 'liters', 'ok', true),
+            ($1, 'Coffee beans', 400, 'grams', 'ok', true),
+            ($1, 'Matcha powder', 80, 'grams', 'low', true),
+            ($1, 'Mango puree', 6, 'packs', 'ok', false),
+            ($1, 'Lychee syrup', 900, 'ml', 'ok', false),
+            ($1, 'Cream cheese', 5, 'packs', 'ok', false),
+            ($1, 'Tapioca pearls', 2, 'kg', 'ok', false),
+            ($1, 'Sugar syrup', 3, 'liters', 'ok', false),
+            ($1, 'Cups & lids', 200, 'pcs', 'ok', false)
         `, [storeId]);
       }
 
       // Seed warehouse with same ingredients
       await client.query(`
         INSERT INTO warehouse_stock (name, quantity, unit) VALUES
-          ('Milk (whole)',      50,   'liters'),
-          ('Tea leaves',       5000, 'grams'),
-          ('Taro powder',      1000, 'grams'),
-          ('Brown sugar syrup',10,   'liters'),
-          ('Coffee beans',     3000, 'grams'),
-          ('Matcha powder',    500,  'grams'),
-          ('Mango puree',      20,   'packs'),
-          ('Lychee syrup',     5000, 'ml'),
-          ('Cream cheese',     20,   'packs'),
-          ('Tapioca pearls',   10,   'kg'),
-          ('Sugar syrup',      15,   'liters'),
-          ('Cups (S)',          2000, 'pcs'),
-          ('Cups (M)',          2000, 'pcs'),
-          ('Cups (L)',          1500, 'pcs'),
-          ('Lids',             4000, 'pcs'),
-          ('Straws',           5000, 'pcs'),
-          ('Plastic bags',     1000, 'pcs')
+          ('Milk (whole)', 50, 'liters'),
+          ('Tea leaves', 5000, 'grams'),
+          ('Taro powder', 1000, 'grams'),
+          ('Brown sugar syrup', 10, 'liters'),
+          ('Coffee beans', 3000, 'grams'),
+          ('Matcha powder', 500, 'grams'),
+          ('Mango puree', 20, 'packs'),
+          ('Lychee syrup', 5000, 'ml'),
+          ('Cream cheese', 20, 'packs'),
+          ('Tapioca pearls', 10, 'kg'),
+          ('Sugar syrup', 15, 'liters'),
+          ('Cups & lids', 1000, 'pcs')
         ON CONFLICT (name) DO NOTHING
       `);
 

@@ -294,7 +294,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
     <div style="display:flex;gap:6px;">
       <button id="itype-ingredient" onclick="setItemType('ingredient')" style="flex:1;padding:9px;border-radius:10px;border:2px solid var(--store-color,var(--g));background:var(--store-bg,var(--gl));color:var(--store-lt,var(--gt));font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🧪 Ingredient</button>
       <button id="itype-supply" onclick="setItemType('supply')" style="flex:1;padding:9px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📦 Supply</button>
-      <button id="itype-product" onclick="setItemType('product')" style="flex:1;padding:9px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🧋 Product</button>
+      <button id="itype-food" onclick="setItemType('food')" style="flex:1;padding:9px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🍞 Food</button>
     </div>
     <input type="hidden" id="mi-type" value="ingredient">
   </div>
@@ -1326,7 +1326,7 @@ function bInv(){
   const s=currentStore, items=invData[s]||[];
   const ft=window._invFilter||'all';
   const filtered=ft==='all'?items:items.filter(x=>(x.item_type||'ingredient')===ft);
-  const typeInfo={all:{label:'All',icon:''},ingredient:{label:'Ingredient',icon:'🧪'},supply:{label:'Supply',icon:'📦'},product:{label:'Product',icon:'🧋'}};
+  const typeInfo={all:{label:'All',icon:''},ingredient:{label:'Ingredient',icon:'🧪'},supply:{label:'Supply',icon:'📦'},food:{label:'Food',icon:'🍞'}};
   return `
   ${storeTabs('inventory')}
   <div class="sh">
@@ -1346,7 +1346,7 @@ function bInv(){
     <div style="flex:1;min-width:0;">
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
         <span style="font-size:13px;font-weight:600;">${v.name}</span>
-        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:${(v.item_type||'ingredient')==='product'?'#E8F5E9':(v.item_type)==='supply'?'#FFF3E0':'#F3E5F5'};color:${(v.item_type||'ingredient')==='product'?'#2E7D32':(v.item_type)==='supply'?'#E65100':'#6A1B9A'};">${(v.item_type||'ingredient')==='product'?'🧋 Product':(v.item_type)==='supply'?'📦 Supply':'🧪 Ingredient'}</span>
+        <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:${(v.item_type)==='food'?'#FFF8E1':(v.item_type)==='supply'?'#FFF3E0':'#F3E5F5'};color:${(v.item_type)==='food'?'#F57F17':(v.item_type)==='supply'?'#E65100':'#6A1B9A'};">${(v.item_type)==='food'?'🍞 Food':(v.item_type)==='supply'?'📦 Supply':'🧪 Ingredient'}</span>
       </div>
       <div style="font-size:11px;color:var(--t2);">${parseFloat(v.quantity)%1===0?parseInt(v.quantity):parseFloat(v.quantity)} ${v.unit} · <span style="color:${v.status==='ok'?'var(--gt)':v.status==='low'?'var(--amb)':'var(--red)'}">${v.status}</span></div>
     </div>
@@ -1357,6 +1357,17 @@ function bInv(){
   </div>`).join('')||`<div class="card"><div class="cb" style="text-align:center;font-size:12px;color:var(--t3);">No items yet. Tap + Add to create one.</div></div>`}`;
 }
 
+
+function setItemType(t){
+  const types=['ingredient','supply','food'];
+  types.forEach(k=>{
+    const btn=document.getElementById('itype-'+k);
+    if(!btn)return;
+    if(k===t){btn.style.border='2px solid var(--store-color,var(--g))';btn.style.background='var(--store-bg,var(--gl))';btn.style.color='var(--store-lt,var(--gt))';}
+    else{btn.style.border='2px solid var(--bd2)';btn.style.background='transparent';btn.style.color='var(--t2)';}
+  });
+  const inp=document.getElementById('mi-type');if(inp)inp.value=t;
+}
 
 function openII(i){eII=i;pendingImg=null;const s=currentStore,e=i>=0,v=e?invData[s][i]:{};togOn=e?v.count_daily:true;
   document.getElementById('mi-t').textContent=e?'Edit ingredient':'Add ingredient';
@@ -1391,9 +1402,9 @@ function bEndStock(){
 
   // Group by type
   const groups=[
-    {key:'product', label:'🧋 Products for Sale', desc:'Items you sell directly to customers', items:allItems.filter(x=>(x.item_type||'ingredient')==='product')},
     {key:'ingredient', label:'🧪 Ingredients', desc:'Items used to make drinks/food', items:allItems.filter(x=>(x.item_type||'ingredient')==='ingredient')},
-    {key:'supply', label:'📦 Supplies', desc:'Cups, lids, packaging etc.', items:allItems.filter(x=>(x.item_type||'ingredient')==='supply')},
+    {key:'supply', label:'📦 Supplies', desc:'Cups, lids, straws, packaging', items:allItems.filter(x=>x.item_type==='supply')},
+    {key:'food', label:'🍞 Food & Snacks', desc:'Bread, snacks, ready-made food', items:allItems.filter(x=>x.item_type==='food')},
   ].filter(g=>g.items.length>0);
 
   function itemCard(it, i){

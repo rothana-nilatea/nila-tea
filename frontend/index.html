@@ -1189,9 +1189,9 @@ function bCloseDay(){
       <div style="font-size:11px;font-weight:700;color:var(--cash-c);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">${t('usDollar')}</div>
       <div style="display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:12px;padding:10px 14px;border:2px solid var(--bd2);margin-bottom:8px;">
         <span style="font-size:20px;font-weight:700;color:var(--t2);">$</span>
-        <input type="number" id="cash-usd" value="${savedCashUSD||''}" placeholder="0.00" step="0.25" min="0" inputmode="decimal"
+        <input type="text" id="cash-usd" value="${savedCashUSD?parseFloat(savedCashUSD).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):''}" placeholder="0.00" inputmode="decimal"
           style="flex:1;font-size:22px;font-weight:700;text-align:center;border:none;background:transparent;color:var(--t1);outline:none;font-family:inherit;"
-          oninput="updateCashDual()">
+          oninput="formatUSDLive(this);updateCashDual()">
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
         ${[1,5,10,20,50,100].map(a=>`<button onclick="addCashUSD(${a})" style="font-size:12px;font-weight:600;padding:5px 10px;border-radius:8px;border:1.5px solid var(--bd2);background:var(--bg);color:var(--t1);cursor:pointer;font-family:inherit;">+$${a}</button>`).join('')}
@@ -1267,7 +1267,7 @@ function bCloseDay(){
         `<div style="background:var(--gl);border-radius:9px;padding:9px 11px;margin-top:8px;font-size:12px;color:var(--gt);font-weight:500;">${t('allABAMatched')}</div>`}
     </div></div>
 
-    <button class="btn p full" onclick="submitClose()">${t('submitClosingBtn')}</button>
+    <button class="btn p full" onclick="confirmClose()">${t('submitClosingBtn')}</button>
     <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px;margin-bottom:16px;">Nila (Owner) will be notified instantly</div>
   </div>
   <div id="cd-success" style="display:none;">
@@ -1329,6 +1329,22 @@ function fmtKHRInput(val){
   const n=parseFloat(val)||0;
   return n.toLocaleString('en-US');
 }
+function formatUSDLive(el){
+  const raw=(el.value||'').replace(/[^0-9.]/g,'');
+  // Allow typing decimals
+  if(raw===''||raw==='.'||raw.endsWith('.')||raw.match(/\.\d$/)){
+    el.value=raw; return;
+  }
+  const num=parseFloat(raw);
+  if(isNaN(num)){el.value='';return;}
+  // Only format if more than 3 digits before decimal
+  const parts=raw.split('.');
+  if(parts[0].length>3){
+    const formatted=num.toLocaleString('en-US',{minimumFractionDigits:parts[1]!==undefined?parts[1].length:0,maximumFractionDigits:2});
+    el.value=formatted;
+  }
+}
+
 function formatKHRLive(el){
   // Get raw digits only
   const pos=el.selectionStart;
@@ -1353,7 +1369,8 @@ function requestEdit(){
 }
 
 function updateCashDual(){
-  const usd=parseFloat(document.getElementById('cash-usd')?.value||0);
+  const rawUSD=(document.getElementById('cash-usd')?.value||'0').replace(/,/g,'');
+  const usd=parseFloat(rawUSD)||0;
   const rawKHR=(document.getElementById('cash-khr')?.value||'0').replace(/,/g,'');
   const khr=parseFloat(rawKHR)||0;
   const total=usd+khr/RATE;
@@ -1361,12 +1378,17 @@ function updateCashDual(){
   const el2=document.getElementById('cd-cash-khr');if(el2)el2.textContent='= ៛'+Math.round(total*RATE).toLocaleString('en-US')+' total';
   const el3=document.getElementById('cd-usd-line');if(el3)el3.textContent=fmt(usd);
   const el4=document.getElementById('cd-khr-line');if(el4)el4.textContent=fmt(khr/RATE);
-  localStorage.setItem('nila_cash_usd_'+currentStore+'_'+new Date().toDateString(), usd||0);
+  localStorage.setItem('nila_cash_usd_'+currentStore+'_'+new Date().toDateString(), parseFloat((document.getElementById('cash-usd')?.value||'0').replace(/,/g,''))||0);
   localStorage.setItem('nila_cash_khr_'+currentStore+'_'+new Date().toDateString(), parseFloat((document.getElementById('cash-khr')?.value||'0').replace(/,/g,''))||0);
 }
 function addCashUSD(a){
   const el=document.getElementById('cash-usd');
-  if(el){el.value=(parseFloat(el.value||0)+a).toFixed(2);updateCashDual();}
+  if(el){
+    const cur=parseFloat((el.value||'0').replace(/,/g,''))||0;
+    const newVal=cur+a;
+    el.value=newVal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    updateCashDual();
+  }
 }
 function addCashKHR(a){
   const el=document.getElementById('cash-khr');
@@ -1378,8 +1400,40 @@ function addCashKHR(a){
   }
 }
 
+function confirmClose(){
+  const rawUSD=(document.getElementById('cash-usd')?.value||'0').replace(/,/g,'');
+  const rawKHR=(document.getElementById('cash-khr')?.value||'0').replace(/,/g,'');
+  const cashUSD=parseFloat(rawUSD)||0;
+  const cashKHR=parseFloat(rawKHR)||0;
+  const cashTotal=cashUSD+cashKHR/RATE;
+  const abaAuto=(abaData[currentStore]||[]).reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
+  const grand=cashTotal+abaAuto;
+  const msg=lang==='km'
+    ?`✅ សូមផ្ទៀងផ្ទាត់ជាមុនសិន
+
+💵 USD: $${cashUSD.toLocaleString('en-US',{minimumFractionDigits:2})}
+🇰🇭 KHR: ៛${cashKHR.toLocaleString('en-US')}
+💰 ប្រាក់សាច់សរុប: ${fmt(cashTotal)}
+🏦 ABA: ${fmt(abaAuto)}
+
+🎯 សរុបធំ: ${fmt(grand)} (${fmtK(grand)})
+
+បន្ទាប់ពីដាក់ស្នើ នឹងស្នើសុំកែប្រែ។`
+    :`✅ Please confirm before submitting
+
+💵 USD Cash: $${cashUSD.toLocaleString('en-US',{minimumFractionDigits:2})}
+🇰🇭 KHR Cash: ៛${cashKHR.toLocaleString('en-US')}
+💰 Total Cash: ${fmt(cashTotal)}
+🏦 ABA: ${fmt(abaAuto)}
+
+🎯 Grand Total: ${fmt(grand)} (${fmtK(grand)})
+
+After submitting you will need to request to edit.`;
+  if(confirm(msg)) submitClose();
+}
+
 async function submitClose(){
-  const cashUSD=parseFloat(document.getElementById('cash-usd')?.value||0);
+  const cashUSD=parseFloat((document.getElementById('cash-usd')?.value||'0').replace(/,/g,''))||0;
   const cashKHR=parseFloat((document.getElementById('cash-khr')?.value||'0').replace(/,/g,''))||0;
   const cashTotal=cashUSD + cashKHR/RATE;
   const cashNote=document.getElementById('cash-note')?.value||'';

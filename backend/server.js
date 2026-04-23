@@ -270,7 +270,6 @@ app.get('/api/stores/:storeId/aba', auth, async (req, res) => {
 // ── CLOSING REPORT ──
 app.post('/api/stores/:storeId/close', auth, async (req, res) => {
   try {
-    const { submitted_by } = req.body;
     const storeId = req.params.storeId;
     const date = new Date().toISOString().split('T')[0];
     const { cash_total, cash_usd, cash_khr, aba_total, submitted_by } = req.body;

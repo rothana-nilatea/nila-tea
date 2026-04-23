@@ -431,6 +431,22 @@ en:{
   ingredientLabel:'🧪 Ingredient',supplyLabel:'📦 Supply',foodLabel:'🍞 Food',
   noItemsMarked2:'No items marked for daily count. Go to Inventory → Edit item → turn on Count daily',
   photosOf:'photos',
+  usDollar:'🇺🇸 US Dollar (USD)',khrRiel:'🇰🇭 Khmer Riel (KHR)',
+  cashCollectedToday:'Cash collected today',countPhysical:'Count physical cash — enter both currencies',
+  noteOptionalLbl:'Note (optional)',usdCash:'USD cash',khrCash:'KHR cash',
+  totalCashLbl:'Total cash',abaTransLbl:'ABA transactions',
+  autoPulledLbl:'Auto-pulled from ABA Business API',connectedLbl:'Connected · ABA Business webhook active',
+  noABAToday:'No ABA transactions yet today',allABAMatched:'All ABA transactions matched',
+  matchedTxt:'matched',unmatchedTxt:'unmatched',
+  submitClosingBtn:'Submit closing report',dayClosedTxt:'Day closed!',backToSalesTxt:'Back to sales',
+  goodMorningTxt:'Good morning',goodAfternoonTxt:'Good afternoon',goodEveningTxt:'Good evening',
+  bothStoresTxt:'Both stores',combinedRevToday:'Combined revenue today',
+  atmStoreTxt:'ATM Store',hruStoreTxt:'HRU Store',revenueLbl:'Revenue',
+  recentSalesTxt:'Recent sales',seeAllTxt:'See all',lowStockItems:'Low stock items',
+  lowStockNeeds:'Low stock — needs restocking',stockOverview:'Stock overview',
+  recordSaleTxt:'Record sale',inventoryTxt:'Inventory',closeDayTxt:'Close day',
+  todayTotalLbl:'Today total',grandTotalToday:'Grand total today',
+  itemsLbl:'items',cashKHRlbl:'Cash KHR',
 },
 km:{
   appName:'នីឡា ទ',appSub:'ប្រព័ន្ធគ្រប់គ្រងហាង',signIn:'ចូលទៅគ្រប់គ្រងហាង',
@@ -510,6 +526,22 @@ km:{
   ingredientLabel:'🧪 គ្រឿងផ្សំ',supplyLabel:'📦 វត្ថុផ្គត់ផ្គង់',foodLabel:'🍞 អាហារ',
   noItemsMarked2:'មិនមានមុខទំនិញដែលសម្គាល់ · ទៅ សារពើភ័ណ្ឌ → កែ → បើក រាប់រាល់ថ្ងៃ',
   photosOf:'រូបភាព',
+  usDollar:'🇺🇸 ដុល្លារអាមេរិក (USD)',khrRiel:'🇰🇭 រៀលខ្មែរ (KHR)',
+  cashCollectedToday:'សាច់ប្រាក់ប្រមូលថ្ងៃនេះ',countPhysical:'រាប់ប្រាក់ — បញ្ចូលរូបិយប័ណ្ណទាំងពីរ',
+  noteOptionalLbl:'កំណត់ចំណាំ (ស្រេចចិត្ត)',usdCash:'ប្រាក់ USD',khrCash:'ប្រាក់រៀល',
+  totalCashLbl:'ប្រាក់សរុប',abaTransLbl:'ប្រតិបត្តិការ ABA',
+  autoPulledLbl:'ទាញពី ABA Business API ដោយស្វ័យប្រវត្តិ',connectedLbl:'បានភ្ជាប់ · ABA webhook សកម្ម',
+  noABAToday:'មិនទាន់មានប្រតិបត្តិការ ABA ថ្ងៃនេះ',allABAMatched:'ប្រតិបត្តិការ ABA ទាំងអស់ត្រូវគ្នា',
+  matchedTxt:'ត្រូវគ្នា',unmatchedTxt:'មិនត្រូវ',
+  submitClosingBtn:'ដាក់ស្នើរបាយការណ៍បិទថ្ងៃ',dayClosedTxt:'បិទថ្ងៃហើយ!',backToSalesTxt:'ត្រឡប់ទៅការលក់',
+  goodMorningTxt:'អរុណសួស្តី',goodAfternoonTxt:'ទិវាសួស្តី',goodEveningTxt:'សាយណ្ហសួស្តី',
+  bothStoresTxt:'ហាងទាំងពីរ',combinedRevToday:'ចំណូលសរុបថ្ងៃនេះ',
+  atmStoreTxt:'ហាង ATM',hruStoreTxt:'ហាង HRU',revenueLbl:'ចំណូល',
+  recentSalesTxt:'ការលក់ថ្មីៗ',seeAllTxt:'មើលទាំងអស់',lowStockItems:'ស្តុកទាប',
+  lowStockNeeds:'ស្តុកទាប — ត្រូវការបន្ថែម',stockOverview:'ទិដ្ឋភាពស្តុក',
+  recordSaleTxt:'កត់ត្រាការលក់',inventoryTxt:'សារពើភ័ណ្ឌ',closeDayTxt:'បិទថ្ងៃ',
+  todayTotalLbl:'សរុបថ្ងៃនេះ',grandTotalToday:'ចំណូលសរុបថ្ងៃនេះ',
+  itemsLbl:'មុខ',cashKHRlbl:'ប្រាក់រៀល',
 }
 };
 function t(key){return(T[lang]&&T[lang][key])||T.en[key]||key;}
@@ -814,23 +846,23 @@ function bDash(){
     const atmT=(atmS.grand_total||0), hruT=(hruS.grand_total||0), total=atmT+hruT;
     return `
     <div style="margin-bottom:12px;">
-      <div style="font-size:19px;font-weight:700;">Good morning, Nila!</div>
-      <div style="font-size:12px;color:var(--t2);margin-top:3px;">${today()} · Both stores</div>
+      <div style="font-size:19px;font-weight:700;">${t('goodMorningTxt')}, ${me.name.split(' ')[0]}</div>
+      <div style="font-size:12px;color:var(--t2);margin-top:3px;">${today()} · ${t('bothStoresTxt')}</div>
     </div>
     <div class="combined-card" style="background:var(--store-color,var(--g));">
-      <div class="gt-label">Combined revenue today</div>
+      <div class="gt-label">${t('combinedRevToday')}</div>
       <div class="gt-val">${fmt(total)}</div>
       <div class="gt-khr">${fmtK(total)}</div>
       <div class="gt-breakdown">
-        <div class="gt-part"><div class="gt-part-lbl">ATM Store</div><div class="gt-part-val">${fmt(atmT)}</div></div>
-        <div class="gt-part" style="background:rgba(255,255,255,0.08);"><div class="gt-part-lbl">HRU Store</div><div class="gt-part-val">${fmt(hruT)}</div></div>
+        <div class="gt-part"><div class="gt-part-lbl">${t('atmStoreTxt')}</div><div class="gt-part-val">${fmt(atmT)}</div></div>
+        <div class="gt-part" style="background:rgba(255,255,255,0.08);"><div class="gt-part-lbl">${t('hruStoreTxt')}</div><div class="gt-part-val">${fmt(hruT)}</div></div>
       </div>
     </div>
     <div class="sh"><div class="sh-t">Store comparison</div></div>
     <div class="cmp-grid">
       <div class="cmp-card atm">
         <div class="cmp-store" style="color:var(--atm-lt);"><div class="cmp-dot" style="background:var(--atm-c);"></div>ATM</div>
-        <div class="cmp-lbl">Revenue</div><div class="cmp-val">${fmt(atmT)}</div><div class="cmp-sub">${fmtK(atmT)}</div>
+        <div class="cmp-lbl">${t('revenueLbl')}</div><div class="cmp-val">${fmt(atmT)}</div><div class="cmp-sub">${fmtK(atmT)}</div>
         <div class="cmp-div"></div>
         <div class="cmp-lbl">Cash</div><div style="font-size:14px;font-weight:700;">${fmt(atmS.cash_total||0)}</div>
         <div class="cmp-div"></div>
@@ -838,7 +870,7 @@ function bDash(){
       </div>
       <div class="cmp-card hru">
         <div class="cmp-store" style="color:var(--hru-lt);"><div class="cmp-dot" style="background:var(--hru-c);"></div>HRU</div>
-        <div class="cmp-lbl">Revenue</div><div class="cmp-val">${fmt(hruT)}</div><div class="cmp-sub">${fmtK(hruT)}</div>
+        <div class="cmp-lbl">${t('revenueLbl')}</div><div class="cmp-val">${fmt(hruT)}</div><div class="cmp-sub">${fmtK(hruT)}</div>
         <div class="cmp-div"></div>
         <div class="cmp-lbl">Cash</div><div style="font-size:14px;font-weight:700;">${fmt(hruS.cash_total||0)}</div>
         <div class="cmp-div"></div>
@@ -849,7 +881,7 @@ function bDash(){
       <button class="btn" style="flex:1;background:var(--atm-bg);color:var(--atm-lt);border-color:#E8A87A;" onclick="switchStore('atm');showPage('sales')">ATM Sales →</button>
       <button class="btn" style="flex:1;background:var(--hru-bg);color:var(--hru-lt);border-color:#7EC8B0;" onclick="switchStore('hru');showPage('sales')">HRU Sales →</button>
     </div>
-    <div class="sh"><div class="sh-t">Recent sales — ${st.name}</div><button class="btn sm" onclick="showPage('sales')">See all</button></div>
+    <div class="sh"><div class="sh-t">${t('recentSalesTxt')} — ${st.name}</div><button class="btn sm" onclick="showPage('sales')">${t('seeAllTxt')}</button></div>
     ${recentSalesList(s)}`;
   } else {
     // Staff sees stock-focused dashboard
@@ -858,7 +890,7 @@ function bDash(){
     const okItems=inv.filter(x=>x.status==='ok');
     const dailyItems=inv.filter(x=>x.count_daily);
     const hr=new Date().getHours();
-    const greeting=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
+    const greeting=hr<12?t('goodMorningTxt'):hr<18?t('goodAfternoonTxt'):t('goodEveningTxt');
     return `
     <div style="margin-bottom:16px;">
       <div style="font-size:20px;font-weight:700;">${greeting}, ${me.name.split(' ')[0]}!</div>
@@ -870,7 +902,7 @@ function bDash(){
       <div style="background:${lowItems.length>0?'#FFF3DC':'var(--gl)'};border-radius:14px;padding:14px;border:1.5px solid ${lowItems.length>0?'#F59F00':'#D4A882'};">
         <div style="font-size:22px;margin-bottom:6px;">${lowItems.length>0?'⚠️':'✅'}</div>
         <div style="font-size:20px;font-weight:700;color:${lowItems.length>0?'var(--amb)':'var(--gt)'};">${lowItems.length}</div>
-        <div style="font-size:11px;font-weight:600;color:var(--t2);margin-top:2px;">Low stock items</div>
+        <div style="font-size:11px;font-weight:600;color:var(--t2);margin-top:2px;">${t('lowStockItems')}</div>
       </div>
       <div style="background:var(--gl);border-radius:14px;padding:14px;border:1.5px solid #D4A882;">
         <div style="font-size:22px;margin-bottom:6px;">📦</div>
@@ -882,7 +914,7 @@ function bDash(){
     <!-- LOW STOCK ALERT -->
     ${lowItems.length>0?`
     <div style="background:#FFF3DC;border-radius:var(--r);padding:12px 13px;margin-bottom:12px;border:1.5px solid #F59F00;">
-      <div style="font-size:12px;font-weight:700;color:var(--amb);margin-bottom:8px;">⚠️ Low stock — needs restocking</div>
+      <div style="font-size:12px;font-weight:700;color:var(--amb);margin-bottom:8px;">⚠️ ${t('lowStockNeeds')}</div>
       ${lowItems.slice(0,4).map(it=>`
         <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid rgba(245,159,0,0.2);">
           <span style="font-size:12px;font-weight:500;">${it.name}</span>
@@ -901,23 +933,23 @@ function bDash(){
       </button>
       <button onclick="showPage('inventory')" style="background:#fff;border:0.5px solid var(--bd);border-radius:14px;padding:14px;text-align:left;cursor:pointer;font-family:inherit;box-shadow:var(--shadow);">
         <div style="font-size:20px;margin-bottom:6px;">🏪</div>
-        <div style="font-size:13px;font-weight:700;color:var(--t1);">Inventory</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">${t('inventoryTxt')}</div>
         <div style="font-size:11px;color:var(--t2);margin-top:2px;">${inv.length} items total</div>
       </button>
       <button onclick="showPage('sales')" style="background:#fff;border:0.5px solid var(--bd);border-radius:14px;padding:14px;text-align:left;cursor:pointer;font-family:inherit;box-shadow:var(--shadow);">
         <div style="font-size:20px;margin-bottom:6px;">💰</div>
-        <div style="font-size:13px;font-weight:700;color:var(--t1);">Record sale</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">${t('recordSaleTxt')}</div>
         <div style="font-size:11px;color:var(--t2);margin-top:2px;">Add new transaction</div>
       </button>
       <button onclick="showPage('closeday')" style="background:#fff;border:0.5px solid var(--bd);border-radius:14px;padding:14px;text-align:left;cursor:pointer;font-family:inherit;box-shadow:var(--shadow);">
         <div style="font-size:20px;margin-bottom:6px;">📋</div>
-        <div style="font-size:13px;font-weight:700;color:var(--t1);">Close day</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">${t('closeDayTxt')}</div>
         <div style="font-size:11px;color:var(--t2);margin-top:2px;">Submit daily report</div>
       </button>
     </div>
 
     <!-- STOCK LIST -->
-    <div class="sh"><div class="sh-t">Stock overview</div><button class="btn sm" onclick="showPage('inventory')">See all</button></div>
+    <div class="sh"><div class="sh-t">${t('stockOverview')}</div><button class="btn sm" onclick="showPage('inventory')">${t('seeAllTxt')}</button></div>
     ${inv.filter(x=>x.count_daily).slice(0,5).map(it=>`
       <div class="inv-item">
         <div style="width:10px;height:10px;border-radius:50%;background:${it.status==='ok'?'var(--g)':it.status==='low'?'#F59F00':'var(--red)'};flex-shrink:0;margin-right:2px;"></div>
@@ -997,9 +1029,9 @@ function bSales(){
         <div style="font-size:10px;color:var(--t2);">Bank transfer</div>
       </div>
     </div>
-    <div class="fl" style="margin-top:4px;">Note (optional)</div>
+    <div class="fl" style="margin-top:4px;">${t('noteOptionalLbl')}</div>
     <input class="fi" type="text" id="sale-note" placeholder="e.g. Milk Tea x2, Taro Latte" style="margin-bottom:12px;">
-    <button class="btn p full" onclick="recordSale()">Record sale</button>
+    <button class="btn p full" onclick="recordSale()">${t('recordSaleTxt')}</button>
   </div></div>
 
   <div class="sh"><div class="sh-t">Sales log today</div><span style="font-size:11px;color:var(--t2);">${sl.length} total</span></div>
@@ -1065,7 +1097,7 @@ function bCloseDay(){
     <div style="font-size:12px;color:var(--t2);margin-bottom:14px;">${st.name} · ${today()}</div>
 
     <div class="combined-card" style="background:${st.color};">
-      <div class="gt-label">Grand total today</div>
+      <div class="gt-label">${t('grandTotalToday')}</div>
       <div class="gt-val" id="cd-grand">${fmt(grandTotal)}</div>
       <div class="gt-khr" id="cd-grand-khr">${fmtK(grandTotal)}</div>
       <div class="gt-breakdown">
@@ -1080,12 +1112,12 @@ function bCloseDay(){
         <div style="width:36px;height:36px;border-radius:9px;background:var(--cash-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           <svg width="18" height="18" viewBox="0 0 22 22" fill="none"><rect x="2" y="6" width="18" height="12" rx="3" stroke="var(--cash-c)" stroke-width="1.5"/><circle cx="11" cy="12" r="2.5" stroke="var(--cash-c)" stroke-width="1.5"/></svg>
         </div>
-        <div><div style="font-size:13px;font-weight:700;">Cash collected today</div>
-        <div style="font-size:11px;color:var(--t2);">Count physical cash — enter both currencies</div></div>
+        <div><div style="font-size:13px;font-weight:700;">${t('cashCollectedToday')}</div>
+        <div style="font-size:11px;color:var(--t2);">${t('countPhysical')}</div></div>
       </div>
 
       <!-- USD INPUT -->
-      <div style="font-size:11px;font-weight:700;color:var(--cash-c);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">🇺🇸 US Dollar (USD)</div>
+      <div style="font-size:11px;font-weight:700;color:var(--cash-c);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">${t('usDollar')}</div>
       <div style="display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:12px;padding:10px 14px;border:2px solid var(--bd2);margin-bottom:8px;">
         <span style="font-size:20px;font-weight:700;color:var(--t2);">$</span>
         <input type="number" id="cash-usd" value="${savedCashUSD||''}" placeholder="0.00" step="0.25" min="0" inputmode="decimal"
@@ -1097,7 +1129,7 @@ function bCloseDay(){
       </div>
 
       <!-- KHR INPUT -->
-      <div style="font-size:11px;font-weight:700;color:#8B4513;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">🇰🇭 Khmer Riel (KHR)</div>
+      <div style="font-size:11px;font-weight:700;color:#8B4513;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">${t('khrRiel')}</div>
       <div style="display:flex;align-items:center;gap:8px;background:#FDF5EE;border-radius:12px;padding:10px 14px;border:2px solid #E8C8A0;margin-bottom:8px;">
         <span style="font-size:20px;font-weight:700;color:#8B4513;">៛</span>
         <input type="number" id="cash-khr" value="${savedCashKHR||''}" placeholder="0" step="500" min="0" inputmode="numeric"
@@ -1109,7 +1141,7 @@ function bCloseDay(){
       </div>
 
       <!-- NOTE -->
-      <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:5px;">Note (optional)</div>
+      <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:5px;">${t('noteOptionalLbl')}</div>
       <input type="text" id="cash-note" value="${savedNote}" placeholder="e.g. Busy day, 45 customers..."
         style="width:100%;font-size:13px;padding:9px 11px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);color:var(--t1);font-family:inherit;"
         oninput="localStorage.setItem('nila_note_'+currentStore+'_'+new Date().toDateString(),this.value)">
@@ -1117,15 +1149,15 @@ function bCloseDay(){
       <!-- TOTAL -->
       <div style="border-top:1.5px solid var(--bd);margin-top:12px;padding-top:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-          <span style="font-size:12px;color:var(--t2);">USD cash</span>
+          <span style="font-size:12px;color:var(--t2);">${t('usdCash')}</span>
           <span style="font-size:13px;font-weight:600;" id="cd-usd-line">${fmt(savedCashUSD)}</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:12px;color:var(--t2);">KHR cash <span style="font-size:10px;">(÷${RATE})</span></span>
+          <span style="font-size:12px;color:var(--t2);">${t('khrCash')} <span style="font-size:10px;">(÷${RATE})</span></span>
           <span style="font-size:13px;font-weight:600;" id="cd-khr-line">${fmt(savedCashKHR/RATE)}</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:13px;font-weight:700;">Total cash</span>
+          <span style="font-size:13px;font-weight:700;">${t('totalCashLbl')}</span>
           <div style="text-align:right;">
             <div style="font-size:16px;font-weight:700;color:var(--cash-c);" id="cd-cash-total">${fmt(savedCashUSD+savedCashKHR/RATE)}</div>
             <div style="font-size:11px;color:var(--t3);" id="cd-cash-khr">= ៛${Math.round((savedCashUSD+savedCashKHR/RATE)*RATE).toLocaleString()} total</div>
@@ -1138,19 +1170,19 @@ function bCloseDay(){
     <div class="card"><div class="cb">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
         <div class="aba-logo">ABA</div>
-        <div><div style="font-size:13px;font-weight:700;">ABA transactions</div><div style="font-size:11px;color:var(--t2);">Auto-pulled from ABA Business API</div></div>
+        <div><div style="font-size:13px;font-weight:700;">${t('abaTransLbl')}</div><div style="font-size:11px;color:var(--t2);">${t('autoPulledLbl')}</div></div>
         <span class="badge bg-aba" style="margin-left:auto;">${fmt(abaAuto)}</span>
       </div>
       <div style="background:var(--aba-bg);border-radius:9px;padding:9px 11px;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
         <div class="dot-pulse"></div>
-        <div style="font-size:11px;color:var(--aba-lt);font-weight:500;">Connected · ABA Business webhook active</div>
+        <div style="font-size:11px;color:var(--aba-lt);font-weight:500;">${t('connectedLbl')}</div>
       </div>
       ${abaL.length?abaL.map(txn=>`
         <div class="aba-txn">
           <div><div style="font-size:12px;font-weight:500;">${txn.from_account||'Unknown'}</div>
-          <div style="font-size:10px;color:var(--t3);">${txn.ref} · ${txn.txn_time?new Date(txn.txn_time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''} <span style="color:${txn.matched?'var(--gt)':'var(--red)'};font-weight:600;">${txn.matched?'✓ matched':'· unmatched'}</span></div></div>
+          <div style="font-size:10px;color:var(--t3);">${txn.ref} · ${txn.txn_time?new Date(txn.txn_time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''} <span style="color:${txn.matched?'var(--gt)':'var(--red)'};font-weight:600;">${txn.matched?t('matchedTxt'):'· '+t('unmatchedTxt')}</span></div></div>
           <div style="font-weight:700;color:var(--aba-lt);">${fmt(txn.amount_usd)}</div>
-        </div>`).join(''):`<div style="font-size:12px;color:var(--t3);text-align:center;padding:8px 0;">No ABA transactions yet today</div>`}
+        </div>`).join(''):`<div style="font-size:12px;color:var(--t3);text-align:center;padding:8px 0;">${t('noABAToday')}</div>`}
       <div style="border-top:1.5px solid var(--bd);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:13px;font-weight:700;">Total ABA</span>
         <div style="text-align:right;">
@@ -1163,16 +1195,16 @@ function bCloseDay(){
           ${diff>0?`⚠ ABA shows ${fmt(Math.abs(diff))} more than recorded — check unmatched transactions`:
                     `⚠ ${fmt(Math.abs(diff))} in ABA sales not yet received in account`}
         </div>`:
-        `<div style="background:var(--gl);border-radius:9px;padding:9px 11px;margin-top:8px;font-size:12px;color:var(--gt);font-weight:500;">✓ All ABA transactions matched</div>`}
+        `<div style="background:var(--gl);border-radius:9px;padding:9px 11px;margin-top:8px;font-size:12px;color:var(--gt);font-weight:500;">${t('allABAMatched')}</div>`}
     </div></div>
 
-    <button class="btn p full" onclick="submitClose()">Submit closing report</button>
+    <button class="btn p full" onclick="submitClose()">${t('submitClosingBtn')}</button>
     <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px;margin-bottom:16px;">Nila (Owner) will be notified instantly</div>
   </div>
   <div id="cd-success" style="display:none;">
     <div class="success-card">
       <div class="s-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 13l5.5 5.5 12-12" stroke="var(--g)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div style="font-size:17px;font-weight:700;margin-bottom:5px;">Day closed!</div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:5px;">${t('dayClosedTxt')}</div>
       <div style="font-size:12px;color:var(--t2);margin-bottom:12px;">${st.name} · closing report submitted</div>
       <div class="combined-card" style="background:${st.color};margin-bottom:12px;">
         <div class="gt-label">Total collected</div>
@@ -1180,7 +1212,7 @@ function bCloseDay(){
         <div class="gt-khr">${fmtK(grandTotal)}</div>
       </div>
       <div class="notif-box"><div class="notif-title">${t('ownerNotifiedTitle')}</div><div class="notif-sub">${t('ownerNotifiedClose')}</div></div>
-      <button class="btn p full" onclick="showPage('sales')">Back to sales</button>
+      <button class="btn p full" onclick="showPage('sales')">${t('backToSalesTxt')}</button>
     </div>
   </div>`;
 }
@@ -1261,7 +1293,7 @@ async function submitClose(){
     ss.innerHTML=`
     <div class="success-card">
       <div class="s-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 13l5.5 5.5 12-12" stroke="var(--store-color,var(--g))" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div style="font-size:17px;font-weight:700;margin-bottom:5px;">Day closed! ✅</div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:5px;">${t('dayClosedTxt')} ✅</div>
       <div style="font-size:12px;color:var(--t2);margin-bottom:14px;">${STORES[s].name} · ${new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
       <div style="background:var(--store-color,var(--g));border-radius:14px;padding:14px;margin-bottom:12px;">
         <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-bottom:4px;">Grand total collected</div>
@@ -1273,7 +1305,7 @@ async function submitClose(){
             <div style="font-size:14px;font-weight:700;color:#fff;margin-top:2px;">$${cashUSD||0}</div>
           </div>
           <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:8px;padding:8px;">
-            <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;">🇰🇭 Cash KHR</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;">${t('cashKHRlbl')}</div>
             <div style="font-size:14px;font-weight:700;color:#fff;margin-top:2px;">៛${(cashKHR||0).toLocaleString()}</div>
           </div>
           <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:8px;padding:8px;">
@@ -1353,7 +1385,7 @@ function bInv(){
   return `
   ${storeTabs('inventory')}
   <div class="sh">
-    <div><div class="pg-title" style="margin-bottom:0;">Inventory</div><div style="font-size:11px;color:var(--t2);">${filtered.length} items · ${STORES[s].name}</div></div>
+    <div><div class="pg-title" style="margin-bottom:0;">${t('inventoryTxt')}</div><div style="font-size:11px;color:var(--t2);">${filtered.length} ${t('itemsLbl')} · ${STORES[s].name}</div></div>
     <button class="btn p sm" onclick="openII(-1)">+ Add</button>
   </div>
   <div style="display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px;">
@@ -1566,7 +1598,7 @@ function bRevenue(){
     <div class="cmp-grid">
       <div class="cmp-card atm">
         <div class="cmp-store" style="color:var(--atm-lt);"><div class="cmp-dot" style="background:var(--atm-c);"></div>ATM</div>
-        <div class="cmp-lbl">Today total</div><div class="cmp-val">${fmt(atmS.grand_total||0)}</div><div class="cmp-sub">${fmtK(atmS.grand_total||0)}</div>
+        <div class="cmp-lbl">${t('todayTotalLbl')}</div><div class="cmp-val">${fmt(atmS.grand_total||0)}</div><div class="cmp-sub">${fmtK(atmS.grand_total||0)}</div>
         <div class="cmp-div"></div>
         <div class="cmp-lbl">Cash</div><div style="font-size:14px;font-weight:700;">${fmt(atmS.cash_total||0)}</div>
         <div class="cmp-div"></div>
@@ -1574,7 +1606,7 @@ function bRevenue(){
       </div>
       <div class="cmp-card hru">
         <div class="cmp-store" style="color:var(--hru-lt);"><div class="cmp-dot" style="background:var(--hru-c);"></div>HRU</div>
-        <div class="cmp-lbl">Today total</div><div class="cmp-val">${fmt(hruS.grand_total||0)}</div><div class="cmp-sub">${fmtK(hruS.grand_total||0)}</div>
+        <div class="cmp-lbl">${t('todayTotalLbl')}</div><div class="cmp-val">${fmt(hruS.grand_total||0)}</div><div class="cmp-sub">${fmtK(hruS.grand_total||0)}</div>
         <div class="cmp-div"></div>
         <div class="cmp-lbl">Cash</div><div style="font-size:14px;font-weight:700;">${fmt(hruS.cash_total||0)}</div>
         <div class="cmp-div"></div>
@@ -1583,8 +1615,8 @@ function bRevenue(){
     </div>
     <div class="card"><div class="cb">
       <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Combined total today</div>
-      <div class="row"><span style="color:var(--t2);">ATM Store</span><span style="font-weight:700;">${fmt(atmS.grand_total||0)}</span></div>
-      <div class="row"><span style="color:var(--t2);">HRU Store</span><span style="font-weight:700;">${fmt(hruS.grand_total||0)}</span></div>
+      <div class="row"><span style="color:var(--t2);">${t('atmStoreTxt')}</span><span style="font-weight:700;">${fmt(atmS.grand_total||0)}</span></div>
+      <div class="row"><span style="color:var(--t2);">${t('hruStoreTxt')}</span><span style="font-weight:700;">${fmt(hruS.grand_total||0)}</span></div>
       <div class="row"><span style="font-size:14px;font-weight:700;">Grand total</span>
         <div style="text-align:right;"><div style="font-size:18px;font-weight:700;color:var(--g);">${fmt((atmS.grand_total||0)+(hruS.grand_total||0))}</div>
         <div style="font-size:11px;color:var(--t3);">${fmtK((atmS.grand_total||0)+(hruS.grand_total||0))}</div></div>

@@ -1176,7 +1176,7 @@ function bCloseDay(){
         <span style="font-size:20px;font-weight:700;color:#8B4513;">៛</span>
         <input type="text" id="cash-khr" value="${savedCashKHR?savedCashKHR.toLocaleString('en-US'):''}" placeholder="0" inputmode="numeric"
           style="flex:1;font-size:22px;font-weight:700;text-align:center;border:none;background:transparent;color:var(--t1);outline:none;font-family:inherit;"
-          oninput="updateCashDual()">
+          oninput="formatKHRLive(this);updateCashDual()">
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
         ${[1000,5000,10000,50000,100000,500000].map(a=>`<button onclick="addCashKHR(${a})" style="font-size:11px;font-weight:600;padding:5px 8px;border-radius:8px;border:1.5px solid #E8C8A0;background:#FDF5EE;color:#8B4513;cursor:pointer;font-family:inherit;">+${a>=1000000?a/1000000+'M':a>=1000?a/1000+'k':a}</button>`).join('')}
@@ -1302,6 +1302,18 @@ function fmtKHRInput(val){
   const n=parseFloat(val)||0;
   return n.toLocaleString('en-US');
 }
+function formatKHRLive(el){
+  // Get raw digits only
+  const pos=el.selectionStart;
+  const raw=(el.value||'').replace(/[^0-9]/g,'');
+  if(!raw){el.value='';return;}
+  // Format with commas
+  const formatted=parseInt(raw,10).toLocaleString('en-US');
+  el.value=formatted;
+  // Try to keep cursor position reasonable
+  try{el.setSelectionRange(formatted.length,formatted.length);}catch(e){}
+}
+
 function requestEdit(){
   if(confirm(lang==='km'?'សុំច្នៃប្រឌិតឡើងវិញ? ម្ចាស់ហាងនឹងទទួលដំណឹង':'Request to edit today\'s report? Owner will be notified.')){
     const s=currentStore;
@@ -1319,7 +1331,7 @@ function updateCashDual(){
   const khr=parseFloat(rawKHR)||0;
   const total=usd+khr/RATE;
   const el=document.getElementById('cd-cash-total');if(el)el.textContent=fmt(total);
-  const el2=document.getElementById('cd-cash-khr');if(el2)el2.textContent='= ៛'+Math.round(total*RATE).toLocaleString()+' total';
+  const el2=document.getElementById('cd-cash-khr');if(el2)el2.textContent='= ៛'+Math.round(total*RATE).toLocaleString('en-US')+' total';
   const el3=document.getElementById('cd-usd-line');if(el3)el3.textContent=fmt(usd);
   const el4=document.getElementById('cd-khr-line');if(el4)el4.textContent=fmt(khr/RATE);
   localStorage.setItem('nila_cash_usd_'+currentStore+'_'+new Date().toDateString(), usd||0);
@@ -1333,7 +1345,8 @@ function addCashKHR(a){
   const el=document.getElementById('cash-khr');
   if(el){
     const cur=parseFloat((el.value||'0').replace(/,/g,''))||0;
-    el.value=(cur+a).toLocaleString('en-US');
+    const newVal=cur+a;
+    el.value=newVal.toLocaleString('en-US');
     updateCashDual();
   }
 }

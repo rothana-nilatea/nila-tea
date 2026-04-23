@@ -297,11 +297,15 @@ app.post('/api/stores/:storeId/close', auth, async (req, res) => {
 
     const grandTotal = cashTotal + abaTotal;
 
+    // Delete any existing record for today first, then insert fresh
+    await pool.query(
+      `DELETE FROM closing_reports WHERE store_id=$1 AND report_date=$2`,
+      [storeId, date]
+    );
+
     await pool.query(
       `INSERT INTO closing_reports (store_id,report_date,cash_total,aba_total,grand_total,submitted_by)
-       VALUES ($1,$2,$3,$4,$5,$6)
-       ON CONFLICT (store_id, report_date) DO UPDATE
-       SET cash_total=$3, aba_total=$4, grand_total=$5, submitted_by=$6, created_at=NOW()`,
+       VALUES ($1,$2,$3,$4,$5,$6)`,
       [storeId, date, cashTotal, abaTotal, grandTotal, submitted_by]
     );
 

@@ -149,19 +149,6 @@ async function initDB() {
         submitted_by VARCHAR(50),
         created_at TIMESTAMP DEFAULT NOW()
       );
-
-      -- Migration: add unique constraint safely (remove duplicates first)
-      DO $$ BEGIN
-        IF NOT EXISTS (
-          SELECT 1 FROM pg_constraint WHERE conname='closing_reports_store_id_report_date_key'
-        ) THEN
-          -- Remove duplicate rows keeping only the latest per store+date
-          DELETE FROM closing_reports a USING closing_reports b
-          WHERE a.id < b.id AND a.store_id = b.store_id AND a.report_date = b.report_date;
-          -- Now add the constraint
-          ALTER TABLE closing_reports ADD CONSTRAINT closing_reports_store_id_report_date_key UNIQUE(store_id, report_date);
-        END IF;
-      END $$;
     `);
 
     // Seed stores

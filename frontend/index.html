@@ -1415,10 +1415,10 @@ function bInv(){
     </div>
     <div style="flex:1;min-width:0;">
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
-        <span style="font-size:13px;font-weight:600;">${v.name}</span>
+        <span style="font-size:13px;font-weight:600;">${nm(v)}</span>
         <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:${(v.item_type)==='food'?'#FFF8E1':(v.item_type)==='supply'?'#FFF3E0':'#F3E5F5'};color:${(v.item_type)==='food'?'#F57F17':(v.item_type)==='supply'?'#E65100':'#6A1B9A'};">${(v.item_type)==='food'?t('foodLabel'):(v.item_type)==='supply'?t('supplyLabel'):t('ingredientLabel')}</span>
       </div>
-      <div style="font-size:11px;color:var(--t2);">${parseFloat(v.quantity)%1===0?parseInt(v.quantity):parseFloat(v.quantity)} ${v.unit} · <span style="color:${v.status==='ok'?'var(--gt)':v.status==='low'?'var(--amb)':'var(--red)'}">${v.status}</span></div>
+      <div style="font-size:11px;color:var(--t2);">${parseFloat(v.quantity)%1===0?parseInt(v.quantity):parseFloat(v.quantity)} ${un(v)} · <span style="color:${v.status==='ok'?'var(--gt)':v.status==='low'?'var(--amb)':'var(--red)'}">${v.status==='ok'?t('okStatus'):v.status==='low'?t('lowStatus'):t('outStatus')}</span></div>
     </div>
     <div style="display:flex;gap:4px;flex-shrink:0;">
       <button class="btn sm" onclick="openII(${items.indexOf(v)})">Edit</button>

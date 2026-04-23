@@ -478,7 +478,7 @@ km:{
   exchangeRate:'អត្រាប្តូរប្រាក់',usersPerms:'អ្នកប្រើ & សិទ្ធិ',
   addUser:'+ បន្ថែមអ្នកប្រើ',ownerLabel2:'ម្ចាស់',staffLabel:'បុគ្គលិក',
   viewRevenue:'មើលចំណូល',manageMenu:'គ្រប់គ្រងមុខម្ហូប',manageStock:'គ្រប់គ្រងស្តុក',
-  endDayStock:'ស្តុកបិទថ្ងៃ',recordSales:'កត់ត្រាការលក់',
+  endDayStock:'ស្តុកបិទថ្ងៃ',recordSales:'កត់ត្រាការលក់',closeday:'បិទថ្ងៃ',closeDayPerm:'បិទថ្ងៃ',
   fullName:'ឈ្មោះពេញ',usernameLbl:'ឈ្មោះអ្នកប្រើ',passwordLbl:'លេខសម្ងាត់',
   storeLbl:'ហាង',roleLbl:'តួនាទី',saveUser:'រក្សាទុក',
   editUser:'កែសម្រួលអ្នកប្រើ',addUserTitle:'បន្ថែមអ្នកប្រើ',
@@ -719,11 +719,13 @@ function buildApp(){
 
 function buildNavItems(nav){
   let html='',lastSec='';
+  const secLabels={Main:t('main'),Manage:t('manage'),Reports:t('reports'),Account:t('account')};
+  const navLabels={dashboard:t('dashboard'),sales:t('sales'),closeday:t('closeday'),menu:t('menu'),inventory:t('inventory'),endstock:t('endstock'),revenue:t('revenue'),settings:t('settings')};
   nav.forEach(p=>{
-    if(p.sec!==lastSec){html+=`<div class="d-sec">${p.sec}</div>`;lastSec=p.sec;}
+    if(p.sec!==lastSec){html+=`<div class="d-sec">${secLabels[p.sec]||p.sec}</div>`;lastSec=p.sec;}
     html+=`<button class="d-item" id="di-${p.id}" onclick="goPage('${p.id}')">
       <div class="d-ico"><svg width="14" height="14" viewBox="0 0 14 14" fill="none">${p.ico}</svg></div>
-      <span>${p.label}</span>
+      <span>${navLabels[p.id]||p.label}</span>
       ${p.dot?`<div style="margin-left:auto;width:7px;height:7px;background:#E84040;border-radius:50%;"></div>`:''}
     </button>`;
   });
@@ -760,7 +762,7 @@ function showPage(id){
   const pg=document.getElementById('pg-'+id);
   if(pg){pg.classList.add('active');pg.innerHTML=buildPage(id);}
   const di=document.getElementById('di-'+id);if(di)di.classList.add('active');
-  const labels={dashboard:'Dashboard',sales:'Record sale',closeday:'Close day',menu:'Menu',inventory:'Inventory',endstock:'End-day stock',revenue:'Revenue',settings:'Settings'};
+  const labels={dashboard:t('dashboard'),sales:t('sales'),closeday:t('closeday'),menu:t('menu'),inventory:t('inventory'),endstock:t('endstock'),revenue:t('revenue'),settings:t('settings')};
   const lbl=document.getElementById('pg-lbl');if(lbl)lbl.textContent=labels[id]||id;
   document.getElementById('mc')?.scrollTo(0,0);
   // Update store color CSS var
@@ -1772,7 +1774,7 @@ async function uploadLogo(input){
   reader.readAsDataURL(file);
 }
 
-function setLang(l){lang=l;localStorage.setItem('nila_lang',l);if(me){render();showPage('settings');}}
+function setLang(l){lang=l;localStorage.setItem('nila_lang',l);if(me){const cur=document.querySelector('.page.active');const curId=cur?cur.id:'dashboard';render();showPage(curId);}}
 
 async function togglePerm(userIdx,perm,el){
   const u=usersData[userIdx];

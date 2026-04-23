@@ -2053,7 +2053,7 @@ function bRevenue(){
 
 function showRevTab(tab){
   if(tab==='daily'){loadDailyReports();}
-  ['today','month','range'].forEach(t=>{
+  ['today','daily','month','range'].forEach(t=>{
     const el=document.getElementById('rev-'+t);
     const btn=document.getElementById('rtab-'+t);
     if(el) el.style.display=t===tab?'block':'none';

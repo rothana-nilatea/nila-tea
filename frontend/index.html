@@ -1023,7 +1023,10 @@ function bDash(){
     <div class="sh"><div class="sh-t">${t('stockOverview')}</div><button class="btn sm" onclick="showPage('inventory')">${t('seeAllTxt')}</button></div>
     ${inv.filter(x=>x.count_daily).slice(0,5).map(it=>`
       <div class="inv-item">
-        <div style="width:10px;height:10px;border-radius:50%;background:${it.status==='ok'?'var(--g)':it.status==='low'?'#F59F00':'var(--red)'};flex-shrink:0;margin-right:2px;"></div>
+        <div style="width:38px;height:38px;border-radius:9px;overflow:hidden;background:var(--bg);flex-shrink:0;border:0.5px solid var(--bd);">
+          ${it.image_url?`<img src="${it.image_url}" style="width:100%;height:100%;object-fit:cover;">`:
+          `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">${icoSVG(16)}</div>`}
+        </div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:13px;font-weight:600;">${nm(it)}</div>
           <div style="font-size:11px;color:var(--t2);">${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)} ${un(it)}</div>

@@ -513,7 +513,7 @@ km:{
 }
 };
 function t(key){return(T[lang]&&T[lang][key])||T.en[key]||key;}
-var me=null, token=null, lang='en', currentStore='atm', logoUrl=null;
+var me=null, token=null, lang='en', currentStore='atm', logoUrl=null, currentPage='dashboard';
 
 function getLogo(){return logoUrl||'logo.svg';}
 function logoImg(w=40,h=40,style=''){return `<img src="${getLogo()}" style="width:${w}px;height:${h}px;object-fit:contain;${style}" onerror="this.src='logo.svg'">`;}
@@ -777,6 +777,7 @@ function switchStore(s){
 }
 
 function showPage(id){
+  currentPage=id;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.d-item').forEach(b=>b.classList.remove('active'));
   const pg=document.getElementById('pg-'+id);
@@ -1794,7 +1795,7 @@ async function uploadLogo(input){
   reader.readAsDataURL(file);
 }
 
-function setLang(l){lang=l;localStorage.setItem('nila_lang',l);if(me){const cur=document.querySelector('.page.active');const curId=cur?cur.id:'dashboard';render();showPage(curId);}}
+function setLang(l){lang=l;localStorage.setItem('nila_lang',l);if(me){const curId=currentPage||'dashboard';render();showPage(curId);}}
 
 async function togglePerm(userIdx,perm,el){
   const u=usersData[userIdx];

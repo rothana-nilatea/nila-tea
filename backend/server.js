@@ -42,7 +42,11 @@ function auth(req, res, next) {
   } catch { res.status(401).json({ error: 'Invalid token' }); }
 }
 function ownerOnly(req, res, next) {
-  if (req.user.role !== 'owner') return res.status(403).json({ error: 'Owner only' });
+  if (req.user.role !== 'owner') return res.status(403).json({ error: 'Super admin only' });
+  next();
+}
+function adminOrOwner(req, res, next) {
+  if (req.user.role !== 'owner' && req.user.role !== 'manager') return res.status(403).json({ error: 'Admin access required' });
   next();
 }
 function storeAccess(req, res, next) {
@@ -90,7 +94,7 @@ app.get('/api/stores', auth, async (req, res) => {
 });
 
 // ── USERS ──
-app.get('/api/users', auth, ownerOnly, async (req, res) => {
+app.get('/api/users', auth, adminOrOwner, async (req, res) => {
   const { rows } = await pool.query(`
     SELECT u.id,u.name,u.username,u.role,u.store_id,
            u.perm_revenue,u.perm_menu,u.perm_inv,u.perm_users,u.perm_sales,u.perm_endstock,
@@ -106,7 +110,7 @@ app.post('/api/users', auth, ownerOnly, async (req, res) => {
   try {
     const { name, username, password, role, store_id, perms } = req.body;
     const hash = await bcrypt.hash(password, 10);
-    const isOwner = role === 'owner';
+    const isOwner = role === 'owner' || role === 'manager';
     const p = perms || {};
     await pool.query(
       `INSERT INTO users (name,username,password_hash,role,store_id,perm_revenue,perm_menu,perm_inv,perm_users,perm_sales,perm_endstock)
@@ -122,7 +126,7 @@ app.put('/api/users/:id', auth, ownerOnly, async (req, res) => {
   try {
     const { name, username, password, role, store_id, perms } = req.body;
     const p = perms || {};
-    const isOwner = role === 'owner';
+    const isOwner = role === 'owner' || role === 'manager';
     if (password) {
       const hash = await bcrypt.hash(password, 10);
       await pool.query(
@@ -370,7 +374,7 @@ app.get('/api/stores/:storeId/revenue/today', auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/revenue/all-stores', auth, ownerOnly, async (req, res) => {
+app.get('/api/revenue/all-stores', auth, adminOrOwner, async (req, res) => {
   try {
     const stores = ['atm', 'hru'];
     const result = {};
@@ -411,8 +415,20 @@ app.get('/api/stores/:storeId/revenue/week', auth, async (req, res) => {
 });
 
 
-// ── CLOSING REPORTS HISTORY ──
-app.get('/api/closing-reports', auth, ownerOnly, async (req, res) => {
+// ── DELETE CLOSING REPORT (admin only) ──
+app.delete('/api/stores/:storeId/close', auth, ownerOnly, async (req, res) => {
+  try {
+    const today = cambodiaDate();
+    await pool.query(
+      `DELETE FROM closing_reports WHERE store_id=$1 AND report_date=$2`,
+      [req.params.storeId, today]
+    );
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+
+app.get('/api/closing-reports', auth, adminOrOwner, async (req, res) => {
   try {
     const { days = 30 } = req.query;
     const { rows } = await pool.query(

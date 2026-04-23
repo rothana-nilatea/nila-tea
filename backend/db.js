@@ -23,7 +23,7 @@ async function initDB() {
         name VARCHAR(100) NOT NULL,
         username VARCHAR(50) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
-        role VARCHAR(20) DEFAULT 'staff',
+        role VARCHAR(20) DEFAULT 'staff', -- roles: owner (super admin), manager (admin), staff
         store_id VARCHAR(10) REFERENCES stores(id),
         perm_revenue BOOLEAN DEFAULT false,
         perm_menu BOOLEAN DEFAULT false,

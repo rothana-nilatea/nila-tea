@@ -407,7 +407,7 @@ en:{
   payBreakdown:'Payment breakdown',
   settingsTitle:'Settings & stores',languageLabel:'Language',
   exchangeRate:'Exchange rate',usersPerms:'Users & permissions',
-  addUser:'+ Add user',ownerLabel2:'Owner',staffLabel:'Staff',
+  addUser:'+ Add user',ownerLabel2:'Super Admin',staffLabel:'Staff',managerLabel:'Admin',
   viewRevenue:'View revenue',manageMenu:'Manage menu',manageStock:'Manage stock',
   endDayStock:'End-day stock',recordSales:'Record sales',closeday:'Close day',closeDayPerm:'Close day',
   fullName:'Full name',usernameLbl:'Username',passwordLbl:'Password',
@@ -420,7 +420,7 @@ en:{
   combinedView:'Combined view',allStoresLabel:'All stores',
   matchedLabel:'matched',unmatchedLabel:'unmatched',liveLabel:'Live',
   noPhotoLabel:'No photo',photoCheckLabel:'Photo ✓',
-  ownerAllStores:'Owner · All stores',transactions:'transactions',
+  ownerAllStores:'Super Admin · All stores',transactions:'transactions',
   itemsToCountShort:'items to count',photosLabel:'photos',ofLabel:'of',
   retakePhoto:'Retake',takePhoto:'Take Photo',requiredBeforeSubmit:'Required before submit',
   openingLabel2:'Opening',closingLabel2:'Closing',statusLabel2:'Status',
@@ -508,7 +508,7 @@ km:{
   payBreakdown:'ការបែងចែកការទូទាត់',
   settingsTitle:'ការកំណត់ & ហាង',languageLabel:'ភាសា',
   exchangeRate:'អត្រាប្តូរប្រាក់',usersPerms:'អ្នកប្រើ & សិទ្ធិ',
-  addUser:'+ បន្ថែមអ្នកប្រើ',ownerLabel2:'ម្ចាស់',staffLabel:'បុគ្គលិក',
+  addUser:'+ បន្ថែមអ្នកប្រើ',ownerLabel2:'អ្នកគ្រប់គ្រងកំពូល',staffLabel:'បុគ្គលិក',managerLabel:'អ្នកគ្រប់គ្រង',
   viewRevenue:'មើលចំណូល',manageMenu:'គ្រប់គ្រងមុខម្ហូប',manageStock:'គ្រប់គ្រងស្តុក',
   endDayStock:'ស្តុកបិទថ្ងៃ',recordSales:'កត់ត្រាការលក់',closeday:'បិទថ្ងៃ',closeDayPerm:'បិទថ្ងៃ',
   fullName:'ឈ្មោះពេញ',usernameLbl:'ឈ្មោះអ្នកប្រើ',passwordLbl:'លេខសម្ងាត់',
@@ -521,7 +521,7 @@ km:{
   combinedView:'មើលរួម',allStoresLabel:'ហាងទាំងអស់',
   matchedLabel:'ត្រូវគ្នា',unmatchedLabel:'មិនត្រូវ',liveLabel:'រស់នៅ',
   noPhotoLabel:'គ្មានរូបភាព',photoCheckLabel:'រូបភាព ✓',
-  ownerAllStores:'ម្ចាស់ · ហាងទាំងអស់',transactions:'ប្រតិបត្តិការ',
+  ownerAllStores:'អ្នកគ្រប់គ្រងកំពូល · ហាងទាំងអស់',transactions:'ប្រតិបត្តិការ',
   itemsToCountShort:'មុខទំនិញត្រូវរាប់',photosLabel:'រូបភាព',ofLabel:'នៃ',
   retakePhoto:'ថតម្តងទៀត',takePhoto:'ថតរូប',requiredBeforeSubmit:'ត្រូវការមុនដាក់ស្នើ',
   openingLabel2:'ការបើក',closingLabel2:'ការបិទ',statusLabel2:'ស្ថានភាព',
@@ -573,7 +573,9 @@ var delType=null, delIdx=-1, eMI=-1, eII=-1, eUI=-1, stkPh={};
 // ── HELPERS ──
 function fmt(u){const v=parseFloat(u)||0;return '$'+(v%1===0?v.toFixed(0):v.toFixed(2));}
 function fmtK(u){return '៛'+(Math.round((parseFloat(u)||0)*RATE)).toLocaleString();}
-function can(p){return me&&(me.role==='owner'||me.perms?.[p]);}
+function can(p){return me&&(me.role==='owner'||me.role==='manager'||me.perms?.[p]);}
+function isSuperAdmin(){return me&&me.role==='owner';}
+function isAdmin(){return me&&(me.role==='owner'||me.role==='manager');}
 function ini(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
 function today(){return new Date().toLocaleDateString('en-US',{weekday:'short',day:'numeric',month:'short'});}
 function now(){const d=new Date();return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
@@ -696,7 +698,7 @@ async function refreshDashboard(){
 
 async function loadAllData(){
   try{
-    if(me.role==='owner'){
+    if(me.role==='owner'||me.role==='manager'){
       await Promise.allSettled([loadStoreData('atm'),loadStoreData('hru')]);
       try{usersData=await api('GET','/api/users');}catch(e){console.warn('Users load:',e);}
     } else {
@@ -736,7 +738,7 @@ var navDefs=[
    ico:'<path d="M7 1.5L2 4.5v6L7 13.5l5-3v-6L7 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M2 4.5l5 3m0 0l5-3m-5 3v6" stroke="currentColor" stroke-width="1.3"/>'},
   {id:'endstock',label:t('endDayStock'),perm:'endstock',sec:'Manage',secLabel:'Manage',
    ico:'<path d="M2 3h10v8a3 3 0 01-3 3H5a3 3 0 01-3-3V3z" stroke="currentColor" stroke-width="1.3"/><path d="M4 3V2a1 1 0 012 0v1M8 3V2a1 1 0 012 0v1" stroke="currentColor" stroke-width="1.3"/>'},
-  {id:'revenue',label:'Revenue',perm:'revenue',sec:'Reports',secLabel:'Reports',
+  {id:'revenue',label:'Revenue',perm:'revenue',sec:'Reports',showFor:['owner','manager','staff'],secLabel:'Reports',
    ico:'<path d="M1 10l3-4 3 3 3-5 3 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>'},
   {id:'settings',label:'Settings',always:true,sec:'Account',secLabel:'Account',
    ico:'<circle cx="7" cy="7" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 1v1.5M7 12.5V14M1 7h1.5M12.5 7H14M3 3l1 1M10 10l1 1M10 4l1-1M3 11l1-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'},
@@ -744,7 +746,7 @@ var navDefs=[
 
 // ── APP SHELL ──
 function buildApp(){
-  const nav=navDefs.filter(p=>p.always||can(p.perm));
+  const nav=navDefs.filter(p=>p.always||can(p.perm)||(me.role==='manager'&&p.id==='revenue'));
   const isOwner=me.role==='owner';
   const s=STORES[currentStore];
 
@@ -914,7 +916,8 @@ function buildStoreCards(atmS,hruS,atmT,hruT){
         html+='<button class="btn sm d" data-sid="'+sid+'" data-act="reject" onclick="handleStoreAction(this)" style="flex:1;font-size:11px;padding:6px;">✗ '+(lang==='km'?'បដិសេធ':'Reject')+'</button>';
         html+='</div></div>';
       }
-      html+='<button class="btn sm full" data-sid="'+sid+'" data-act="unlock" onclick="handleStoreAction(this)" style="font-size:11px;color:var(--t2);">🔓 '+(lang==='km'?'អ្នកគ្រប់គ្រងអនុញ្ញាតឱ្យកែ':'Admin unlock to edit')+'</button>';
+      html+='<button class="btn sm full" data-sid="'+sid+'" data-act="unlock" onclick="handleStoreAction(this)" style="font-size:11px;color:var(--t2);margin-bottom:4px;">🔓 '+(lang==='km'?'អ្នកគ្រប់គ្រងអនុញ្ញាតឱ្យកែ':'Admin unlock to edit')+'</button>';
+      if(isSuperAdmin())html+='<button class="btn sm full" data-sid="'+sid+'" data-act="delete" onclick="handleStoreAction(this)" style="font-size:11px;color:var(--red);border-color:rgba(176,48,48,0.3);">🗑️ '+(lang==='km'?'លុបរបាយការណ៍':'Delete report')+'</button>';
       html+='</div>';
     }
     html+='</div>';
@@ -1390,6 +1393,7 @@ function handleStoreAction(btn){
   if(act==='approve') approveEdit(sid);
   else if(act==='reject') rejectEdit(sid);
   else if(act==='unlock') adminUnlockEdit(sid);
+  else if(act==='delete') deleteCloseReport(sid);
 }
 
 function rejectEdit(sid){
@@ -1411,6 +1415,26 @@ function adminUnlockEdit(sid){
     showPage('dashboard');
   }
 }
+async function deleteCloseReport(sid){
+  const storeName=STORES[sid]?STORES[sid].name:sid;
+  const msg=lang==='km'?'លុបរបាយការណ៍បិទថ្ងៃនេះសម្រាប់ '+storeName+'?':'Delete today closing report for '+storeName+'?';
+  if(!confirm(msg)) return;
+  try{
+    await api('DELETE','/api/stores/'+sid+'/close');
+    // Clear localStorage
+    const todayKey='nila_submitted_'+sid+'_'+new Date().toDateString();
+    const selfKey='nila_self_edited_'+sid+'_'+new Date().toDateString();
+    const adminKey='nila_admin_unlock_'+sid+'_'+new Date().toDateString();
+    localStorage.removeItem(todayKey);
+    localStorage.removeItem(selfKey);
+    localStorage.removeItem(adminKey);
+    await loadAllData();
+    alert(lang==='km'?'✅ បានលុបរបាយការណ៍':'✅ Report deleted');
+  }catch(e){
+    alert('Error: '+e.message);
+  }
+}
+
 function approveEdit(sid){
   const adminKey='nila_admin_unlock_'+sid+'_'+new Date().toDateString();
   const reqKey='nila_edit_request_'+sid+'_'+new Date().toDateString();

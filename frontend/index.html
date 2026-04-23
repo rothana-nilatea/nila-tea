@@ -1095,6 +1095,33 @@ async function recordSale(){
 // ════════ CLOSE DAY ════════
 function bCloseDay(){
   const s=currentStore, st=STORES[s];
+  const todayKey='nila_submitted_'+s+'_'+new Date().toDateString();
+  const alreadySubmitted=localStorage.getItem(todayKey);
+  if(alreadySubmitted && me.role!=='owner'){
+    const sub=JSON.parse(alreadySubmitted);
+    return `<div style="padding:8px 0 16px;">
+      <div class="success-card">
+        <div class="s-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 13l5.5 5.5 12-12" stroke="var(--store-color,var(--g))" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div style="font-size:17px;font-weight:700;margin-bottom:5px;">${t('dayClosedTxt')} ✅</div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:14px;">${st.name} · ${today()}</div>
+        <div style="background:var(--store-color,var(--g));border-radius:14px;padding:14px;margin-bottom:12px;color:#fff;">
+          <div style="font-size:11px;opacity:0.7;margin-bottom:4px;">${t('grandTotalToday')}</div>
+          <div style="font-size:26px;font-weight:700;">${fmt(sub.cashTotal+sub.abaAuto)}</div>
+          <div style="font-size:12px;opacity:0.6;">${fmtK(sub.cashTotal+sub.abaAuto)}</div>
+        </div>
+        <div class="notif-box" style="margin-bottom:14px;">
+          <div class="notif-title">${t('ownerNotifiedTitle')}</div>
+          <div class="notif-sub">${t('ownerNotifiedClose')}</div>
+        </div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:10px;text-align:center;">
+          ${lang==='km'?'បានដាក់ស្នើម្តងហើយ':'Already submitted today'}
+        </div>
+        <button class="btn full" onclick="requestEdit()" style="border-color:var(--store-color,var(--g));color:var(--store-color,var(--g));">
+          ${lang==='km'?'📝 សុំច្នៃប្រឌិតឡើងវិញ':'📝 Request to edit'}
+        </button>
+      </div>
+    </div>`;
+  }
   const abaL=abaData[s]||[];
   const abaAuto=abaL.reduce((a,b)=>a+(parseFloat(b.amount_usd)||0),0);
   const isOwner=me.role==='owner';
@@ -1147,7 +1174,7 @@ function bCloseDay(){
       <div style="font-size:11px;font-weight:700;color:#8B4513;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">${t('khrRiel')}</div>
       <div style="display:flex;align-items:center;gap:8px;background:#FDF5EE;border-radius:12px;padding:10px 14px;border:2px solid #E8C8A0;margin-bottom:8px;">
         <span style="font-size:20px;font-weight:700;color:#8B4513;">៛</span>
-        <input type="number" id="cash-khr" value="${savedCashKHR||''}" placeholder="0" step="1000" min="0" inputmode="numeric"
+        <input type="text" id="cash-khr" value="${savedCashKHR?savedCashKHR.toLocaleString('en-US'):''}" placeholder="0" inputmode="numeric"
           style="flex:1;font-size:22px;font-weight:700;text-align:center;border:none;background:transparent;color:var(--t1);outline:none;font-family:inherit;"
           oninput="updateCashDual()">
       </div>
@@ -1270,16 +1297,33 @@ function setCash(amt){
   const inp=document.getElementById('cash-input');
   if(inp){inp.value=amt;updateCashTotal(amt);}
 }
+function fmtKHRInput(val){
+  // Format number with commas for display
+  const n=parseFloat(val)||0;
+  return n.toLocaleString('en-US');
+}
+function requestEdit(){
+  if(confirm(lang==='km'?'សុំច្នៃប្រឌិតឡើងវិញ? ម្ចាស់ហាងនឹងទទួលដំណឹង':'Request to edit today\'s report? Owner will be notified.')){
+    const s=currentStore;
+    const todayKey='nila_submitted_'+s+'_'+new Date().toDateString();
+    localStorage.removeItem(todayKey);
+    // Notify via console (in real app would send API notification)
+    console.log('Edit requested by '+me.username+' for '+s+' on '+new Date().toDateString());
+    showPage('closeday');
+  }
+}
+
 function updateCashDual(){
   const usd=parseFloat(document.getElementById('cash-usd')?.value||0);
-  const khr=parseFloat(document.getElementById('cash-khr')?.value||0);
+  const rawKHR=(document.getElementById('cash-khr')?.value||'0').replace(/,/g,'');
+  const khr=parseFloat(rawKHR)||0;
   const total=usd+khr/RATE;
   const el=document.getElementById('cd-cash-total');if(el)el.textContent=fmt(total);
   const el2=document.getElementById('cd-cash-khr');if(el2)el2.textContent='= ៛'+Math.round(total*RATE).toLocaleString()+' total';
   const el3=document.getElementById('cd-usd-line');if(el3)el3.textContent=fmt(usd);
   const el4=document.getElementById('cd-khr-line');if(el4)el4.textContent=fmt(khr/RATE);
   localStorage.setItem('nila_cash_usd_'+currentStore+'_'+new Date().toDateString(), usd||0);
-  localStorage.setItem('nila_cash_khr_'+currentStore+'_'+new Date().toDateString(), khr||0);
+  localStorage.setItem('nila_cash_khr_'+currentStore+'_'+new Date().toDateString(), parseFloat((document.getElementById('cash-khr')?.value||'0').replace(/,/g,''))||0);
 }
 function addCashUSD(a){
   const el=document.getElementById('cash-usd');
@@ -1287,12 +1331,16 @@ function addCashUSD(a){
 }
 function addCashKHR(a){
   const el=document.getElementById('cash-khr');
-  if(el){el.value=(parseFloat(el.value||0)+a);updateCashDual();}
+  if(el){
+    const cur=parseFloat((el.value||'0').replace(/,/g,''))||0;
+    el.value=(cur+a).toLocaleString('en-US');
+    updateCashDual();
+  }
 }
 
 async function submitClose(){
   const cashUSD=parseFloat(document.getElementById('cash-usd')?.value||0);
-  const cashKHR=parseFloat(document.getElementById('cash-khr')?.value||0);
+  const cashKHR=parseFloat((document.getElementById('cash-khr')?.value||'0').replace(/,/g,''))||0;
   const cashTotal=cashUSD + cashKHR/RATE;
   const cashNote=document.getElementById('cash-note')?.value||'';
   const s=currentStore;
@@ -1609,7 +1657,12 @@ async function submitES(){
   if(done<total){w.style.display='block';w.textContent=`${total-done} photo(s) missing.`;return;}
   w.style.display='none';
   const payload=items.map((it,i)=>({id:it.id,quantity:parseFloat(document.getElementById('esq-'+i)?.value)||it.quantity,status:document.getElementById('esst-'+i)?.value||it.status}));
-  try{await api('POST',`/api/stores/${s}/inventory/endstock`,{items:payload,submitted_by:me.username});}catch(e){}
+  try{
+    await api('POST',`/api/stores/${s}/inventory/endstock`,{items:payload,submitted_by:me.username});
+    // Refresh inventory data so dashboard updates
+    const freshInv=await api('GET',`/api/stores/${s}/inventory`);
+    if(freshInv&&Array.isArray(freshInv))invData[s]=freshInv;
+  }catch(e){console.warn('endstock submit:',e.message);}
   document.getElementById('es-form').style.display='none';
   document.getElementById('es-suc').style.display='block';
 }

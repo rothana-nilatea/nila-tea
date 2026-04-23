@@ -704,6 +704,18 @@ async function loadAllData(){
     } else {
       await loadStoreData(currentStore);
     }
+    // If on closeday, re-render to sync with server state
+    const activeId=currentPage||'dashboard';
+    if(activeId==='closeday'){
+      // Clear stale submission if server deleted it
+      ['atm','hru'].forEach(sid=>{
+        const sr=storeStats[sid]||{};
+        if(!sr.close_report){
+          localStorage.removeItem('nila_submitted_'+sid+'_'+new Date().toDateString());
+          localStorage.removeItem('nila_self_edited_'+sid+'_'+new Date().toDateString());
+        }
+      });
+    }
     // Update refresh timestamp
     const rt=document.getElementById('dash-refresh-time');
     if(rt)rt.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
@@ -1161,8 +1173,16 @@ async function recordSale(){
 function bCloseDay(){
   const s=currentStore, st=STORES[s];
   const todayKey='nila_submitted_'+s+'_'+new Date().toDateString();
+  // Sync with server - if admin deleted report, clear local storage
+  const serverStats=storeStats[s]||{};
+  if(!serverStats.close_report){
+    // Server has no report for today - clear any stale localStorage
+    localStorage.removeItem(todayKey);
+    localStorage.removeItem('nila_self_edited_'+s+'_'+new Date().toDateString());
+    localStorage.removeItem('nila_admin_unlock_'+s+'_'+new Date().toDateString());
+  }
   const alreadySubmitted=localStorage.getItem(todayKey);
-  if(alreadySubmitted && me.role!=='owner'){
+  if(alreadySubmitted && me.role!=='owner'&&me.role!=='manager'){
     const sub=JSON.parse(alreadySubmitted);
     const selfEditKey='nila_self_edited_'+s+'_'+new Date().toDateString();
     const adminUnlockKey='nila_admin_unlock_'+s+'_'+new Date().toDateString();

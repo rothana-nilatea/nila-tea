@@ -219,6 +219,7 @@ app.delete('/api/inventory/:id', auth, async (req, res) => {
 app.post('/api/stores/:storeId/inventory/endstock', auth, async (req, res) => {
   try {
     const { items, submitted_by } = req.body;
+    const storeId = req.params.storeId;
     for (const item of items) {
       await pool.query(
         'UPDATE inventory SET quantity=$1,status=$2,updated_at=NOW() WHERE id=$3',
@@ -227,7 +228,14 @@ app.post('/api/stores/:storeId/inventory/endstock', auth, async (req, res) => {
     }
     await pool.query(
       'INSERT INTO stock_submissions (store_id,submitted_by) VALUES ($1,$2)',
-      [req.params.storeId, submitted_by]
+      [storeId, submitted_by]
+    );
+    // Push notification to admins
+    const storeName = (await pool.query('SELECT name FROM stores WHERE id=$1', [storeId])).rows[0]?.name || storeId;
+    sendPushToAdmins(
+      '📦 End-Day Stock Submitted',
+      `${storeName} — ${items.length} items counted by ${submitted_by}`,
+      'endstock-' + storeId
     );
     res.json({ success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
@@ -325,8 +333,7 @@ app.post('/api/stores/:storeId/close', auth, async (req, res) => {
     sendPushToAdmins(
       '💰 Close Day Submitted',
       `${storeName} - Cash: $${cashTotal.toFixed(2)} | Total: $${grandTotal.toFixed(2)}`,
-      'close-day-' + storeId,
-      '/dashboard'
+      'close-day-' + storeId
     );
     res.json({ cash_total: cashTotal, aba_total: abaTotal, grand_total: grandTotal, khr_total: Math.round(grandTotal * KHR_RATE) });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -449,6 +456,64 @@ app.get('/api/closing-reports', auth, adminOrOwner, async (req, res) => {
        ORDER BY cr.report_date DESC, cr.store_id`
     );
     res.json(rows);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── EDIT REQUESTS ──
+app.post('/api/stores/:storeId/edit-request', auth, async (req, res) => {
+  try {
+    const { requested_by } = req.body;
+    const storeId = req.params.storeId;
+    const today = cambodiaDate();
+    await pool.query(`CREATE TABLE IF NOT EXISTS edit_requests (
+      id SERIAL PRIMARY KEY, store_id VARCHAR(10) REFERENCES stores(id),
+      requested_by VARCHAR(50), request_date DATE DEFAULT CURRENT_DATE,
+      status VARCHAR(20) DEFAULT 'pending', created_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE(store_id, request_date)
+    )`);
+    await pool.query(
+      `INSERT INTO edit_requests (store_id,requested_by,request_date,status)
+       VALUES ($1,$2,$3,'pending')
+       ON CONFLICT (store_id,request_date) DO UPDATE SET requested_by=$2,status='pending',created_at=NOW()`,
+      [storeId, requested_by, today]
+    );
+    const storeName = (await pool.query('SELECT name FROM stores WHERE id=$1', [storeId])).rows[0]?.name || storeId;
+    sendPushToAdmins(
+      '✏️ Edit Request',
+      `${requested_by} wants to edit ${storeName} close day report`,
+      'edit-request-' + storeId
+    );
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/edit-requests', auth, async (req, res) => {
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS edit_requests (
+      id SERIAL PRIMARY KEY, store_id VARCHAR(10) REFERENCES stores(id),
+      requested_by VARCHAR(50), request_date DATE DEFAULT CURRENT_DATE,
+      status VARCHAR(20) DEFAULT 'pending', created_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE(store_id, request_date)
+    )`);
+    const today = cambodiaDate();
+    const { rows } = await pool.query(
+      `SELECT er.*, s.name as store_name FROM edit_requests er
+       JOIN stores s ON er.store_id=s.id
+       WHERE er.request_date=$1 AND er.status='pending'`, [today]
+    );
+    res.json(rows);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/stores/:storeId/edit-request', auth, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const today = cambodiaDate();
+    await pool.query(
+      `UPDATE edit_requests SET status=$1 WHERE store_id=$2 AND request_date=$3`,
+      [status, req.params.storeId, today]
+    );
+    res.json({ success: true });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 

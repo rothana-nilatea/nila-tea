@@ -933,10 +933,10 @@ function buildStoreCards(atmS,hruS,atmT,hruT){
     var sid=p.sid, s=p.s, total=p.total;
     var closed=!!(s&&s.close_report);
     var req=(editRequests||[]).find(function(r){return r.store_id===sid;})||null;
-    var bc=closed?'#A5D6A7':'#FFD180';
-    var sbg=closed?'#E8F5E9':'#FFF3E0';
-    var sc=closed?'#2E7D32':'#E65100';
-    var stxt=closed?('✓ '+(lang==='km'?'បានបិទ':'Closed')):('⏳ '+(lang==='km'?'មិនទាន់':'Pending'));
+    var bc=closed?'#A5D6A7':'var(--bd)';
+    var sbg=closed?'#E8F5E9':'var(--bg)';
+    var sc=closed?'#2E7D32':'var(--t3)';
+    var stxt=closed?('✓ '+(lang==='km'?'បានបិទ':'Closed')):('— '+(lang==='km'?'មិនទាន់ដាក់ស្នើ':'Not submitted'));
     html+='<div style="background:var(--card);border-radius:var(--r);border:1.5px solid '+bc+';padding:12px;margin-bottom:10px;">';
     html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
     html+='<div style="display:flex;align-items:center;gap:6px;">';

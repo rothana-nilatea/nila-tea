@@ -2577,7 +2577,19 @@ function bSettings(){
         <span>${pl[p]}</span>
       </div>`).join('')}</div>`:''}
   </div>`).join('')}`:''}
-  <button class="btn full" style="margin-top:8px;color:var(--red);border-color:rgba(176,48,48,0.25);" onclick="doLogout()">Log out</button>`;
+  <button class="btn full" style="margin-top:8px;color:var(--red);border-color:rgba(176,48,48,0.25);" onclick="doLogout()">Log out</button>
+  ${isAdmin()?`
+  <div class="s-card" style="margin-top:10px;">
+    <div class="s-row" style="border:none;flex-direction:column;align-items:flex-start;gap:10px;">
+      <div>
+        <div class="s-l">🔔 ${lang==='km'?'ការជូនដំណឹងទូរស័ព្ទ':'Push Notifications'}</div>
+        <div class="s-sub">${lang==='km'?'ទទួលដំណឹងពេលបុគ្គលិកដាក់ស្នើ':'Get notified when staff submit reports — even when screen is locked'}</div>
+      </div>
+      <button id="push-toggle-btn" class="btn full" style="font-size:13px;background:var(--gl);color:var(--gt);border-color:var(--g);" onclick="subscribePush()">
+        🔕 ${lang==='km'?'បើកការជូនដំណឹង':'Enable notifications'}
+      </button>
+    </div>
+  </div>`:''}`;
 }
 
 async function uploadLogo(input){

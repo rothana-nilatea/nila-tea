@@ -1051,7 +1051,12 @@ async function loadAllData(){
       try{usersData=await api('GET','/api/users');}catch(e){console.warn('Users load:',e);}
       try{editRequests=await api('GET','/api/edit-requests');}catch(e){editRequests=[];}
       // Check for new activity and show popups
-      checkForNewActivity(_snapBefore, storeStats, editRequests);
+      if(_prevSnapshot._initialized){
+        checkForNewActivity(_snapBefore, storeStats, editRequests);
+      }
+      // Update snapshot for next comparison
+      _prevSnapshot=snapshotState();
+      _prevSnapshot._initialized=true;
     } else {
       await loadStoreData(currentStore);
       try{editRequests=await api('GET','/api/edit-requests');}catch(e){editRequests=[];}
@@ -1067,6 +1072,11 @@ async function loadAllData(){
           localStorage.removeItem('nila_self_edited_'+sid+'_'+new Date().toDateString());
         }
       });
+    }
+    // After FIRST load, snapshot so existing data isn't treated as new
+    if(!_prevSnapshot._initialized){
+      _prevSnapshot=snapshotState();
+      _prevSnapshot._initialized=true;
     }
     updateBellBadge();
     // Update refresh timestamp
@@ -1319,10 +1329,21 @@ function bDash(){
     <div class="combined-card" style="background:var(--store-color,var(--g));">
       <div class="gt-label">${t('combinedRevToday')} <span id="dash-refresh-time" style="font-size:9px;opacity:0.5;"></span></div>
       <div class="gt-val">${fmt(total)}</div>
-      <div class="gt-khr">${fmtK(total)}</div>
+      <div style="display:flex;gap:10px;margin-top:4px;margin-bottom:10px;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);">💵 USD: <b>${fmt(atmS.cash_total+hruS.cash_total)}</b></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);">🇰🇭 KHR: <b>₭${Math.round((atmS.cash_total+hruS.cash_total)*4100).toLocaleString()}</b></div>
+      </div>
       <div class="gt-breakdown">
-        <div class="gt-part"><div class="gt-part-lbl">${t('atmStoreTxt')}</div><div class="gt-part-val">${fmt(atmT)}</div></div>
-        <div class="gt-part" style="background:rgba(255,255,255,0.08);"><div class="gt-part-lbl">${t('hruStoreTxt')}</div><div class="gt-part-val">${fmt(hruT)}</div></div>
+        <div class="gt-part">
+          <div class="gt-part-lbl">${t('atmStoreTxt')}</div>
+          <div class="gt-part-val">${fmt(atmT)}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px;">₭${Math.round(atmT*4100).toLocaleString()}</div>
+        </div>
+        <div class="gt-part" style="background:rgba(255,255,255,0.08);">
+          <div class="gt-part-lbl">${t('hruStoreTxt')}</div>
+          <div class="gt-part-val">${fmt(hruT)}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px;">₭${Math.round(hruT*4100).toLocaleString()}</div>
+        </div>
       </div>
     </div>
     <div class="sh"><div class="sh-t">${t('storeComparison')}</div><button class="btn sm" onclick="refreshDashboard()" style="display:flex;align-items:center;gap:4px;">🔄 ${lang==='km'?'ធ្វើបច្ចុប្បន្ន':'Refresh'}</button></div>
@@ -3159,13 +3180,16 @@ function checkForNewActivity(prevData, newStoreStats, newEditReqs){
         // New submission!
         const storeName=STORES[sid]?STORES[sid].name:sid.toUpperCase();
         const submitter=curr.submitted_by||'';
-        const total=curr.grand_total||0;
+        const cashAmt=newStoreStats[sid]?newStoreStats[sid].cash_total||0:0;
+        const abaAmt=newStoreStats[sid]?newStoreStats[sid].aba_total||0:0;
+        const totalAmt=cashAmt+abaAmt;
+        const amtStr=cashAmt>0&&abaAmt>0?fmt(cashAmt)+' cash + '+fmt(abaAmt)+' ABA':fmt(totalAmt);
         showActivityPopup(
           'closeday',
           (lang==='km'?'បានបិទថ្ងៃ':'Close day submitted'),
-          submitter+' · '+storeName+' · '+fmt(total),
+          submitter+' · '+storeName+' · '+amtStr,
           lang==='km'?'មើលរបាយការណ៍':'View report',
-          "switchStore('"+sid+"');showPage('closeday')",
+          "navigateToReport('"+sid+"')",
           '#E8F5E9','💰'
         );
       }
@@ -3202,12 +3226,21 @@ function checkForNewActivity(prevData, newStoreStats, newEditReqs){
           (lang==='km'?'ស្តុកចុងថ្ងៃបានដាក់ស្នើ':'End-day stock submitted'),
           storeName,
           lang==='km'?'មើលស្តុក':'View stock',
-          "switchStore('"+sid+"');showPage('endstock')",
+          "navigateToEndStock('"+sid+"')",
           '#E3F2FD','📦'
         );
       }
     });
   }
+}
+
+function navigateToReport(sid){
+  switchStore(sid);
+  showPage('closeday');
+}
+function navigateToEndStock(sid){
+  switchStore(sid);
+  showPage('endstock');
 }
 
 function snapshotState(){

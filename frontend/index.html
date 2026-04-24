@@ -2731,7 +2731,7 @@ async function togglePerm(userIdx,perm,el){
   el.className='perm-item'+(on?' on':'');
   const chkEl=el.querySelector('.pchk');if(chkEl){chkEl.className='pchk'+(on?' on':'');chkEl.innerHTML=on?chk():'';}
   const sp=el.querySelector('span');if(sp){sp.style.color=on?'var(--gt)':'';sp.style.fontWeight=on?'600':'';}
-  try{await api('PUT',`/api/users/${u.id}`,{name:u.name,username:u.username,role:u.role,store_id:u.store_id,perms:u.perms});}catch(e){}
+  try{await api('PUT',`/api/users/${u.id}`,{name:u.name,username:u.username,role:u.role,store_id:u.store_id,perms:u.perms});el.style.outline='2px solid var(--g)';setTimeout(function(){el.style.outline='';},700);}catch(e){u.perms[perm]=!u.perms[perm];showAlert('❌','Error',e.message||'Failed to save');}
 }
 
 // ════════ USERS MODAL ════════

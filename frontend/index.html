@@ -702,7 +702,26 @@ function startAutoRefresh(){
     if(me && document.visibilityState==='visible'){
       await loadAllData();
     }
-  }, 60000); // refresh every 60 seconds
+  }, 10000); // refresh every 10 seconds
+  
+  // Also refresh when user comes back to the tab
+  document.removeEventListener('visibilitychange', _onVisible);
+  document.addEventListener('visibilitychange', _onVisible);
+}
+// Listen for broadcasts from other tabs
+try{
+  const _bc=new BroadcastChannel('nila_refresh');
+  _bc.onmessage=async function(e){
+    if(e.data&&e.data.type==='close_submitted'&&me){
+      await loadAllData();
+    }
+  };
+}catch(e){}
+
+async function _onVisible(){
+  if(document.visibilityState==='visible' && me){
+    await loadAllData();
+  }
 }
 
 async function refreshDashboard(){
@@ -736,7 +755,7 @@ async function loadAllData(){
     }
     // Update refresh timestamp
     const rt=document.getElementById('dash-refresh-time');
-    if(rt)rt.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    if(rt)rt.textContent='🟢 '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     // Refresh current page with new data
     const activePage=document.querySelector('.page.active');
     if(activePage){
@@ -971,7 +990,7 @@ function bDash(){
       <div style="font-size:12px;color:var(--t2);margin-top:3px;">${today()} · ${t('bothStoresTxt')}</div>
     </div>
     <div class="combined-card" style="background:var(--store-color,var(--g));">
-      <div class="gt-label">${t('combinedRevToday')} <span id="dash-refresh-time" style="font-size:9px;opacity:0.6;font-style:italic;"></span></div>
+      <div class="gt-label">${t('combinedRevToday')} <span id="dash-refresh-time" style="font-size:9px;opacity:0.5;"></span></div>
       <div class="gt-val">${fmt(total)}</div>
       <div class="gt-khr">${fmtK(total)}</div>
       <div class="gt-breakdown">
@@ -1669,6 +1688,8 @@ async function submitClose(){
     });
     // Reload store stats so close_report is up to date
     try{const fresh=await api('GET',`/api/stores/${s}/revenue/today`);if(fresh)storeStats[s]=fresh;}catch(e){}
+    // Broadcast to other tabs on same device
+    try{const bc=new BroadcastChannel('nila_refresh');bc.postMessage({type:'close_submitted',store:s});bc.close();}catch(e){}
   }catch(e){console.warn('Close day submit:',e.message);}
 
   // Clear draft inputs

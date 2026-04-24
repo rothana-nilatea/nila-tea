@@ -2430,6 +2430,8 @@ async function submitES(){
   }));
   document.getElementById('es-form').style.display='none';
   document.getElementById('es-suc').style.display='block';
+  // Auto redirect to dashboard after 3s
+  setTimeout(function(){ stkPh={}; showPage('dashboard'); }, 3000);
 }
 function resetES(){stkPh={};showPage('endstock');}
 

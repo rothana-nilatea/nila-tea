@@ -2287,6 +2287,22 @@ function bEndStock(){
   const s=currentStore, allItems=(invData[s]||[]).filter(it=>it.count_daily);
   const done=Object.keys(stkPh).length, total=allItems.length, pct=total?Math.round(done/total*100):0;
 
+  // Check if already submitted today
+  const submittedKey='nila_endstock_submitted_'+s+'_'+new Date().toDateString();
+  const alreadySubmitted=localStorage.getItem(submittedKey);
+  if(alreadySubmitted && me.role!=='owner' && me.role!=='manager'){
+    const sub=JSON.parse(alreadySubmitted);
+    return `<div style="padding:8px 0 16px;">
+      <div class="success-card">
+        <div class="s-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 13l5.5 5.5 12-12" stroke="var(--store-color,var(--g))" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div style="font-size:17px;font-weight:700;margin-bottom:5px;">${t('stockSubmitted')} ✅</div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:6px;">${STORES[s]?.name||''} · ${today()}</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:14px;">${lang==='km'?'ដាក់ស្នើដោយ':'Submitted by'} <b>${sub.by||me.username}</b> · ${sub.time||''}</div>
+        <div class="notif-box"><div class="notif-title">${t('ownerNotifiedTitle')}</div><div class="notif-sub">${t('ownerNotifiedStock2')}</div></div>
+      </div>
+    </div>`;
+  }
+
   // Group by type
   const groups=[
     {key:'ingredient', label:t('ingredientLabel').replace('🧪 ','🧪 ')+'s', desc:t('staffCountsDaily'), items:allItems.filter(x=>(x.item_type||'ingredient')==='ingredient')},
@@ -2406,6 +2422,12 @@ async function submitES(){
     const freshInv=await api('GET',`/api/stores/${s}/inventory`);
     if(freshInv&&Array.isArray(freshInv))invData[s]=freshInv;
   }catch(e){console.warn('endstock submit:',e.message);}
+  // Save submission state so page shows success on reload
+  const submittedKey='nila_endstock_submitted_'+s+'_'+new Date().toDateString();
+  localStorage.setItem(submittedKey, JSON.stringify({
+    by: me.username,
+    time: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
+  }));
   document.getElementById('es-form').style.display='none';
   document.getElementById('es-suc').style.display='block';
 }

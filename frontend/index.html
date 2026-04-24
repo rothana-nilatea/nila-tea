@@ -935,6 +935,42 @@ async function loadLogo(fetchFromDb=false){
 }
 
 let _refreshTimer=null;
+let _fastPollTimer=null;
+
+function startFastPoll(){
+  // Poll every 2s when staff is locked waiting for admin approval
+  if(_fastPollTimer) return; // already running
+  _fastPollTimer=setInterval(async function(){
+    if(!me || document.visibilityState!=='visible') return;
+    const s=currentStore;
+    const selfEditKey='nila_self_edited_'+s+'_'+new Date().toDateString();
+    const adminUnlockKey='nila_admin_unlock_'+s+'_'+new Date().toDateString();
+    const isLocked=localStorage.getItem(selfEditKey) && !localStorage.getItem(adminUnlockKey);
+    if(!isLocked){
+      // No longer locked - stop fast poll
+      stopFastPoll();
+      return;
+    }
+    try{
+      const fresh=await api('GET','/api/edit-requests');
+      editRequests=fresh||[];
+      // Check if admin approved
+      const myReq=(editRequests||[]).find(function(r){return r.store_id===s&&r.status==='approved';});
+      if(myReq){
+        localStorage.setItem(adminUnlockKey,'1');
+        localStorage.removeItem(selfEditKey);
+        stopFastPoll();
+        await loadAllData();
+        showAlert('✅',lang==='km'?'បានអនុញ្ញាត':'Approved!',lang==='km'?'អ្នកអាចកែប្រែឥឡូវ':'You can now edit the report.');
+      }
+    }catch(e){}
+  }, 2000);
+}
+
+function stopFastPoll(){
+  if(_fastPollTimer){clearInterval(_fastPollTimer);_fastPollTimer=null;}
+}
+
 function startAutoRefresh(){
   if(_refreshTimer)clearInterval(_refreshTimer);
   _refreshTimer=setInterval(async()=>{
@@ -1811,7 +1847,10 @@ async function deleteCloseReport(sid){
 async function approveEdit(sid){
   try{
     await api('PUT','/api/stores/'+sid+'/edit-request',{status:'approved'});
-    editRequests=editRequests.filter(function(r){return r.store_id!==sid;});
+    // Keep request in array with approved status so staff side polling sees it
+    editRequests=editRequests.map(function(r){
+      return r.store_id===sid?Object.assign({},r,{status:'approved'}):r;
+    });
     updateBellBadge();
     showAlert('✅',lang==='km'?'បានអនុញ្ញាត':'Approved',lang==='km'?'បុគ្គលិកអាចកែប្រែឥឡូវ':'Staff can now edit the report.');
     await loadAllData();
@@ -1829,6 +1868,7 @@ function requestAdminEdit(s){
         await api('POST','/api/stores/'+(s||currentStore)+'/edit-request',{requested_by:me.username});
         showAlert('✅',lang==='km'?'បានផ្ញើ':'Sent!',lang==='km'?'រង់ចាំការអនុញ្ញាតពីម្ចាស់ហាង':'Waiting for admin approval.');
         await loadAllData();
+        startFastPoll(); // start 2s polling until admin approves
       }catch(e){showAlert('❌','Error',e.message);}
     }
   );

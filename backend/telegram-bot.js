@@ -7,8 +7,8 @@ const KHR_RATE = 4100;
 
 // Store name mapping from Telegram group names
 const STORE_MAP = {
-  'atm': ['atm', 'អង្គតាមីញ', 'angtamin', 'nila atm'],
-  'hru': ['hru', 'សាលាធនធាន', 'human resource', 'nila hru']
+  'atm': ['atm', 'អង្គតាមីញ', 'angtamin', 'nila atm', 'nila1', 'at nila atm'],
+  'hru': ['hru', 'សាលាធនធាន', 'human resource', 'nila hru', 'nila2', 'at nila hru']
 };
 
 function detectStore(text, chatTitle) {
@@ -24,6 +24,14 @@ function detectStore(text, chatTitle) {
 function parseAmount(text) {
   if (!text) return null;
 
+  // Match ABA KHR format: ₭3,000 paid by ... at Nila ATM KHR
+  // ₭ symbol (U+20AD) used by ABA app
+  const abaKhrMatch = text.match(/[₭៛₫฿]\s*([0-9,]+)/);
+  if (abaKhrMatch) {
+    const amount = parseFloat(abaKhrMatch[1].replace(/,/g, ''));
+    return { amount, currency: 'KHR', amountUsd: amount / KHR_RATE };
+  }
+
   // Match USD: $1.00 or $1,000.00
   const usdMatch = text.match(/\$([0-9,]+\.?[0-9]*)/);
   if (usdMatch) {
@@ -31,17 +39,10 @@ function parseAmount(text) {
     return { amount, currency: 'USD', amountUsd: amount };
   }
 
-  // Match KHR: ៛3,500 or ₫3,500
-  const khrMatch = text.match(/[៛₫฿]([0-9,]+)/);
-  if (khrMatch) {
-    const amount = parseFloat(khrMatch[1].replace(/,/g, ''));
-    return { amount, currency: 'KHR', amountUsd: amount / KHR_RATE };
-  }
-
-  // Match plain number with "paid" context
+  // Match plain number with currency word: 3000 KHR or 5.00 USD
   const paidMatch = text.match(/([0-9,]+(?:\.[0-9]+)?)\s*(?:USD|KHR|usd|khr)/i);
   if (paidMatch) {
-    const amount = parseFloat(paidMatch[1].replace(',', ''));
+    const amount = parseFloat(paidMatch[1].replace(/,/g, ''));
     const currency = paidMatch[2].toUpperCase();
     return { amount, currency, amountUsd: currency === 'KHR' ? amount / KHR_RATE : amount };
   }
@@ -50,9 +51,12 @@ function parseAmount(text) {
 }
 
 function parsePayer(text) {
-  // "paid by NAME (*123)"
-  const match = text.match(/paid by ([^(]+)\s*\(\s*\*?\d+/i);
+  // ABA format: "paid by NAME (*123)" or "paid by NAME (*319)"
+  const match = text.match(/paid by ([^(\n]+?)\s*\(\s*\*?\d+/i);
   if (match) return match[1].trim();
+  // Fallback: just "paid by NAME"
+  const match2 = text.match(/paid by ([^\n,]+)/i);
+  if (match2) return match2[1].trim();
   return 'Unknown';
 }
 
@@ -65,7 +69,9 @@ async function processPayment(message, chatTitle) {
   const text = message.text || message.caption || '';
   
   // Only process PayWay/ABA payment messages
-  const isPayment = text.includes('paid by') || text.includes('PayWay') || text.includes('ABA KHQR');
+  const isPayment = text.includes('paid by') || text.includes('PayWay') || 
+                    text.includes('ABA KHQR') || text.includes('via ABA PAY') ||
+                    text.includes('ABA PAY') || text.includes('KHQR');
   if (!isPayment) return;
 
   const parsed = parseAmount(text);

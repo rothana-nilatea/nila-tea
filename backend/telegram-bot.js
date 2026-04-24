@@ -90,13 +90,18 @@ async function processPayment(message, chatTitle) {
   console.log(`💰 Payment detected: ${parsed.currency} ${parsed.amount} (${parsed.amountUsd.toFixed(2)} USD) at ${storeId} from ${payer}`);
 
   try {
-    await pool.query(
+    const result = await pool.query(
       `INSERT INTO aba_transactions (store_id, ref, amount_usd, from_account, txn_time)
        VALUES ($1, $2, $3, $4, NOW())
-       ON CONFLICT (ref) DO NOTHING`,
+       ON CONFLICT (ref) DO NOTHING RETURNING *`,
       [storeId, ref, parsed.amountUsd.toFixed(4), payer]
     );
     console.log(`✅ Saved to DB: ${ref}`);
+
+    // Push real-time SSE event to all connected app clients
+    if (result.rows.length > 0) {
+      notifyAppClients(storeId, parsed.amountUsd, payer, ref);
+    }
   } catch (e) {
     console.error('DB error:', e.message);
   }
@@ -135,6 +140,24 @@ async function setPrivacy() {
       });
     }).on('error', resolve);
   });
+}
+
+async function notifyAppClients(storeId, amountUsd, fromAccount, ref) {
+  // Call the server's internal webhook to trigger SSE push
+  const API_URL = process.env.API_URL || 'https://nila-tea-app.onrender.com';
+  const INTERNAL_KEY = process.env.INTERNAL_KEY || 'nila_internal_2024';
+  try {
+    const https2 = require('https');
+    const http2 = require('http');
+    const url = new URL(`${API_URL}/api/aba/webhook`);
+    const body = JSON.stringify({ store_id: storeId, ref, amount: Math.round(amountUsd * 4100), amount_usd: amountUsd, from_account: fromAccount, internal_key: INTERNAL_KEY });
+    const lib = url.protocol === 'https:' ? https2 : http2;
+    const reqOptions = { method: 'POST', hostname: url.hostname, port: url.port||443, path: url.pathname, headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } };
+    const req = lib.request(reqOptions);
+    req.write(body);
+    req.end();
+    console.log(`📡 SSE push triggered for ${storeId}: $${amountUsd.toFixed(2)}`);
+  } catch(e) { console.log('SSE notify error:', e.message); }
 }
 
 async function poll() {

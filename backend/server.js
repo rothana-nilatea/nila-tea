@@ -10,6 +10,20 @@ const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'nila-tea-secret-2024';
 const KHR_RATE = 4100;
 
+// ── SSE: Real-time push to connected clients ──────────────────────────────
+const sseClients = new Map(); // token -> res
+
+function pushToClients(event, data) {
+  const msg = `event: ${event}
+data: ${JSON.stringify(data)}
+
+`;
+  for (const [token, res] of sseClients) {
+    try { res.write(msg); } catch(e) { sseClients.delete(token); }
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────
+
 // Cambodia is UTC+7 - get today's date in Cambodia time
 function cambodiaDate() {
   const now = new Date();
@@ -263,16 +277,57 @@ app.post('/api/stores/:storeId/sales', auth, async (req, res) => {
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
+// ── SSE: Real-time event stream ──────────────────────────────────────────
+app.get('/api/events', auth, (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders();
+
+  // Send initial ping
+  res.write('event: ping
+data: {}
+
+');
+
+  const token = req.headers.authorization || Date.now().toString();
+  sseClients.set(token, res);
+
+  // Keepalive every 25s
+  const keepalive = setInterval(() => {
+    try { res.write('event: ping
+data: {}
+
+'); } catch(e) {}
+  }, 25000);
+
+  req.on('close', () => {
+    clearInterval(keepalive);
+    sseClients.delete(token);
+  });
+});
+
 // ── ABA WEBHOOK (receives ABA payment notifications) ──
 app.post('/api/aba/webhook', async (req, res) => {
   try {
     const { store_id, ref, amount, from_account, txn_time } = req.body;
     const amountUsd = parseFloat(amount) / KHR_RATE;
-    await pool.query(
+    const result = await pool.query(
       `INSERT INTO aba_transactions (store_id,ref,amount_usd,from_account,txn_time)
-       VALUES ($1,$2,$3,$4,$5) ON CONFLICT (ref) DO NOTHING`,
+       VALUES ($1,$2,$3,$4,$5) ON CONFLICT (ref) DO NOTHING RETURNING *`,
       [store_id, ref, amountUsd, from_account, txn_time || new Date()]
     );
+    // Push real-time event to all connected clients
+    if (result.rows.length > 0) {
+      pushToClients('aba_payment', {
+        store_id,
+        amount_usd: amountUsd,
+        from_account,
+        ref,
+        txn_time: txn_time || new Date()
+      });
+    }
     res.json({ received: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
@@ -320,12 +375,6 @@ app.post('/api/stores/:storeId/close', auth, async (req, res) => {
     await pool.query(
       `DELETE FROM closing_reports WHERE store_id=$1 AND report_date=$2`,
       [storeId, date]
-    );
-
-    // Clean up any old edit requests for this store (fresh submission = fresh start)
-    await pool.query(
-      `DELETE FROM edit_requests WHERE store_id=$1`,
-      [storeId]
     );
 
     await pool.query(
@@ -444,11 +493,6 @@ app.delete('/api/stores/:storeId/close', auth, ownerOnly, async (req, res) => {
       `DELETE FROM closing_reports WHERE store_id=$1 AND report_date=$2`,
       [req.params.storeId, today]
     );
-    // Also clear edit requests when report is deleted
-    await pool.query(
-      `DELETE FROM edit_requests WHERE store_id=$1`,
-      [req.params.storeId]
-    );
     res.json({ success: true });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -510,7 +554,7 @@ app.get('/api/edit-requests', auth, async (req, res) => {
     const { rows } = await pool.query(
       `SELECT er.*, s.name as store_name FROM edit_requests er
        JOIN stores s ON er.store_id=s.id
-       WHERE er.request_date=$1 AND er.status IN ('pending','approved')`, [today]
+       WHERE er.request_date=$1 AND er.status='pending'`, [today]
     );
     res.json(rows);
   } catch(e) { res.status(500).json({ error: e.message }); }
@@ -520,30 +564,9 @@ app.put('/api/stores/:storeId/edit-request', auth, async (req, res) => {
   try {
     const { status } = req.body;
     const today = cambodiaDate();
-    if (status === 'rejected') {
-      // Rejected: delete so staff sees no request
-      await pool.query(
-        `DELETE FROM edit_requests WHERE store_id=$1 AND request_date=$2`,
-        [req.params.storeId, today]
-      );
-    } else {
-      // Approved: update status so staff polling picks it up
-      await pool.query(
-        `UPDATE edit_requests SET status=$1 WHERE store_id=$2 AND request_date=$3`,
-        [status, req.params.storeId, today]
-      );
-    }
-    res.json({ success: true });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-// Staff calls this to acknowledge approval and clear the request
-app.delete('/api/stores/:storeId/edit-request', auth, async (req, res) => {
-  try {
-    const today = cambodiaDate();
     await pool.query(
-      `DELETE FROM edit_requests WHERE store_id=$1 AND request_date=$2`,
-      [req.params.storeId, today]
+      `UPDATE edit_requests SET status=$1 WHERE store_id=$2 AND request_date=$3`,
+      [status, req.params.storeId, today]
     );
     res.json({ success: true });
   } catch(e) { res.status(500).json({ error: e.message }); }

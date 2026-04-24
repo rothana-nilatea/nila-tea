@@ -941,6 +941,7 @@ async function doLogin(){
     await loadLogo(true);
     render();
     await loadAllData();
+    startSSE();
     showPage('dashboard');
   }catch(e){
     const err=document.getElementById('l-err');
@@ -1092,6 +1093,7 @@ async function loadAllData(){
 }
 
 function doLogout(){
+  stopSSE();
   me=null;token=null;localStorage.removeItem('nila_token');
   menuData={atm:[],hru:[]};invData={atm:[],hru:[]};
   salesData={atm:[],hru:[]};abaData={atm:[],hru:[]};
@@ -2952,7 +2954,7 @@ async function init(){
         me={id:payload.id,name:payload.name,username:payload.username,role:payload.role,store_id:payload.store_id,perms:payload.perms};
         currentStore=me.store_id||'atm';
         render();
-        try{await loadLogo(true);await loadAllData();startAutoRefresh();setTimeout(updatePushButton,500);}catch(e){console.warn('Auto-login data load:',e);}
+        try{await loadLogo(true);await loadAllData();startAutoRefresh();startSSE();setTimeout(updatePushButton,500);}catch(e){console.warn('Auto-login data load:',e);}
         showPage('dashboard');
         return;
       }
@@ -3312,6 +3314,60 @@ function showStoreReport(sid){
   mod.style.display='flex';
   document.getElementById('mod-report-body').innerHTML=html;
 }
+
+// ── REAL-TIME SSE: ABA Payment alerts ────────────────────────────────────
+var _sseSource = null;
+
+function startSSE() {
+  if(_sseSource) return; // already connected
+  if(!token) return; // not logged in
+
+  try {
+    _sseSource = new EventSource('/api/events?token='+encodeURIComponent(token));
+
+    _sseSource.addEventListener('aba_payment', function(e) {
+      try {
+        const data = JSON.parse(e.data);
+        const storeName = STORES[data.store_id] ? STORES[data.store_id].name : data.store_id;
+        const amtUsd = parseFloat(data.amount_usd) || 0;
+        const amtKhr = Math.round(amtUsd * RATE);
+
+        // Show instant popup alert
+        showActivityPopup(
+          'aba',
+          (lang==='km' ? 'ទទួលបាន ABA' : 'ABA Payment Received'),
+          (data.from_account||'') + ' · ' + storeName + ' · $' + amtUsd.toFixed(2) + ' (៛' + amtKhr.toLocaleString() + ')',
+          lang==='km' ? 'មើលប្រតិបត្តិការ' : 'View transactions',
+          "switchStore('" + data.store_id + "');showPage('closeday')",
+          '#E3F2FD', '💳'
+        );
+
+        // Refresh data so ABA section updates
+        loadAllData();
+      } catch(err) { console.warn('SSE parse error:', err); }
+    });
+
+    _sseSource.addEventListener('ping', function() {
+      // keepalive — do nothing
+    });
+
+    _sseSource.onerror = function() {
+      // Reconnect after 5s
+      _sseSource.close();
+      _sseSource = null;
+      setTimeout(startSSE, 5000);
+    };
+
+    console.log('✅ SSE connected - real-time ABA alerts active');
+  } catch(e) {
+    console.warn('SSE not supported or failed:', e);
+  }
+}
+
+function stopSSE() {
+  if(_sseSource) { _sseSource.close(); _sseSource = null; }
+}
+// ─────────────────────────────────────────────────────────────────────────
 </script>
 <div class="act-popup-wrap" id="act-popup-wrap"></div>
 </body>

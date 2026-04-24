@@ -1054,6 +1054,7 @@ async function loadAllData(){
       // Check for new activity and show popups
       if(_prevSnapshot._initialized){
         checkForNewActivity(_snapBefore, storeStats, editRequests);
+      loadStockReports();
       }
       // Update snapshot for next comparison
       _prevSnapshot=snapshotState();
@@ -1369,6 +1370,7 @@ function bDash(){
     </div>
     <div class="sh"><div class="sh-t">${t('storeComparison')}</div><button class="btn sm" onclick="refreshDashboard()" style="display:flex;align-items:center;gap:4px;">🔄 ${lang==='km'?'ធ្វើបច្ចុប្បន្ន':'Refresh'}</button></div>
     ${buildStoreCards(atmS,hruS,atmT,hruT)}
+    ${isAdmin()?buildStockReportSection():''}
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <button class="btn" style="flex:1;background:var(--atm-bg);color:var(--atm-lt);border-color:#E8A87A;" onclick="switchStore('atm');showPage('sales')">${t('atmSalesBtn')}</button>
       <button class="btn" style="flex:1;background:var(--hru-bg);color:var(--hru-lt);border-color:#7EC8B0;" onclick="switchStore('hru');showPage('sales')">${t('hruSalesBtn')}</button>
@@ -3282,6 +3284,7 @@ function checkForNewActivity(prevData, newStoreStats, newEditReqs){
 function navigateToReport(sid){
   showStoreReport(sid);
 }
+function stockViewAll(el){ navigateToEndStock(el.dataset.sid||el); }
 function navigateToEndStock(sid){
   // Show stock summary modal for admin instead of the staff form
   const inv=invData[sid]||[];
@@ -3463,6 +3466,82 @@ function startSSE() {
 
 function stopSSE() {
   if(_sseSource) { _sseSource.close(); _sseSource = null; }
+}
+// ─────────────────────────────────────────────────────────────────────────
+
+// ── STOCK REPORT DATA ────────────────────────────────────────────────────
+var stockReportData = {atm: null, hru: null};
+
+async function loadStockReports() {
+  if(!isAdmin||!isAdmin()) return;
+  try {
+    const [atmR, hruR] = await Promise.allSettled([
+      api('GET', '/api/stores/atm/stock-report'),
+      api('GET', '/api/stores/hru/stock-report')
+    ]);
+    stockReportData.atm = atmR.status==='fulfilled' ? atmR.value : null;
+    stockReportData.hru = hruR.status==='fulfilled' ? hruR.value : null;
+  } catch(e) {}
+}
+
+function buildStockReportSection() {
+  const stores = [
+    {id:'atm', name: STORES.atm?STORES.atm.name:'ATM Store'},
+    {id:'hru', name: STORES.hru?STORES.hru.name:'HRU Store'}
+  ];
+
+  let html = '<div style="margin-bottom:12px;">';
+  html += '<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">'
+        + (lang==='km'?'របាយការណ៍ស្តុកចុងថ្ងៃ':'End-day Stock Reports') + '</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+
+  stores.forEach(function(st) {
+    const data = stockReportData[st.id];
+    const submitted = data && data.submitted;
+    const submittedBy = data ? data.submitted_by||'' : '';
+    const submittedAt = data && data.submitted_at
+      ? new Date(data.submitted_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+    const items = data ? data.items||[] : [];
+    const lowCount = items.filter(function(x){return x.status==='low'||x.status==='out';}).length;
+
+    html += '<div style="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;">';
+    // Header
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+    html += '<div style="font-size:13px;font-weight:700;color:var(--t1);">'+st.name+'</div>';
+    if(submitted) {
+      html += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--gl);color:var(--gt);">✓ '+(lang==='km'?'បានដាក់ស្នើ':'Submitted')+'</span>';
+    } else {
+      html += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--bg);color:var(--t3);">— '+(lang==='km'?'មិនទាន់':'Pending')+'</span>';
+    }
+    html += '</div>';
+
+    if(submitted) {
+      html += '<div style="font-size:11px;color:var(--t3);margin-bottom:8px;">'+submittedBy+' · '+submittedAt+'</div>';
+      // Items preview
+      items.slice(0,4).forEach(function(it) {
+        const stColor = it.status==='ok'?'var(--gt)':it.status==='low'?'var(--amb)':'var(--red)';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--bd);">';
+        html += '<div style="font-size:11px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%;">'+(lang==='km'&&it.name_km?it.name_km:it.name)+'</div>';
+        html += '<div style="display:flex;align-items:center;gap:5px;">';
+        html += '<span style="font-size:11px;font-weight:600;">'+parseFloat(it.quantity)+' '+(it.unit||'')+'</span>';
+        html += '<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;background:'+stColor+'20;color:'+stColor+';">'+it.status.toUpperCase()+'</span>';
+        html += '</div></div>';
+      });
+      if(items.length > 4) {
+        html += '<div style="font-size:11px;color:var(--t3);margin-top:5px;text-align:center;">+'+(items.length-4)+' more items</div>';
+      }
+      if(lowCount > 0) {
+        html += '<div style="margin-top:8px;padding:6px 10px;background:var(--amber-bg,#FFF3DC);border-radius:8px;font-size:11px;font-weight:600;color:var(--amb);">⚠ '+lowCount+' '+(lang==='km'?'ស្តុកទាប':'low stock items')+'</div>';
+      }
+      html += '<button onclick="stockViewAll(this)" data-sid="'+st.id+'" style="width:100%;margin-top:10px;padding:7px;border-radius:9px;border:1px solid var(--bd);background:var(--bg);font-size:12px;cursor:pointer;font-family:inherit;color:var(--t2);">'+(lang==='km'?'មើលទាំងអស់':'View all items')+'</button>';
+    } else {
+      html += '<div style="text-align:center;padding:16px 0;font-size:12px;color:var(--t3);">'+(lang==='km'?'មិនទាន់ដាក់ស្នើ':'Not submitted yet')+'</div>';
+    }
+    html += '</div>';
+  });
+
+  html += '</div></div>';
+  return html;
 }
 // ─────────────────────────────────────────────────────────────────────────
 </script>

@@ -264,6 +264,33 @@ app.post('/api/stores/:storeId/inventory/endstock', auth, async (req, res) => {
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
+// ── STOCK SUBMISSIONS REPORT ──
+app.get('/api/stores/:storeId/stock-report', auth, async (req, res) => {
+  try {
+    const today = cambodiaDate();
+    const storeId = req.params.storeId;
+    // Get latest submission for today
+    const { rows: subRows } = await pool.query(
+      `SELECT submitted_by, submitted_at FROM stock_submissions 
+       WHERE store_id=$1 AND DATE(submitted_at AT TIME ZONE 'Asia/Phnom_Penh')=$2
+       ORDER BY submitted_at DESC LIMIT 1`,
+      [storeId, today]
+    );
+    // Get current inventory with quantities and photos
+    const { rows: invRows } = await pool.query(
+      `SELECT id, name, name_km, quantity, unit, unit_km, status, item_type, image_url, count_daily
+       FROM inventory WHERE store_id=$1 AND count_daily=true ORDER BY item_type, name`,
+      [storeId]
+    );
+    res.json({
+      submitted: subRows.length > 0,
+      submitted_by: subRows[0]?.submitted_by || null,
+      submitted_at: subRows[0]?.submitted_at || null,
+      items: invRows
+    });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── SALES ──
 app.get('/api/stores/:storeId/sales', auth, async (req, res) => {
   const date = req.query.date || new Date().toISOString().split('T')[0];

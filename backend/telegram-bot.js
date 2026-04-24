@@ -68,20 +68,24 @@ function parseTrxId(text) {
 async function processPayment(message, chatTitle) {
   const text = message.text || message.caption || '';
   
+  console.log(`📩 Message from "${chatTitle}": ${text.substring(0,80)}...`);
+
   // Only process PayWay/ABA payment messages
   const isPayment = text.includes('paid by') || text.includes('PayWay') || 
                     text.includes('ABA KHQR') || text.includes('via ABA PAY') ||
                     text.includes('ABA PAY') || text.includes('KHQR');
-  if (!isPayment) return;
+  if (!isPayment) { console.log('⏭ Not a payment message, skipping'); return; }
 
   const parsed = parseAmount(text);
-  if (!parsed) return;
+  if (!parsed) { console.log('⚠️ Could not parse amount from:', text.substring(0,60)); return; }
+  console.log(`💰 Parsed: ${parsed.currency} ${parsed.amount} = $${parsed.amountUsd.toFixed(4)}`);
 
   const storeId = detectStore(text, chatTitle);
   if (!storeId) {
-    console.log('Could not detect store from:', chatTitle);
+    console.log('⚠️ Could not detect store from text:', text.substring(0,80), '| chat:', chatTitle);
     return;
   }
+  console.log(`🏪 Store detected: ${storeId}`);
 
   const payer = parsePayer(text);
   const trxId = parseTrxId(text);

@@ -3235,8 +3235,7 @@ function checkForNewActivity(prevData, newStoreStats, newEditReqs){
 }
 
 function navigateToReport(sid){
-  switchStore(sid);
-  showPage('closeday');
+  showStoreReport(sid);
 }
 function navigateToEndStock(sid){
   switchStore(sid);
@@ -3254,6 +3253,65 @@ function snapshotState(){
   return snap;
 }
 // ─────────────────────────────────────────────────────────────────────────
+
+function showStoreReport(sid){
+  const s=storeStats[sid]||{};
+  const cr=s.close_report||{};
+  const st=STORES[sid]||{name:sid,color:'#6B3F1F'};
+  const cashUSD=s.cash_total||0;
+  const abaTotal=s.aba_total||0;
+  const grandTotal=s.grand_total||0;
+  const khrTotal=s.khr_total||Math.round(grandTotal*RATE);
+  const submittedBy=cr.submitted_by||'';
+  const submittedAt=cr.submitted_at?new Date(cr.submitted_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+
+  // Build modal content
+  const html=`
+    <div style="padding:0;">
+      <div style="background:${st.color};border-radius:14px;padding:16px;margin-bottom:14px;color:#fff;">
+        <div style="font-size:11px;opacity:0.7;margin-bottom:4px;">${st.name} · ${today()}</div>
+        <div style="font-size:11px;opacity:0.7;margin-bottom:12px;">${lang==='km'?'ដាក់ស្នើដោយ':'Submitted by'} <b>${submittedBy}</b>${submittedAt?' · '+submittedAt:''}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.2);">
+          <span style="font-size:13px;opacity:0.8;">💵 USD ${lang==='km'?'សាច់ប្រាក់':'Cash'}</span>
+          <span style="font-size:16px;font-weight:700;">$${cashUSD.toLocaleString('en-US',{minimumFractionDigits:2})}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.2);">
+          <span style="font-size:13px;opacity:0.8;">🏦 ABA</span>
+          <span style="font-size:16px;font-weight:700;">$${abaTotal.toLocaleString('en-US',{minimumFractionDigits:2})}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 0;">
+          <span style="font-size:13px;font-weight:700;">${lang==='km'?'សរុប':'Total'}</span>
+          <div style="text-align:right;">
+            <div style="font-size:20px;font-weight:700;">$${grandTotal.toLocaleString('en-US',{minimumFractionDigits:2})}</div>
+            <div style="font-size:11px;opacity:0.65;">= ៛${khrTotal.toLocaleString()}</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="closeM('mod-report')" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);font-size:13px;cursor:pointer;font-family:inherit;">${lang==='km'?'បិទ':'Close'}</button>
+        <button onclick="switchStore('${sid}');showPage('closeday');closeM('mod-report')" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--g);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">${lang==='km'?'ទៅកាន់ទំព័របិទថ្ងៃ':'Go to close day'}</button>
+      </div>
+    </div>`;
+
+  // Use existing modal or create simple overlay
+  let mod=document.getElementById('mod-report');
+  if(!mod){
+    mod=document.createElement('div');
+    mod.id='mod-report';
+    mod.style.cssText='position:fixed;inset:0;z-index:500;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0.45);';
+    mod.innerHTML=`<div style="background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;box-shadow:0 -4px 24px rgba(0,0,0,0.15);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-size:15px;font-weight:700;">${lang==='km'?'របាយការណ៍បិទថ្ងៃ':'Close Day Report'}</div>
+        <button onclick="closeM('mod-report')" style="width:28px;height:28px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;font-size:14px;">✕</button>
+      </div>
+      <div id="mod-report-body"></div>
+    </div>`;
+    document.body.appendChild(mod);
+    mod.addEventListener('click', function(e){ if(e.target===mod) closeM('mod-report'); });
+  }
+  mod.style.display='flex';
+  document.getElementById('mod-report-body').innerHTML=html;
+}
 </script>
 <div class="act-popup-wrap" id="act-popup-wrap"></div>
 </body>

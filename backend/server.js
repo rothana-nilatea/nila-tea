@@ -452,6 +452,79 @@ app.get('/api/closing-reports', auth, adminOrOwner, async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── WEB PUSH NOTIFICATIONS ──
+let webpush = null;
+try {
+  webpush = require('web-push');
+  const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY;
+  const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
+  if (VAPID_PUBLIC && VAPID_PRIVATE) {
+    webpush.setVapidDetails(
+      'mailto:' + (process.env.ADMIN_EMAIL || 'admin@nilatea.com'),
+      VAPID_PUBLIC, VAPID_PRIVATE
+    );
+    console.log('✅ Web Push configured');
+  } else {
+    console.warn('⚠️ VAPID keys not set');
+    webpush = null;
+  }
+} catch(e) { console.warn('⚠️ web-push not available:', e.message); }
+
+// Create push_subscriptions table
+pool.query(`CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  endpoint TEXT UNIQUE NOT NULL,
+  p256dh TEXT, auth TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+)`).catch(console.error);
+
+async function sendPushToAdmins(title, body, tag) {
+  if (!webpush) return;
+  try {
+    const { rows } = await pool.query(
+      `SELECT ps.endpoint, ps.p256dh, ps.auth FROM push_subscriptions ps
+       JOIN users u ON ps.user_id=u.id WHERE u.role IN ('owner','manager')`
+    );
+    const payload = JSON.stringify({ title, body, tag, requireInteraction: true });
+    for (const sub of rows) {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          payload
+        );
+      } catch(e) {
+        if (e.statusCode === 410) {
+          await pool.query('DELETE FROM push_subscriptions WHERE endpoint=$1', [sub.endpoint]);
+        }
+      }
+    }
+  } catch(e) { console.error('Push error:', e.message); }
+}
+
+app.get('/api/push/vapid-key', (req, res) => {
+  res.json({ key: process.env.VAPID_PUBLIC_KEY || null });
+});
+
+app.post('/api/push/subscribe', auth, async (req, res) => {
+  try {
+    const { endpoint, p256dh, auth } = req.body;
+    await pool.query(
+      `INSERT INTO push_subscriptions (user_id,endpoint,p256dh,auth)
+       VALUES ($1,$2,$3,$4) ON CONFLICT (endpoint) DO UPDATE SET p256dh=$3,auth=$4`,
+      [req.user.id, endpoint, p256dh, auth]
+    );
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/push/subscribe', auth, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM push_subscriptions WHERE user_id=$1', [req.user.id]);
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── START ──
 initDB().then(() => {
   app.listen(PORT, () => console.log(`🍵 Nila Tea API on port ${PORT}`));

@@ -1,14 +1,24 @@
 {
   "name": "Nila Tea POS",
   "short_name": "Nila Tea",
-  "description": "Multi-store POS for Nila Tea coffee shop",
+  "description": "Multi-store POS for Nila Tea",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F4F6F4",
-  "theme_color": "#1A6B3C",
+  "background_color": "#FBF5EF",
+  "theme_color": "#C2692A",
   "orientation": "portrait",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "/Logo_Nila_Tea.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Logo_Nila_Tea.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

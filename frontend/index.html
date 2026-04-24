@@ -281,6 +281,230 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .cdlg-btn.cancel{background:var(--bg);color:var(--t2);border:1.5px solid var(--bd2);}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   Mobile:  < 768px  (current - 430px centered)
+   iPad:    768px - 1199px
+   Desktop: 1200px+
+═══════════════════════════════════════════════ */
+
+/* ── iPad (768px - 1199px) ── */
+@media (min-width: 768px) {
+  html,body { overflow: hidden; }
+
+  .app {
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  /* Topbar spans full width */
+  .topbar {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    height: 60px;
+    padding: 0 20px;
+  }
+
+  /* Drawer becomes a permanent sidebar */
+  .ov { display: none !important; }
+  .drawer {
+    position: relative;
+    top: 0; left: 0;
+    width: 260px;
+    height: 100%;
+    grid-column: 1;
+    grid-row: 2;
+    box-shadow: 1px 0 0 var(--bd);
+    transition: none;
+    display: flex;
+  }
+  .d-close { display: none; }
+  .ham { display: none; }
+
+  /* Content area */
+  .content {
+    grid-column: 2;
+    grid-row: 2;
+    overflow-y: auto;
+  }
+
+  .page { padding: 20px 24px; padding-bottom: 30px; }
+
+  /* Modals */
+  .mbg {
+    align-items: center;
+    justify-content: center;
+  }
+  .modal {
+    border-radius: 20px;
+    max-width: 480px;
+    max-height: 85vh;
+    margin: auto;
+  }
+
+  /* Dashboard grid for iPad */
+  .dash-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  /* Inventory grid */
+  .inv-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .inv-item {
+    border-radius: var(--r);
+    border: 0.5px solid var(--bd);
+    padding: 10px 12px;
+    background: var(--card);
+  }
+
+  /* Store comparison side by side */
+  .cmp-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* Menu grid */
+  .mc2-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* Revenue cards */
+  .rev-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Close day form wider */
+  .close-form-inner {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+}
+
+/* ── Desktop (1200px+) ── */
+@media (min-width: 1200px) {
+  .app {
+    grid-template-columns: 280px 1fr;
+    max-width: 1600px;
+    margin: 0 auto;
+    box-shadow: 0 0 0 1px var(--bd);
+  }
+
+  .drawer { width: 280px; }
+
+  .page { padding: 28px 36px; }
+
+  /* Desktop: 2-column layout for main content */
+  .desk-2col {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* Dashboard owner: 3-col stats */
+  .dash-stats-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  /* Inventory: 3 columns */
+  .inv-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Menu: 4 columns */
+  .mc2-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  /* Store comparison: side by side with more detail */
+  .cmp-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* Topbar height */
+  .topbar { height: 64px; }
+
+  /* Modal: centered with max-width */
+  .modal {
+    max-width: 540px;
+    border-radius: 24px;
+  }
+  
+  /* End stock 2 columns on desktop */
+  .endstock-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+}
+
+/* ── Sidebar always-open helper ── */
+@media (min-width: 768px) {
+  /* Active nav item highlight */
+  .d-item.active {
+    background: var(--gl);
+    color: var(--gt);
+  }
+  
+  /* Drawer top area compact on tablet */
+  .d-top { padding: 24px 16px 16px; }
+
+  /* Page title bigger on tablet+ */
+  .pg-title { font-size: 22px; }
+  .pg-sub { font-size: 13px; }
+
+  /* Cards shadow */
+  .card-hover:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+  }
+
+  /* Revenue page tabs horizontal */
+  .rev-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  /* Form inputs bigger */
+  .fi { font-size: 15px; padding: 11px 12px; }
+  
+  /* Buttons */
+  .btn { font-size: 14px; padding: 11px 16px; }
+  
+  /* Quick actions grid */
+  .qa-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+}
+
+/* ── Desktop sidebar hover effects ── */
+@media (min-width: 1200px) {
+  .d-item {
+    font-size: 14px;
+    padding: 11px 12px;
+  }
+  .store-opt { padding: 10px 12px; }
+  .d-top { padding: 32px 20px 20px; }
+  .d-app-name { font-size: 17px; }
+}
 </style>
 </head>
 <body>
@@ -1451,6 +1675,34 @@ function doSelfEdit(s){
   showPage('closeday');
 }
 
+
+// ── RESPONSIVE HELPERS ──
+function isTablet(){ return window.innerWidth >= 768; }
+function isDesktop(){ return window.innerWidth >= 1200; }
+
+// Override openDrawer/closeDrawer for tablet
+const _origOpenDrawer = window.openDrawer;
+const _origCloseDrawer = window.closeDrawer;
+
+function openDrawer(){
+  if(isTablet()) return; // sidebar always visible on tablet+
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('ov').classList.add('open');
+}
+function closeDrawer(){
+  if(isTablet()) return;
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('ov').classList.remove('open');
+}
+
+// Handle resize
+window.addEventListener('resize', function(){
+  if(isTablet()){
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('ov').classList.remove('open');
+  }
+});
+
 // ── CUSTOM DIALOG SYSTEM ──
 function showDialog({icon='', title='', message='', confirmText='OK', cancelText='', confirmClass='primary', onConfirm=null, onCancel=null}){
   const existing=document.getElementById('cdlg-root');
@@ -2116,9 +2368,9 @@ function bRevenue(){
   </div>
 
   <!-- TODAY TAB -->
-  <div id="rev-today">
+  <div id="rev-today" class="rev-tab-panel">
     ${isOwner?`
-    <div class="cmp-grid">
+    <div class="cmp-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
       <div class="cmp-card atm">
         <div class="cmp-store" style="color:var(--atm-lt);"><div class="cmp-dot" style="background:var(--atm-c);"></div>ATM</div>
         <div class="cmp-lbl">${t('todayTotalLbl')}</div><div class="cmp-val">${fmt(atmS.grand_total||0)}</div><div class="cmp-sub">${fmtK(atmS.grand_total||0)}</div>

@@ -2864,6 +2864,16 @@ async function init(){
 init();
 
 // ── BELL NOTIFICATION PANEL ──────────────────────────────────────────────
+// Auto-poll every 30s so admin sees new edit requests without manual refresh
+setInterval(async function(){
+  if(!isAdmin||!isAdmin()) return;
+  try{
+    const fresh=await api('GET','/api/edit-requests');
+    editRequests=fresh||[];
+    updateBellBadge();
+  }catch(e){}
+},30000);
+
 function updateBellBadge(){
   if(!isAdmin||!isAdmin()) return;
   const badge=document.getElementById('bell-badge');
@@ -2880,30 +2890,39 @@ function renderBellList(){
   const list=document.getElementById('bell-list');
   if(!list) return;
   let html='';
-  // Edit requests
+  // Edit requests — click goes to dashboard to approve
   (editRequests||[]).forEach(function(req){
     const storeName=STORES[req.store_id]?STORES[req.store_id].name:req.store_id;
     const time=req.created_at?new Date(req.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
-    html+='<div class="bell-row">';
+    html+='<div class="bell-row" style="cursor:pointer;" onclick="closeBellAndGo(this)" data-page="dashboard">';
     html+='<div class="bell-dot" style="background:#F59F00;margin-top:4px;"></div>';
     html+='<div style="flex:1;">';
     html+='<div style="font-size:12px;font-weight:700;color:var(--t1);">'+(lang==='km'?'សំណើកែប្រែពី':'Edit request from')+' '+(req.requested_by||'')+'</div>';
     html+='<div style="font-size:11px;color:var(--t2);">'+storeName+(time?' · '+time:'')+'</div>';
-    html+='</div></div>';
+    html+='<div style="font-size:10px;color:var(--amb);margin-top:2px;font-weight:600;">'+(lang==='km'?'ចុចដើម្បីអនុញ្ញាត / បដិសេធ':'Tap to approve or reject')+'</div>';
+    html+='</div><div style="font-size:10px;color:var(--t3);align-self:center;">›</div></div>';
   });
-  // Low stock — use invData which is where inventory is actually stored
+  // Low stock — click goes to inventory page
   const allInv=[].concat(invData&&invData.atm?invData.atm:[]).concat(invData&&invData.hru?invData.hru:[]);
   const lowItems=allInv.filter(function(x){return x.status==='low'||x.status==='out';});
   lowItems.slice(0,5).forEach(function(it){
-    html+='<div class="bell-row">';
+    html+='<div class="bell-row" style="cursor:pointer;" onclick="closeBellAndGo(this)" data-page="inventory">';
     html+='<div class="bell-dot" style="background:#E84040;margin-top:4px;"></div>';
     html+='<div style="flex:1;">';
     html+='<div style="font-size:12px;font-weight:700;color:var(--t1);">'+(lang==='km'?'ស្តុកទាប — ':'Low stock — ')+it.name+'</div>';
     html+='<div style="font-size:11px;color:var(--t2);">'+(it.quantity!==undefined?it.quantity+' '+(it.unit||''):'')+(it.status==='out'?' · '+(lang==='km'?'អស់ស្តុក':'Out of stock'):'')+'</div>';
-    html+='</div></div>';
+    html+='<div style="font-size:10px;color:var(--red);margin-top:2px;font-weight:600;">'+(lang==='km'?'ចុចដើម្បីមើលស្តុក':'Tap to view inventory')+'</div>';
+    html+='</div><div style="font-size:10px;color:var(--t3);align-self:center;">›</div></div>';
   });
   if(!html) html='<div class="bell-empty">'+(lang==='km'?'គ្មានការជូនដំណឹង':'No notifications')+'</div>';
   list.innerHTML=html;
+}
+
+function closeBellAndGo(el){
+  const panel=document.getElementById('bell-panel');
+  if(panel) panel.classList.remove('open');
+  const pageId=el.dataset?el.dataset.page:el;
+  goPage(pageId);
 }
 
 function toggleBellPanel(e){

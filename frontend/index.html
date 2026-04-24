@@ -1119,7 +1119,7 @@ function switchStore(s){
 }
 
 function showPage(id){
-  currentPage=id;
+  if(id==='settings') setTimeout(updatePushButton, 100);
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.d-item').forEach(b=>b.classList.remove('active'));
   const pg=document.getElementById('pg-'+id);
@@ -2779,11 +2779,20 @@ async function unsubscribePush(){
 async function updatePushButton(){
   const btn = document.getElementById('push-toggle-btn');
   if(!btn) return;
-  const sub = await getPushSubscription();
+  // Wait for service worker to be ready before checking subscription
+  let sub = null;
+  try {
+    if('serviceWorker' in navigator && 'PushManager' in window) {
+      await navigator.serviceWorker.ready;
+      sub = await getPushSubscription();
+    }
+  } catch(e) { console.warn('Push check:', e.message); }
+  
   if(sub){
     btn.textContent = '🔔 ' + (lang==='km'?'បិទការជូនដំណឹង':'Disable notifications');
     btn.style.background = '#E8F5E9';
     btn.style.color = '#2E7D32';
+    btn.style.borderColor = '#2E7D32';
     btn.onclick = ()=>showConfirm('🔕',lang==='km'?'បិទការជូនដំណឹង':'Disable Notifications',
       lang==='km'?'មិនទទួលដំណឹងទៀតទេ?':'Stop receiving push alerts?',
       lang==='km'?'បិទ':'Disable','danger',unsubscribePush);
@@ -2791,6 +2800,7 @@ async function updatePushButton(){
     btn.textContent = '🔕 ' + (lang==='km'?'បើកការជូនដំណឹង':'Enable notifications');
     btn.style.background = 'var(--gl)';
     btn.style.color = 'var(--gt)';
+    btn.style.borderColor = 'var(--g)';
     btn.onclick = subscribePush;
   }
 }
@@ -2815,7 +2825,7 @@ async function init(){
         me={id:payload.id,name:payload.name,username:payload.username,role:payload.role,store_id:payload.store_id,perms:payload.perms};
         currentStore=me.store_id||'atm';
         render();
-        try{await loadLogo(true);await loadAllData();startAutoRefresh();}catch(e){console.warn('Auto-login data load:',e);}
+        try{await loadLogo(true);await loadAllData();startAutoRefresh();setTimeout(updatePushButton,500);}catch(e){console.warn('Auto-login data load:',e);}
         showPage('dashboard');
         return;
       }

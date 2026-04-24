@@ -2869,8 +2869,8 @@ function updateBellBadge(){
   const badge=document.getElementById('bell-badge');
   if(!badge) return;
   const editCount=(editRequests||[]).length;
-  const inv=Object.values(storeStats||{}).flatMap(s=>(s&&s.inventory)||[]);
-  const lowCount=inv.filter(x=>x.status==='low'||x.status==='out').length;
+  const allInv=[].concat(invData&&invData.atm?invData.atm:[]).concat(invData&&invData.hru?invData.hru:[]);
+  const lowCount=allInv.filter(function(x){return x.status==='low'||x.status==='out';}).length;
   const total=editCount+lowCount;
   if(total>0){badge.style.display='flex';badge.textContent=total;}
   else{badge.style.display='none';}
@@ -2887,13 +2887,13 @@ function renderBellList(){
     html+='<div class="bell-row">';
     html+='<div class="bell-dot" style="background:#F59F00;margin-top:4px;"></div>';
     html+='<div style="flex:1;">';
-    html+='<div style="font-size:12px;font-weight:700;color:var(--t1);">'+(lang==='km'?'សំណើកែប្រែពី':'Edit request from')+' '+( req.requested_by||'')+'</div>';
+    html+='<div style="font-size:12px;font-weight:700;color:var(--t1);">'+(lang==='km'?'សំណើកែប្រែពី':'Edit request from')+' '+(req.requested_by||'')+'</div>';
     html+='<div style="font-size:11px;color:var(--t2);">'+storeName+(time?' · '+time:'')+'</div>';
     html+='</div></div>';
   });
-  // Low stock
-  const inv=Object.values(storeStats||{}).flatMap(s=>(s&&s.inventory)||[]);
-  const lowItems=inv.filter(x=>x.status==='low'||x.status==='out');
+  // Low stock — use invData which is where inventory is actually stored
+  const allInv=[].concat(invData&&invData.atm?invData.atm:[]).concat(invData&&invData.hru?invData.hru:[]);
+  const lowItems=allInv.filter(function(x){return x.status==='low'||x.status==='out';});
   lowItems.slice(0,5).forEach(function(it){
     html+='<div class="bell-row">';
     html+='<div class="bell-dot" style="background:#E84040;margin-top:4px;"></div>';
@@ -2911,6 +2911,7 @@ function toggleBellPanel(e){
   const panel=document.getElementById('bell-panel');
   if(!panel) return;
   const isOpen=panel.classList.contains('open');
+  if(!isOpen){ renderBellList(); }
   panel.classList.toggle('open',!isOpen);
 }
 

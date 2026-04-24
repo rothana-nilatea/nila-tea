@@ -320,6 +320,14 @@ app.post('/api/stores/:storeId/close', auth, async (req, res) => {
       [storeId, date, cashTotal, abaTotal, grandTotal, submitted_by]
     );
 
+    // Send push notification to admins
+    const storeName = (await pool.query('SELECT name FROM stores WHERE id=$1', [storeId])).rows[0]?.name || storeId;
+    sendPushToAdmins(
+      '💰 Close Day Submitted',
+      `${storeName} - Cash: $${cashTotal.toFixed(2)} | Total: $${grandTotal.toFixed(2)}`,
+      'close-day-' + storeId,
+      '/dashboard'
+    );
     res.json({ cash_total: cashTotal, aba_total: abaTotal, grand_total: grandTotal, khr_total: Math.round(grandTotal * KHR_RATE) });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

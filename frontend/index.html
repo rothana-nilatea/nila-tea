@@ -2590,7 +2590,7 @@ async function uploadLogo(input){
       await api('POST','/api/logo',{logo:base64});
       logoUrl=base64;
       localStorage.setItem('nila_logo',base64);
-      showPage('settings');
+      showPage('settings');setTimeout(updatePushButton,100);
       // Update login logo if visible
       const loginLogo=document.querySelector('.login-logo img');
       if(loginLogo)loginLogo.src=base64;
@@ -2634,7 +2634,7 @@ async function saveUsr(){
     if(eUI>=0){await api('PUT',`/api/users/${usersData[eUI].id}`,body);Object.assign(usersData[eUI],{...body,perms:body.perms});}
     else{await api('POST','/api/users',body);usersData=await api('GET','/api/users');}
   }catch(e){alert(e.message);}
-  closeM('mod-usr');showPage('settings');
+  closeM('mod-usr');showPage('settings');setTimeout(updatePushButton,100);
 }
 
 // ════════ DELETE ════════
@@ -2651,7 +2651,7 @@ async function confirmDel(){
   try{
     if(delType==='menu'){await api('DELETE',`/api/menu/${menuData[s][delIdx].id}`);menuData[s].splice(delIdx,1);closeM('mod-del');showPage('menu');}
     else if(delType==='inv'){await api('DELETE',`/api/inventory/${invData[s][delIdx].id}`);invData[s].splice(delIdx,1);closeM('mod-del');showPage('inventory');}
-    else if(delType==='user'){await api('DELETE',`/api/users/${usersData[delIdx].id}`);usersData.splice(delIdx,1);closeM('mod-del');showPage('settings');}
+    else if(delType==='user'){await api('DELETE',`/api/users/${usersData[delIdx].id}`);usersData.splice(delIdx,1);closeM('mod-del');showPage('settings');setTimeout(updatePushButton,100);}
   }catch(e){
     if(delType==='menu'){menuData[s].splice(delIdx,1);closeM('mod-del');showPage('menu');}
     else if(delType==='inv'){invData[s].splice(delIdx,1);closeM('mod-del');showPage('inventory');}
@@ -2689,6 +2689,79 @@ async function tryLoadData(attempt=0){
       setTimeout(()=>tryLoadData(attempt+1), delay);
     }
   }
+}
+
+// ── PUSH NOTIFICATIONS ──
+async function getPushSubscription(){
+  if(!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    return await reg.pushManager.getSubscription();
+  }catch(e){return null;}
+}
+
+async function subscribePush(){
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    // Get VAPID key from server
+    const {key} = await api('GET', '/api/push/vapid-key');
+    if(!key){
+      showAlert('⚠️','Not configured','Push notifications not configured on server yet.');
+      return;
+    }
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(key)
+    });
+    const j = sub.toJSON();
+    await api('POST', '/api/push/subscribe', {
+      endpoint: j.endpoint,
+      p256dh: j.keys.p256dh,
+      auth: j.keys.auth
+    });
+    showAlert('🔔','Notifications enabled!','You will receive alerts when staff submit reports.');
+    updatePushButton();
+  }catch(e){
+    showAlert('❌','Error',e.message);
+  }
+}
+
+async function unsubscribePush(){
+  try{
+    const sub = await getPushSubscription();
+    if(sub) await sub.unsubscribe();
+    await api('DELETE','/api/push/subscribe');
+    showAlert('🔕','Notifications off','You will no longer receive push alerts.');
+    updatePushButton();
+  }catch(e){
+    showAlert('❌','Error',e.message);
+  }
+}
+
+async function updatePushButton(){
+  const btn = document.getElementById('push-toggle-btn');
+  if(!btn) return;
+  const sub = await getPushSubscription();
+  if(sub){
+    btn.textContent = '🔔 ' + (lang==='km'?'បិទការជូនដំណឹង':'Disable notifications');
+    btn.style.background = '#E8F5E9';
+    btn.style.color = '#2E7D32';
+    btn.onclick = ()=>showConfirm('🔕',lang==='km'?'បិទការជូនដំណឹង':'Disable Notifications',
+      lang==='km'?'មិនទទួលដំណឹងទៀតទេ?':'Stop receiving push alerts?',
+      lang==='km'?'បិទ':'Disable','danger',unsubscribePush);
+  } else {
+    btn.textContent = '🔕 ' + (lang==='km'?'បើកការជូនដំណឹង':'Enable notifications');
+    btn.style.background = 'var(--gl)';
+    btn.style.color = 'var(--gt)';
+    btn.onclick = subscribePush;
+  }
+}
+
+function urlBase64ToUint8Array(base64String){
+  const padding='='.repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=window.atob(base64);
+  return new Uint8Array([...raw].map(c=>c.charCodeAt(0)));
 }
 
 async function init(){

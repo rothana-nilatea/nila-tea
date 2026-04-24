@@ -3289,10 +3289,7 @@ function showStoreReport(sid){
           </div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="closeM('mod-report')" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);font-size:13px;cursor:pointer;font-family:inherit;">${lang==='km'?'បិទ':'Close'}</button>
-        <button onclick="switchStore('${sid}');showPage('closeday');closeM('mod-report')" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--g);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">${lang==='km'?'ទៅកាន់ទំព័របិទថ្ងៃ':'Go to close day'}</button>
-      </div>
+      <button onclick="document.getElementById('mod-report').style.display='none'" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);font-size:13px;cursor:pointer;font-family:inherit;">${lang==='km'?'បិទ':'Close'}</button>
     </div>`;
 
   // Use existing modal or create simple overlay
@@ -3304,12 +3301,12 @@ function showStoreReport(sid){
     mod.innerHTML=`<div style="background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;box-shadow:0 -4px 24px rgba(0,0,0,0.15);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
         <div style="font-size:15px;font-weight:700;">${lang==='km'?'របាយការណ៍បិទថ្ងៃ':'Close Day Report'}</div>
-        <button onclick="closeM('mod-report')" style="width:28px;height:28px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;font-size:14px;">✕</button>
+        <button onclick="document.getElementById('mod-report').style.display='none'" style="width:28px;height:28px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;font-size:14px;">✕</button>
       </div>
       <div id="mod-report-body"></div>
     </div>`;
     document.body.appendChild(mod);
-    mod.addEventListener('click', function(e){ if(e.target===mod) closeM('mod-report'); });
+    mod.addEventListener('click', function(e){ if(e.target===mod) mod.style.display='none'; });
   }
   mod.style.display='flex';
   document.getElementById('mod-report-body').innerHTML=html;

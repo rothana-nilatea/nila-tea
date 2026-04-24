@@ -322,6 +322,12 @@ app.post('/api/stores/:storeId/close', auth, async (req, res) => {
       [storeId, date]
     );
 
+    // Clean up any old edit requests for this store (fresh submission = fresh start)
+    await pool.query(
+      `DELETE FROM edit_requests WHERE store_id=$1`,
+      [storeId]
+    );
+
     await pool.query(
       `INSERT INTO closing_reports (store_id,report_date,cash_total,aba_total,grand_total,submitted_by)
        VALUES ($1,$2,$3,$4,$5,$6)`,
@@ -437,6 +443,11 @@ app.delete('/api/stores/:storeId/close', auth, ownerOnly, async (req, res) => {
     await pool.query(
       `DELETE FROM closing_reports WHERE store_id=$1 AND report_date=$2`,
       [req.params.storeId, today]
+    );
+    // Also clear edit requests when report is deleted
+    await pool.query(
+      `DELETE FROM edit_requests WHERE store_id=$1`,
+      [req.params.storeId]
     );
     res.json({ success: true });
   } catch(e) { res.status(500).json({ error: e.message }); }

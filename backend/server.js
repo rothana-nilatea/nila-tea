@@ -499,7 +499,7 @@ app.get('/api/edit-requests', auth, async (req, res) => {
     const { rows } = await pool.query(
       `SELECT er.*, s.name as store_name FROM edit_requests er
        JOIN stores s ON er.store_id=s.id
-       WHERE er.request_date=$1 AND er.status='pending'`, [today]
+       WHERE er.request_date=$1 AND er.status IN ('pending','approved')`, [today]
     );
     res.json(rows);
   } catch(e) { res.status(500).json({ error: e.message }); }
@@ -509,9 +509,30 @@ app.put('/api/stores/:storeId/edit-request', auth, async (req, res) => {
   try {
     const { status } = req.body;
     const today = cambodiaDate();
+    if (status === 'rejected') {
+      // Rejected: delete so staff sees no request
+      await pool.query(
+        `DELETE FROM edit_requests WHERE store_id=$1 AND request_date=$2`,
+        [req.params.storeId, today]
+      );
+    } else {
+      // Approved: update status so staff polling picks it up
+      await pool.query(
+        `UPDATE edit_requests SET status=$1 WHERE store_id=$2 AND request_date=$3`,
+        [status, req.params.storeId, today]
+      );
+    }
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Staff calls this to acknowledge approval and clear the request
+app.delete('/api/stores/:storeId/edit-request', auth, async (req, res) => {
+  try {
+    const today = cambodiaDate();
     await pool.query(
-      `UPDATE edit_requests SET status=$1 WHERE store_id=$2 AND request_date=$3`,
-      [status, req.params.storeId, today]
+      `DELETE FROM edit_requests WHERE store_id=$1 AND request_date=$2`,
+      [req.params.storeId, today]
     );
     res.json({ success: true });
   } catch(e) { res.status(500).json({ error: e.message }); }

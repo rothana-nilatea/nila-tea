@@ -960,6 +960,8 @@ function startFastPoll(){
         localStorage.setItem(adminUnlockKey,'1');
         localStorage.removeItem(selfEditKey);
         stopFastPoll();
+        // Acknowledge and clean up the approved request on server
+        try{ await api('DELETE','/api/stores/'+s+'/edit-request'); }catch(e){}
         await loadAllData();
         showAlert('✅',lang==='km'?'បានអនុញ្ញាត':'Approved!',lang==='km'?'អ្នកអាចកែប្រែឥឡូវ':'You can now edit the report.');
       }

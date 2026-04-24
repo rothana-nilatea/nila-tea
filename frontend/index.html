@@ -2294,65 +2294,60 @@ function bEndStock(){
   const alreadySubmitted=localStorage.getItem(submittedKey);
   if(alreadySubmitted && me.role!=='owner' && me.role!=='manager'){
     const sub=JSON.parse(alreadySubmitted);
+    const submittedTime=new Date(sub.ts||0);
+    const minutesAgo=Math.round((Date.now()-submittedTime.getTime())/60000);
+    const canEdit=minutesAgo<30;
+    const minutesLeft=Math.max(0,30-minutesAgo);
     return `<div style="padding:8px 0 16px;">
       <div class="success-card">
         <div class="s-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 13l5.5 5.5 12-12" stroke="var(--store-color,var(--g))" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div style="font-size:17px;font-weight:700;margin-bottom:5px;">${t('stockSubmitted')} ✅</div>
         <div style="font-size:12px;color:var(--t2);margin-bottom:6px;">${STORES[s]?.name||''} · ${today()}</div>
         <div style="font-size:12px;color:var(--t3);margin-bottom:14px;">${lang==='km'?'ដាក់ស្នើដោយ':'Submitted by'} <b>${sub.by||me.username}</b> · ${sub.time||''}</div>
-        <div class="notif-box"><div class="notif-title">${t('ownerNotifiedTitle')}</div><div class="notif-sub">${t('ownerNotifiedStock2')}</div></div>
+        <div class="notif-box" style="margin-bottom:12px;"><div class="notif-title">${t('ownerNotifiedTitle')}</div><div class="notif-sub">${t('ownerNotifiedStock2')}</div></div>
+        ${canEdit?`<button class="btn full" onclick="cancelStockSubmit('${s}')" style="background:var(--bg);color:var(--t2);border:1.5px solid var(--bd);margin-bottom:6px;">
+          ✏️ ${lang==='km'?'កែប្រែ (នៅសល់ '+minutesLeft+' នាទី)':'Edit submission ('+minutesLeft+' min left)'}
+        </button>`:`<div style="font-size:11px;color:var(--t3);text-align:center;">
+          ${lang==='km'?'ផុតពេលកែប្រែ (30 នាទី)':'Edit window closed (30 min limit)'}
+        </div>`}
       </div>
     </div>`;
   }
 
-  // Group by type
+  // ── GALLERY GRID VIEW ──────────────────────────────────────────────────
+  function galleryCard(it, i){
+    const hasPhoto=!!stkPh[i];
+    const qty=parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity);
+    const stColor=it.status==='ok'?'var(--g)':it.status==='low'?'var(--amb)':'var(--red)';
+    return `<div onclick="openStockItemModal(${i})" style="background:var(--card);border:2px solid ${hasPhoto?'var(--store-color,var(--g))':'var(--bd)'};border-radius:14px;overflow:hidden;cursor:pointer;position:relative;">
+      <div style="height:110px;background:var(--bg);position:relative;overflow:hidden;">
+        ${hasPhoto
+          ?`<img src="${stkPh[i]}" style="width:100%;height:110px;object-fit:cover;">`
+          :it.image_url
+            ?`<img src="${it.image_url}" style="width:100%;height:110px;object-fit:cover;opacity:0.5;">`
+            :`<div style="width:100%;height:110px;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#C0A880" stroke-width="1.5"/><circle cx="12" cy="13" r="4" stroke="#C0A880" stroke-width="1.5"/></svg></div>`
+        }
+        ${hasPhoto
+          ?`<div style="position:absolute;top:6px;right:6px;background:var(--store-color,var(--g));color:#fff;border-radius:6px;padding:2px 6px;font-size:10px;font-weight:700;">✓ Photo</div>`
+          :`<div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.5);color:#fff;border-radius:6px;padding:2px 6px;font-size:10px;">📷</div>`
+        }
+      </div>
+      <div style="padding:8px 10px 10px;">
+        <div style="font-size:12px;font-weight:700;color:var(--t1);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${nm(it)}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:11px;color:var(--t2);">${qty} ${un(it)}</span>
+          <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:${stColor}20;color:${stColor};">${it.status.toUpperCase()}</span>
+        </div>
+      </div>
+      <input type="file" id="esfile-${i}" accept="image/*" capture="environment" style="display:none;" onchange="handleEsPhoto(${i}, this)">
+    </div>`;
+  }
+
   const groups=[
     {key:'ingredient', label:t('ingredientLabel').replace('🧪 ','🧪 ')+'s', desc:t('staffCountsDaily'), items:allItems.filter(x=>(x.item_type||'ingredient')==='ingredient')},
     {key:'supply', label:t('supplyLabel')+'s', desc:t('staffCountsDaily'), items:allItems.filter(x=>x.item_type==='supply')},
     {key:'food', label:t('foodLabel'), desc:t('staffCountsDaily'), items:allItems.filter(x=>x.item_type==='food')},
   ].filter(g=>g.items.length>0);
-
-  function itemCard(it, i){
-    return `<div class="si">
-      <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;">
-        <div style="width:36px;height:36px;border-radius:9px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
-          ${it.image_url?`<img src="${it.image_url}" style="width:36px;height:36px;object-fit:cover;">`:`${icoSVG(15)}`}
-        </div>
-        <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${nm(it)}</div>
-          <div style="font-size:10px;color:var(--t3);margin-top:1px;">${t('openingLabel2')}: ${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)} ${un(it)}</div>
-        </div>
-        <span id="esb-${i}" class="badge bg-gr">${t('noPhotoLabel')}</span>
-      </div>
-      <div style="display:flex;gap:7px;margin-bottom:8px;">
-        <div style="flex:1;"><div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:3px;">${t('closingLabel2')} (${un(it)})</div>
-          <input style="width:100%;font-size:16px;font-weight:700;padding:10px;border:1.5px solid var(--bd2);border-radius:9px;background:var(--bg);color:var(--t1);font-family:inherit;text-align:center;" type="number" value="${parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity)}" min="0" step="1" id="esq-${i}" inputmode="decimal">
-        </div>
-        <div><div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:3px;">${t('statusLabel2')}</div>
-          <select class="si-sel ${it.status}" id="esst-${i}" onchange="this.className='si-sel '+this.value">
-            <option value="ok" id="opt-ok-${i}" ${it.status==='ok'?'selected':''}>${t('okStatus')}</option>
-            <option value="low" ${it.status==='low'?'selected':''}>${t('lowStatus')}</option>
-          </select>
-        </div>
-      </div>
-      <input type="file" id="esfile-${i}" accept="image/*" capture="environment" style="display:none;" onchange="handleEsPhoto(${i}, this)">
-      ${stkPh[i]?`
-        <div style="position:relative;border-radius:12px;overflow:hidden;height:140px;">
-          <img src="${stkPh[i]}" style="width:100%;height:140px;object-fit:cover;display:block;">
-          <button onclick="document.getElementById('esfile-${i}').click()" style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">${t('retakePhoto')}</button>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="var(--store-color,var(--g))" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span style="font-size:12px;font-weight:600;color:var(--store-color,var(--g));">Photo taken ✓</span>
-        </div>`:`
-        <button onclick="document.getElementById('esfile-${i}').click()" style="width:100%;padding:13px;background:#F8F8F8;border:2px dashed #E0D0C0;border-radius:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#9A8A7A" stroke-width="1.5"/><circle cx="12" cy="13" r="4" stroke="#9A8A7A" stroke-width="1.5"/></svg>
-          <div style="text-align:left;">
-            <div style="font-size:13px;font-weight:700;color:#2C1A08;">${t('takePhoto')}</div>
-            <div style="font-size:11px;color:var(--red);">⚠️ ${t('requiredBeforeSubmit')}</div>
-          </div>
-        </button>`}
-    </div>`;
-  }
 
   return `<div id="es-form">
     <div class="prog-banner">
@@ -2369,8 +2364,9 @@ function bEndStock(){
         <div style="font-size:14px;font-weight:700;">${g.label}</div>
         <div style="font-size:11px;color:var(--t2);">${g.items.length} items</div>
       </div>
-      <div style="font-size:11px;color:var(--t3);margin-bottom:8px;">${g.desc}</div>
-      ${g.items.map(it=>itemCard(it, allItems.indexOf(it))).join('')}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px;">
+        ${g.items.map(it=>galleryCard(it, allItems.indexOf(it))).join('')}
+      </div>
     `).join('')}
 
     <div class="warn" id="es-warn"></div>
@@ -2383,7 +2379,6 @@ function bEndStock(){
       <div style="font-size:17px;font-weight:700;margin-bottom:5px;">${t('stockSubmitted')} ✅</div>
       <div style="font-size:12px;color:var(--t2);margin-bottom:12px;">${t('allItemsCounted')}</div>
       <div class="notif-box"><div class="notif-title">${t('ownerNotifiedTitle')}</div><div class="notif-sub">${t('ownerNotifiedStock2')}</div></div>
-      <button class="btn p full" onclick="resetES()">Done</button>
     </div>
   </div>`;
 }
@@ -2424,11 +2419,12 @@ async function submitES(){
     const freshInv=await api('GET',`/api/stores/${s}/inventory`);
     if(freshInv&&Array.isArray(freshInv))invData[s]=freshInv;
   }catch(e){console.warn('endstock submit:',e.message);}
-  // Save submission state so page shows success on reload
+  // Save submission state with timestamp for 30-min edit window
   const submittedKey='nila_endstock_submitted_'+s+'_'+new Date().toDateString();
   localStorage.setItem(submittedKey, JSON.stringify({
     by: me.username,
-    time: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
+    time: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),
+    ts: Date.now()
   }));
   document.getElementById('es-form').style.display='none';
   document.getElementById('es-suc').style.display='block';
@@ -3648,6 +3644,137 @@ async function saveAdminStockEdit() {
     await loadAllData();
     showAlert('✅', lang==='km'?'បានកែ':'Updated', name+' → '+newQty+' '+unit);
   } catch(e) { showAlert('❌','Error',e.message); }
+}
+
+function cancelStockSubmit(sid){
+  const key='nila_endstock_submitted_'+sid+'_'+new Date().toDateString();
+  localStorage.removeItem(key);
+  showPage('endstock');
+}
+
+function openStockItemModal(idx){
+  const s=currentStore, allItems=(invData[s]||[]).filter(it=>it.count_daily);
+  const it=allItems[idx];
+  if(!it) return;
+
+  let mod=document.getElementById('mod-stock-item');
+  if(!mod){
+    mod=document.createElement('div');
+    mod.id='mod-stock-item';
+    mod.style.cssText='position:fixed;inset:0;z-index:600;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0.5);';
+    document.body.appendChild(mod);
+    mod.addEventListener('click',function(e){if(e.target===mod)mod.style.display='none';});
+  }
+
+  const qty=parseFloat(it.quantity)%1===0?parseInt(it.quantity):parseFloat(it.quantity);
+  const hasPhoto=!!stkPh[idx];
+
+  mod.innerHTML=`<div style="background:var(--card);border-radius:20px 20px 0 0;padding:0 0 32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;">
+    <!-- Photo area -->
+    <div style="position:relative;height:200px;background:var(--bg);border-radius:20px 20px 0 0;overflow:hidden;cursor:pointer;" onclick="document.getElementById('esfile-${idx}').click()">
+      ${hasPhoto
+        ?`<img src="${stkPh[idx]}" style="width:100%;height:200px;object-fit:cover;">`
+        :it.image_url
+          ?`<img src="${it.image_url}" style="width:100%;height:200px;object-fit:cover;opacity:0.4;">`
+          :`<div style="width:100%;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#C0A880" stroke-width="1.5"/><circle cx="12" cy="13" r="4" stroke="#C0A880" stroke-width="1.5"/></svg>
+              <div style="font-size:13px;color:var(--t3);">Tap to take photo</div>
+            </div>`
+      }
+      <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.6);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;">
+        ${hasPhoto?'📷 Retake':'📷 Take Photo'}
+      </div>
+      ${hasPhoto?`<div style="position:absolute;top:10px;left:10px;background:var(--store-color,var(--g));color:#fff;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;">✓ Photo taken</div>`:''}
+    </div>
+    <!-- Item details -->
+    <div style="padding:16px 16px 0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div>
+          <div style="font-size:16px;font-weight:700;">${nm(it)}</div>
+          <div style="font-size:12px;color:var(--t3);">${lang==='km'?'ចំណុះបើក':'Opening'}: ${qty} ${un(it)}</div>
+        </div>
+        <button onclick="document.getElementById('mod-stock-item').style.display='none'" style="width:28px;height:28px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;font-size:14px;">✕</button>
+      </div>
+      <!-- Quantity input -->
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:6px;">${lang==='km'?'ចំណុះបិទ':'Closing quantity'} (${un(it)})</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button onclick="adjQty(${idx},-1)" style="width:44px;height:44px;border-radius:10px;border:1.5px solid var(--bd);background:var(--bg);font-size:20px;cursor:pointer;font-family:inherit;">−</button>
+          <input id="modal-qty-${idx}" type="number" value="${qty}" min="0" step="1" inputmode="decimal"
+            style="flex:1;font-size:22px;font-weight:700;text-align:center;padding:10px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);color:var(--t1);font-family:inherit;">
+          <button onclick="adjQty(${idx},1)" style="width:44px;height:44px;border-radius:10px;border:1.5px solid var(--bd);background:var(--bg);font-size:20px;cursor:pointer;font-family:inherit;">+</button>
+        </div>
+      </div>
+      <!-- Status select -->
+      <div style="margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:6px;">${lang==='km'?'ស្ថានភាព':'Status'}</div>
+        <div style="display:flex;gap:8px;">
+          ${['ok','low','out'].map(st=>`<button onclick="selectStatus(${idx},'${st}',this)" data-status="${st}"
+            style="flex:1;padding:10px;border-radius:10px;border:2px solid ${it.status===st?'var(--store-color,var(--g))':'var(--bd)'};
+            background:${it.status===st?'var(--store-bg,var(--gl))':'transparent'};
+            font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;
+            color:${it.status===st?'var(--store-lt,var(--gt))':'var(--t2)'};">${st.toUpperCase()}</button>`).join('')}
+        </div>
+      </div>
+      <button onclick="saveStockItem(${idx})" style="width:100%;padding:13px;background:var(--store-color,var(--g));color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+        ${lang==='km'?'រក្សាទុក':'Save'}
+      </button>
+    </div>
+  </div>`;
+  mod.style.display='flex';
+}
+
+function adjQty(idx, delta){
+  const input=document.getElementById('modal-qty-'+idx);
+  if(!input) return;
+  const val=Math.max(0,(parseFloat(input.value)||0)+delta);
+  input.value=val;
+}
+
+function selectStatus(idx, status, btn){
+  const parent=btn.parentNode;
+  parent.querySelectorAll('button').forEach(function(b){
+    const s=b.dataset.status;
+    b.style.border='2px solid '+(s===status?'var(--store-color,var(--g))':'var(--bd)');
+    b.style.background=s===status?'var(--store-bg,var(--gl))':'transparent';
+    b.style.color=s===status?'var(--store-lt,var(--gt))':'var(--t2)';
+  });
+  btn.dataset.selected='1';
+}
+
+function saveStockItem(idx){
+  const s=currentStore, allItems=(invData[s]||[]).filter(it=>it.count_daily);
+  const it=allItems[idx];
+  if(!it) return;
+
+  const qtyInput=document.getElementById('modal-qty-'+idx);
+  const qty=parseFloat(qtyInput?.value||0)||0;
+
+  // Get selected status
+  const mod=document.getElementById('mod-stock-item');
+  let status=it.status;
+  if(mod){
+    const selected=mod.querySelector('button[data-selected="1"]');
+    if(selected) status=selected.dataset.status;
+    else {
+      // Auto detect from qty
+      status=qty===0?'out':qty<=5?'low':'ok';
+    }
+  }
+
+  // Update invData locally
+  it.quantity=qty;
+  it.status=status;
+
+  // Update esq and esst inputs if they exist in the form
+  const qEl=document.getElementById('esq-'+idx);
+  const stEl=document.getElementById('esst-'+idx);
+  if(qEl) qEl.value=qty;
+  if(stEl){ stEl.value=status; stEl.className='si-sel '+status; }
+
+  // Close modal and refresh
+  document.getElementById('mod-stock-item').style.display='none';
+  showPage('endstock');
 }
 </script>
 <div class="act-popup-wrap" id="act-popup-wrap"></div>

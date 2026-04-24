@@ -3285,12 +3285,10 @@ function navigateToReport(sid){
   showStoreReport(sid);
 }
 function stockViewAll(el){ navigateToEndStock(el.dataset.sid||el); }
-function navigateToEndStock(sid){
-  // Show stock summary modal for admin instead of the staff form
-  const inv=invData[sid]||[];
-  const st=STORES[sid]||{name:sid,color:'#6B3F1F'};
-  const items=inv.filter(function(x){return x.count_daily;});
+function navigateToEndStock(sid){ renderStockModal(sid); }
 
+async function renderStockModal(sid){
+  const st=STORES[sid]||{name:sid,color:'#6B3F1F'};
   let mod=document.getElementById('mod-stock');
   if(!mod){
     mod=document.createElement('div');
@@ -3299,30 +3297,91 @@ function navigateToEndStock(sid){
     document.body.appendChild(mod);
     mod.addEventListener('click',function(e){if(e.target===mod)mod.style.display='none';});
   }
-
-  let rows='';
-  items.forEach(function(it){
-    const statusColor=it.status==='ok'?'var(--g)':it.status==='low'?'var(--amb)':'var(--red)';
-    rows+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--bd);">'
-      +'<div style="font-size:13px;color:var(--t1);">'+(it.name_km&&lang==='km'?it.name_km:it.name)+'</div>'
-      +'<div style="display:flex;align-items:center;gap:8px;">'
-      +'<span style="font-size:13px;font-weight:600;">'+parseFloat(it.quantity)+' '+(it.unit_km&&lang==='km'?it.unit_km:it.unit||'')+'</span>'
-      +'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:'+statusColor+'20;color:'+statusColor+';">'+it.status.toUpperCase()+'</span>'
-      +'</div>'
-      +'</div>';
-  });
-
-  var closeStockMod="document.getElementById('mod-stock').style.display='none'";
-  mod.innerHTML='<div style="background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto;">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
-    +'<div><div style="font-size:15px;font-weight:700;">'+(lang==='km'?'ស្តុកចុងថ្ងៃ':'End-day Stock')+'</div>'
-    +'<div style="font-size:12px;color:var(--t3);">'+st.name+' · '+today()+'</div></div>'
-    +'<button onclick="'+closeStockMod+'" style="width:28px;height:28px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;font-size:14px;">✕</button>'
-    +'</div>'
-    +(items.length?rows:'<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px;">'+(lang==='km'?'គ្មានទិន្នន័យ':'No data available')+'</div>')
-    +'<button onclick="'+closeStockMod+'" style="width:100%;margin-top:14px;padding:11px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);font-size:13px;cursor:pointer;font-family:inherit;">'+(lang==='km'?'បិទ':'Close')+'</button>'
-    +'</div>';
   mod.style.display='flex';
+  mod.innerHTML='<div style="background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;"><div style="text-align:center;padding:20px;color:var(--t3);">Loading...</div></div>';
+  try{
+    const data=await api('GET','/api/stores/'+sid+'/stock-report');
+    const items=data.items||[];
+    const verified=data.verified||false;
+    const submittedBy=data.submitted_by||'';
+    const submittedAt=data.submitted_at?new Date(data.submitted_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+    let rows='';
+    items.forEach(function(it){
+      const sc=it.status==='ok'?'var(--g)':it.status==='low'?'var(--amb)':'var(--red)';
+      const img=it.image_url?'<img src="'+it.image_url+'" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;">':'<div style="width:36px;height:36px;border-radius:8px;background:var(--bg);flex-shrink:0;"></div>';
+      rows+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--bd);" id="srow_'+it.id+'">'
+        +img
+        +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;">'+(it.name_km&&lang==='km'?it.name_km:it.name)+'</div>'
+        +'<div class="srow-qty" style="font-size:11px;color:var(--t3);">'+parseFloat(it.quantity)+' '+(it.unit||'')+'</div></div>'
+        +'<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
+        +'<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:'+sc+'20;color:'+sc+';">'+it.status.toUpperCase()+'</span>'
+      +'<button onclick="adminEditStockItem(this)" data-sid="'+sid+'" data-id="'+it.id+'" data-qty="'+it.quantity+'" data-unit="'+it.unit+'" style="padding:4px 9px;border-radius:7px;border:1px solid var(--bd);background:var(--bg);font-size:11px;cursor:pointer;font-family:inherit;">Edit</button>'
+        +'</div></div>';
+    });
+    const verifyBtn=verified
+      ?'<div style="flex:1;padding:10px;border-radius:10px;background:var(--gl);color:var(--gt);font-size:12px;font-weight:700;text-align:center;">✓ '+(lang==='km'?'បានផ្ទៀងផ្ទាត់':'Verified')+(data.verified_by?' by '+data.verified_by:'')+'</div>'
+      :'<button onclick="doVerify(this)" data-sid="'+sid+'" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--g);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✓ '+(lang==='km'?'ផ្ទៀងផ្ទាត់':'Verify')+'</button>';
+    mod.innerHTML='<div style="background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
+      +'<div><div style="font-size:15px;font-weight:700;">'+(lang==='km'?'ស្តុកចុងថ្ងៃ':'End-day Stock')+'</div>'
+      +'<div style="font-size:12px;color:var(--t3);">'+st.name+' · '+today()+'</div></div>'
+      +'<button onclick="closeModStock()" style="width:28px;height:28px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;font-size:14px;">✕</button>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--t3);margin-bottom:12px;">'+subInfo+'</div>'
+      +(items.length?rows:'<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px;">'+(lang==='km'?'គ្មានទិន្នន័យ':'No data')+'</div>')
+      +'<div style="display:flex;gap:8px;margin-top:14px;">'
+      +verifyBtn
+      +'<button onclick="doDelete(this)" data-sid="'+sid+'" style="padding:10px 14px;border-radius:10px;border:1px solid #FCA5A5;background:transparent;color:var(--red);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">🗑 '+(lang==='km'?'លុប':'Delete')+'</button>'
+      +'</div>'
+      +'<button onclick="closeModStock()" style="width:100%;margin-top:8px;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);font-size:13px;cursor:pointer;font-family:inherit;">'+(lang==='km'?'បិទ':'Close')+'</button>'
+      +'</div>';
+  }catch(e){
+    mod.innerHTML='<div style="background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px;">'
+      +'<div style="text-align:center;color:var(--red);padding:20px;">Error: '+e.message+'</div>'
+      +'<button onclick="closeModStock()" style="width:100%;padding:10px;border-radius:10px;border:none;background:var(--bg);cursor:pointer;">Close</button>'
+      +'</div>';
+  }
+}
+
+function closeModStock(){var m=document.getElementById('mod-stock');if(m)m.style.display='none';}
+function doVerify(el){verifyStockReport(el.dataset.sid);}
+function doDelete(el){deleteStockReport(el.dataset.sid);}
+async function verifyStockReport(sidOrEl){const sid=typeof sidOrEl==='string'?sidOrEl:sidOrEl.dataset.sid;
+  try{
+    await api('PUT','/api/stores/'+sid+'/stock-report/verify');
+    showAlert('✅',lang==='km'?'បានផ្ទៀងផ្ទាត់':'Verified!','');
+    await loadStockReports();
+    renderStockModal(sid);
+  }catch(e){showAlert('❌','Error',e.message);}
+}
+
+async function deleteStockReport(sidOrEl){const sid=typeof sidOrEl==='string'?sidOrEl:sidOrEl.dataset.sid;
+  showConfirm('🗑',lang==='km'?'លុបរបាយការណ៍':'Delete Report',
+    lang==='km'?'បុគ្គលិកត្រូវរាប់ស្តុកម្ដងទៀត':'Staff will need to recount. Sure?',
+    'danger',async function(){
+      try{
+        await api('DELETE','/api/stores/'+sid+'/stock-report');
+        document.getElementById('mod-stock').style.display='none';
+        localStorage.removeItem('nila_endstock_submitted_'+sid+'_'+new Date().toDateString());
+        await loadStockReports(); await loadAllData();
+        showAlert('✅',lang==='km'?'បានលុប':'Deleted',lang==='km'?'បុគ្គលិកត្រូវដាក់ស្នើម្ដងទៀត':'Staff must resubmit.');
+      }catch(e){showAlert('❌','Error',e.message);}
+    }
+  );
+}
+
+function adminEditStockItem(el){const sid=el.dataset.sid,itemId=el.dataset.id,currentQty=parseFloat(el.dataset.qty),unit=el.dataset.unit;
+  const newQty=prompt((lang==='km'?'ចំណុះថ្មី (':'New quantity (')+unit+'): ',currentQty);
+  if(newQty===null||newQty==='') return;
+  const qty=parseFloat(newQty);
+  if(isNaN(qty)||qty<0){showAlert('❌','Error','Invalid quantity');return;}
+  const status=qty===0?'out':qty<=5?'low':'ok';
+  api('PUT','/api/stores/'+sid+'/inventory/'+itemId,{quantity:qty,status:status})
+    .then(function(){
+      const row=document.getElementById('srow_'+itemId);
+      if(row){const q=row.querySelector('.srow-qty');if(q)q.textContent=qty+' '+unit;}
+      loadStockReports();loadAllData();
+    }).catch(function(e){showAlert('❌','Error',e.message);});
 }
 
 function snapshotState(){
@@ -3544,6 +3603,52 @@ function buildStockReportSection() {
   return html;
 }
 // ─────────────────────────────────────────────────────────────────────────
+
+function adminEditStockItem(itemId, name, qty, unit, status) {
+  // Create edit modal
+  var mod = document.getElementById('mod-stock-edit');
+  if(!mod) {
+    mod = document.createElement('div');
+    mod.id = 'mod-stock-edit';
+    mod.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);padding:16px;';
+    document.body.appendChild(mod);
+  }
+  mod.innerHTML = '<div style="background:var(--card);border-radius:16px;padding:20px;width:100%;max-width:320px;">'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:4px;">'+(lang==='km'?'កែស្តុក':'Edit Stock Item')+'</div>'
+    +'<div style="font-size:13px;color:var(--t2);margin-bottom:14px;">'+name+'</div>'
+    +'<label style="font-size:12px;color:var(--t2);">'+(lang==='km'?'បរិមាណ':'Quantity')+' ('+unit+')</label>'
+    +'<input id="admin-edit-qty" type="number" value="'+qty+'" step="0.1" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid var(--bd);font-size:15px;font-family:inherit;margin-top:4px;margin-bottom:12px;background:var(--bg);color:var(--t1);">'
+    +'<label style="font-size:12px;color:var(--t2);">'+(lang==='km'?'ស្ថានភាព':'Status')+'</label>'
+    +'<select id="admin-edit-status" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid var(--bd);font-size:14px;font-family:inherit;margin-top:4px;margin-bottom:16px;background:var(--bg);color:var(--t1);">'
+    +'<option value="ok"'+(status==='ok'?' selected':'')+'>OK</option>'
+    +'<option value="low"'+(status==='low'?' selected':'')+'>Low</option>'
+    +'<option value="out"'+(status==='out'?' selected':'')+'>Out</option>'
+    +'</select>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<button onclick="closeStockEdit()" style="flex:1;padding:10px;border-radius:9px;border:1px solid var(--bd);background:var(--bg);font-size:13px;cursor:pointer;font-family:inherit;">'+(lang==='km'?'បោះបង់':'Cancel')+'</button>'
+    +'<input type="hidden" id="admin-edit-id" value="'+itemId+'"><input type="hidden" id="admin-edit-name" value="'+name+'"><input type="hidden" id="admin-edit-unit" value="'+unit+'">'
+    +'<button onclick="saveAdminStockEdit()" style="flex:1;padding:10px;border-radius:9px;border:none;background:var(--g);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">'+(lang==='km'?'រក្សា':'Save')+'</button>'
+    +'</div>'
+    +'</div>';
+  mod.style.display = 'flex';
+}
+
+function closeStockEdit(){var m=document.getElementById("mod-stock-edit");if(m)m.style.display="none";}
+async function saveAdminStockEdit() {
+  const itemId=parseInt(document.getElementById("admin-edit-id").value);
+  const name=document.getElementById("admin-edit-name").value;
+  const unit=document.getElementById("admin-edit-unit").value;
+  const newQty = parseFloat(document.getElementById('admin-edit-qty').value);
+  const newStatus = document.getElementById('admin-edit-status').value;
+  if(isNaN(newQty)) return;
+  try {
+    await api('PUT', '/api/inventory/'+itemId, {quantity: newQty, status: newStatus});
+    document.getElementById('mod-stock-edit').style.display = 'none';
+    await loadStockReports();
+    await loadAllData();
+    showAlert('✅', lang==='km'?'បានកែ':'Updated', name+' → '+newQty+' '+unit);
+  } catch(e) { showAlert('❌','Error',e.message); }
+}
 </script>
 <div class="act-popup-wrap" id="act-popup-wrap"></div>
 </body>

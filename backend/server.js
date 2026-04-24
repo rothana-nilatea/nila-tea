@@ -265,6 +265,12 @@ app.post('/api/stores/:storeId/inventory/endstock', auth, async (req, res) => {
 });
 
 // ── STOCK SUBMISSIONS REPORT ──
+
+// Add verified column if not exists (migration)
+pool.query(`ALTER TABLE stock_submissions ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT false;
+            ALTER TABLE stock_submissions ADD COLUMN IF NOT EXISTS verified_by VARCHAR(50);`
+).catch(()=>{});
+
 app.get('/api/stores/:storeId/stock-report', auth, async (req, res) => {
   try {
     const today = cambodiaDate();
@@ -286,8 +292,49 @@ app.get('/api/stores/:storeId/stock-report', auth, async (req, res) => {
       submitted: subRows.length > 0,
       submitted_by: subRows[0]?.submitted_by || null,
       submitted_at: subRows[0]?.submitted_at || null,
+      verified: subRows[0]?.verified || false,
+      verified_by: subRows[0]?.verified_by || null,
       items: invRows
     });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Verify stock submission
+app.put('/api/stores/:storeId/stock-report/verify', auth, ownerOnly, async (req, res) => {
+  try {
+    const today = cambodiaDate();
+    await pool.query(
+      `UPDATE stock_submissions SET verified=true, verified_by=$1 
+       WHERE store_id=$2 AND DATE(submitted_at AT TIME ZONE 'Asia/Phnom_Penh')=$3`,
+      [req.user.username, req.params.storeId, today]
+    );
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Delete stock submission (admin asks staff to recount)
+app.delete('/api/stores/:storeId/stock-report', auth, ownerOnly, async (req, res) => {
+  try {
+    const today = cambodiaDate();
+    await pool.query(
+      `DELETE FROM stock_submissions WHERE store_id=$1 AND DATE(submitted_at AT TIME ZONE 'Asia/Phnom_Penh')=$2`,
+      [req.params.storeId, today]
+    );
+    // Clear localStorage on staff side by pushing SSE
+    pushToClients('stock_deleted', { store_id: req.params.storeId });
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Edit individual inventory item quantity (admin correction)
+app.put('/api/stores/:storeId/inventory/:itemId', auth, ownerOnly, async (req, res) => {
+  try {
+    const { quantity, status } = req.body;
+    await pool.query(
+      `UPDATE inventory SET quantity=$1, status=$2, updated_at=NOW() WHERE id=$3 AND store_id=$4`,
+      [quantity, status, req.params.itemId, req.params.storeId]
+    );
+    res.json({ success: true });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 

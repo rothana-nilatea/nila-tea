@@ -2920,9 +2920,12 @@ function updateBellBadge(){
   if(!isAdmin||!isAdmin()) return;
   const badge=document.getElementById('bell-badge');
   if(!badge) return;
-  const editCount=(editRequests||[]).length;
+  const seenEdit=JSON.parse(localStorage.getItem('nila_notif_seen_dashboard_'+new Date().toDateString())||'[]');
+  const seenInv=JSON.parse(localStorage.getItem('nila_notif_seen_inventory_'+new Date().toDateString())||'[]');
+  const editCount=(editRequests||[]).filter(function(r){return !seenEdit.includes('req_'+(r.id||r.store_id));}).length;
   const allInv=[].concat(invData&&invData.atm?invData.atm:[]).concat(invData&&invData.hru?invData.hru:[]);
-  const lowCount=allInv.filter(function(x){return x.status==='low'||x.status==='out';}).length;
+  const lowItems=allInv.filter(function(x){return x.status==='low'||x.status==='out';});
+  const lowCount=lowItems.filter(function(x){return !seenInv.includes('inv_'+(x.id||x.name));}).length;
   const total=editCount+lowCount;
   if(total>0){badge.style.display='flex';badge.textContent=total;}
   else{badge.style.display='none';}
@@ -2933,10 +2936,13 @@ function renderBellList(){
   if(!list) return;
   let html='';
   // Edit requests — click goes to dashboard to approve
+  const seenEdit=getSeenIds('dashboard');
   (editRequests||[]).forEach(function(req){
     const storeName=STORES[req.store_id]?STORES[req.store_id].name:req.store_id;
     const time=req.created_at?new Date(req.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
-    html+='<div class="bell-row" style="cursor:pointer;" onclick="closeBellAndGo(this)" data-page="dashboard">';
+    const itemId='req_'+(req.id||req.store_id);
+    const seen=seenEdit.includes(itemId);
+    html+='<div class="bell-row" style="cursor:pointer;opacity:'+(seen?'0.45':'1')+'" onclick="closeBellAndGo(this)" data-page="dashboard" data-id="'+itemId+'">';
     html+='<div class="bell-dot" style="background:#F59F00;margin-top:4px;"></div>';
     html+='<div style="flex:1;">';
     html+='<div style="font-size:12px;font-weight:700;color:var(--t1);">'+(lang==='km'?'សំណើកែប្រែពី':'Edit request from')+' '+(req.requested_by||'')+'</div>';
@@ -2947,13 +2953,16 @@ function renderBellList(){
   // Low stock — click goes to inventory page
   const allInv=[].concat(invData&&invData.atm?invData.atm:[]).concat(invData&&invData.hru?invData.hru:[]);
   const lowItems=allInv.filter(function(x){return x.status==='low'||x.status==='out';});
+  const seenInv=getSeenIds('inventory');
   lowItems.slice(0,5).forEach(function(it){
-    html+='<div class="bell-row" style="cursor:pointer;" onclick="closeBellAndGo(this)" data-page="inventory">';
-    html+='<div class="bell-dot" style="background:#E84040;margin-top:4px;"></div>';
+    const itemId='inv_'+(it.id||it.name);
+    const seen=seenInv.includes(itemId);
+    html+='<div class="bell-row" style="cursor:pointer;opacity:'+(seen?'0.45':'1')+'" onclick="closeBellAndGo(this)" data-page="inventory" data-id="'+itemId+'">';
+    html+='<div class="bell-dot" style="background:'+(seen?'#ccc':'#E84040')+';margin-top:4px;"></div>';
     html+='<div style="flex:1;">';
     html+='<div style="font-size:12px;font-weight:700;color:var(--t1);">'+(lang==='km'?'ស្តុកទាប — ':'Low stock — ')+it.name+'</div>';
     html+='<div style="font-size:11px;color:var(--t2);">'+(it.quantity!==undefined?it.quantity+' '+(it.unit||''):'')+(it.status==='out'?' · '+(lang==='km'?'អស់ស្តុក':'Out of stock'):'')+'</div>';
-    html+='<div style="font-size:10px;color:var(--red);margin-top:2px;font-weight:600;">'+(lang==='km'?'ចុចដើម្បីមើលស្តុក':'Tap to view inventory')+'</div>';
+    html+=seen?'<div style="font-size:10px;color:var(--t3);margin-top:2px;">'+(lang==='km'?'បានមើលហើយ':'Seen')+'</div>':'<div style="font-size:10px;color:var(--red);margin-top:2px;font-weight:600;">'+(lang==='km'?'ចុចដើម្បីមើលស្តុក':'Tap to view inventory')+'</div>';
     html+='</div><div style="font-size:10px;color:var(--t3);align-self:center;">›</div></div>';
   });
   if(!html) html='<div class="bell-empty">'+(lang==='km'?'គ្មានការជូនដំណឹង':'No notifications')+'</div>';
@@ -2964,7 +2973,21 @@ function closeBellAndGo(el){
   const panel=document.getElementById('bell-panel');
   if(panel) panel.classList.remove('open');
   const pageId=el.dataset?el.dataset.page:el;
+  // Mark this notification type as seen today
+  const seenKey='nila_notif_seen_'+pageId+'_'+new Date().toDateString();
+  const seenIds=JSON.parse(localStorage.getItem(seenKey)||'[]');
+  const itemId=el.dataset&&el.dataset.id?el.dataset.id:'';
+  if(itemId&&!seenIds.includes(itemId)){
+    seenIds.push(itemId);
+    localStorage.setItem(seenKey,JSON.stringify(seenIds));
+  }
+  updateBellBadge();
   goPage(pageId);
+}
+
+function getSeenIds(pageId){
+  const seenKey='nila_notif_seen_'+pageId+'_'+new Date().toDateString();
+  return JSON.parse(localStorage.getItem(seenKey)||'[]');
 }
 
 function toggleBellPanel(e){

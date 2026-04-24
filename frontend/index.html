@@ -520,6 +520,39 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
 .bell-row:last-child{border:none;}
 .bell-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
 .bell-empty{padding:20px;text-align:center;font-size:12px;color:var(--t3);}
+
+/* ── ACTIVITY POPUP ── */
+.act-popup-wrap{position:fixed;bottom:24px;right:16px;z-index:999;display:flex;flex-direction:column;gap:10px;align-items:flex-end;pointer-events:none;}
+.act-popup{background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.14);width:290px;overflow:hidden;pointer-events:all;animation:popIn 0.25s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{opacity:0;transform:translateY(20px) scale(0.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+.act-popup.hiding{animation:popOut 0.2s ease forwards;}
+@keyframes popOut{to{opacity:0;transform:translateY(16px) scale(0.96);}}
+.act-popup-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;}
+.act-popup-title{font-size:13px;font-weight:700;color:var(--t1);}
+.act-popup-actions{display:flex;align-items:center;gap:6px;}
+.act-popup-settings{width:22px;height:22px;border-radius:6px;background:var(--bg);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;}
+.act-popup-settings:hover{background:var(--bd);}
+.act-popup-close{width:22px;height:22px;border-radius:6px;background:var(--bg);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:var(--t3);}
+.act-popup-close:hover{background:var(--bd);}
+.act-popup-body{padding:0 14px 14px;}
+.act-popup-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.act-popup-row{display:flex;align-items:flex-start;gap:10px;}
+.act-popup-info{}
+.act-popup-msg{font-size:13px;font-weight:600;color:var(--t1);line-height:1.3;}
+.act-popup-sub{font-size:11px;color:var(--t3);margin-top:2px;}
+.act-popup-btn{margin-top:10px;width:100%;padding:8px;border-radius:9px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;}
+.act-popup-mute{width:100%;margin-top:6px;padding:6px;border-radius:9px;border:1px solid var(--bd);background:transparent;font-size:11px;color:var(--t3);cursor:pointer;font-family:inherit;}
+.act-popup-mute:hover{background:var(--bg);}
+/* Settings panel inside popup */
+.act-settings-panel{padding:10px 14px 14px;border-top:1px solid var(--bd);}
+.act-settings-title{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+.act-setting-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--bd);}
+.act-setting-row:last-child{border:none;}
+.act-setting-label{font-size:12px;color:var(--t1);}
+.act-toggle{width:36px;height:20px;border-radius:10px;background:var(--bd);border:none;cursor:pointer;position:relative;transition:background 0.2s;}
+.act-toggle.on{background:var(--g);}
+.act-toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left 0.2s;}
+.act-toggle.on::after{left:19px;}
 </style>
 </head>
 <body>
@@ -1010,10 +1043,15 @@ async function refreshDashboard(){
 
 async function loadAllData(){
   try{
+    // Snapshot state BEFORE loading new data
+    var _snapBefore=snapshotState();
+
     if(me.role==='owner'||me.role==='manager'){
       await Promise.allSettled([loadStoreData('atm'),loadStoreData('hru')]);
       try{usersData=await api('GET','/api/users');}catch(e){console.warn('Users load:',e);}
       try{editRequests=await api('GET','/api/edit-requests');}catch(e){editRequests=[];}
+      // Check for new activity and show popups
+      checkForNewActivity(_snapBefore, storeStats, editRequests);
     } else {
       await loadStoreData(currentStore);
       try{editRequests=await api('GET','/api/edit-requests');}catch(e){editRequests=[];}
@@ -1211,6 +1249,7 @@ function buildPage(id){
 }
 
 // ════════ DASHBOARD ════════
+
 function buildStoreCards(atmS,hruS,atmT,hruT){
   var html='<div style="margin-bottom:10px;">';
   var stores=[
@@ -2924,7 +2963,11 @@ function updateBellBadge(){
   const seenInv=JSON.parse(localStorage.getItem('nila_notif_seen_inventory_'+new Date().toDateString())||'[]');
   const editCount=(editRequests||[]).filter(function(r){return !seenEdit.includes('req_'+(r.id||r.store_id));}).length;
   const allInv=[].concat(invData&&invData.atm?invData.atm:[]).concat(invData&&invData.hru?invData.hru:[]);
-  const lowItems=allInv.filter(function(x){return x.status==='low'||x.status==='out';});
+  const _seenNames2={};
+  const lowItems=allInv.filter(function(x){
+    if((x.status!=='low'&&x.status!=='out')||_seenNames2[x.name]) return false;
+    _seenNames2[x.name]=true; return true;
+  });
   const lowCount=lowItems.filter(function(x){return !seenInv.includes('inv_'+(x.id||x.name));}).length;
   const total=editCount+lowCount;
   if(total>0){badge.style.display='flex';badge.textContent=total;}
@@ -2951,9 +2994,9 @@ function renderBellList(){
     html+='</div><div style="font-size:10px;color:var(--t3);align-self:center;">›</div></div>';
   });
   // Low stock — click goes to inventory page
+  const _seenNamesR={};
   const allInv=[].concat(invData&&invData.atm?invData.atm:[]).concat(invData&&invData.hru?invData.hru:[]);
-  const lowItems=allInv.filter(function(x){return x.status==='low'||x.status==='out';});
-  const seenInv=getSeenIds('inventory');
+  const lowItems=allInv.filter(function(x){if((x.status!=='low'&&x.status!=='out')||_seenNamesR[x.name])return false;_seenNamesR[x.name]=true;return true;});
   lowItems.slice(0,5).forEach(function(it){
     const itemId='inv_'+(it.id||it.name);
     const seen=seenInv.includes(itemId);
@@ -3008,6 +3051,178 @@ document.addEventListener('click',function(e){
   }
 });
 // ─────────────────────────────────────────────────────────────────────────
+
+// ── ACTIVITY POPUP SYSTEM ────────────────────────────────────────────────
+var _prevSnapshot={closeReports:{},editRequests:[],stockSubmissions:{}};
+var _popupMuted=JSON.parse(localStorage.getItem('nila_popup_muted')||'{}');
+// Settings: which events to show popups for
+var _popupSettings=JSON.parse(localStorage.getItem('nila_popup_settings')||JSON.stringify({
+  closeday: true,
+  editrequest: true,
+  endstock: true
+}));
+
+function savePopupSettings(){
+  localStorage.setItem('nila_popup_settings',JSON.stringify(_popupSettings));
+}
+
+function showActivityPopup(type, msg, sub, actionLabel, actionFn, iconBg, iconEmoji){
+  if(!isAdmin||!isAdmin()) return;
+  // Check if muted for today
+  const muteKey='mute_'+type+'_'+new Date().toDateString();
+  if(_popupMuted[muteKey]) return;
+  // Check settings
+  if(!_popupSettings[type]) return;
+
+  const wrap=document.getElementById('act-popup-wrap');
+  if(!wrap) return;
+
+  const id='popup_'+Date.now();
+  const div=document.createElement('div');
+  div.className='act-popup';
+  div.id=id;
+  div.innerHTML=`
+    <div class="act-popup-head">
+      <span class="act-popup-title">${lang==='km'?'សកម្មភាពបុគ្គលិក':'Staff Activity'}</span>
+      <div class="act-popup-actions">
+        <div class="act-popup-settings" onclick="togglePopupSettings('${id}')" title="Settings">⚙️</div>
+        <div class="act-popup-close" onclick="dismissPopup('${id}')">✕</div>
+      </div>
+    </div>
+    <div class="act-popup-body">
+      <div class="act-popup-row">
+        <div class="act-popup-icon" style="background:${iconBg};">${iconEmoji}</div>
+        <div class="act-popup-info">
+          <div class="act-popup-msg">${msg}</div>
+          <div class="act-popup-sub">${sub}</div>
+        </div>
+      </div>
+      ${actionLabel?`<button class="act-popup-btn" style="background:var(--g);color:#fff;" onclick="${actionFn};dismissPopup('${id}')">${actionLabel}</button>`:''}
+      <button class="act-popup-mute" onclick="mutePopupType('${type}','${id}')">${lang==='km'?'មិនបង្ហាញថ្ងៃនេះ':'Mute for today'}</button>
+    </div>
+    <div class="act-settings-panel" id="settings_${id}" style="display:none;">
+      <div class="act-settings-title">${lang==='km'?'ការកំណត់ការជូនដំណឹង':'Notification Settings'}</div>
+      <div class="act-setting-row">
+        <span class="act-setting-label">${lang==='km'?'បិទថ្ងៃ':'Close day submitted'}</span>
+        <button class="act-toggle ${_popupSettings.closeday?'on':''}" onclick="toggleSetting('closeday',this)"></button>
+      </div>
+      <div class="act-setting-row">
+        <span class="act-setting-label">${lang==='km'?'សំណើកែប្រែ':'Edit requests'}</span>
+        <button class="act-toggle ${_popupSettings.editrequest?'on':''}" onclick="toggleSetting('editrequest',this)"></button>
+      </div>
+      <div class="act-setting-row">
+        <span class="act-setting-label">${lang==='km'?'ស្តុកចុងថ្ងៃ':'End-day stock'}</span>
+        <button class="act-toggle ${_popupSettings.endstock?'on':''}" onclick="toggleSetting('endstock',this)"></button>
+      </div>
+    </div>
+  `;
+  wrap.appendChild(div);
+
+  // Auto dismiss after 12s
+  setTimeout(function(){ dismissPopup(id); }, 12000);
+}
+
+function dismissPopup(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.classList.add('hiding');
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 220);
+}
+
+function mutePopupType(type, id){
+  const muteKey='mute_'+type+'_'+new Date().toDateString();
+  _popupMuted[muteKey]=true;
+  localStorage.setItem('nila_popup_muted',JSON.stringify(_popupMuted));
+  dismissPopup(id);
+}
+
+function togglePopupSettings(id){
+  const panel=document.getElementById('settings_'+id);
+  if(!panel) return;
+  panel.style.display=panel.style.display==='none'?'block':'none';
+}
+
+function toggleSetting(key, btn){
+  _popupSettings[key]=!_popupSettings[key];
+  btn.classList.toggle('on', _popupSettings[key]);
+  savePopupSettings();
+}
+
+function checkForNewActivity(prevData, newStoreStats, newEditReqs){
+  if(!isAdmin||!isAdmin()) return;
+
+  // 1. Check new close day submissions
+  if(_popupSettings.closeday){
+    ['atm','hru'].forEach(function(sid){
+      const prev=prevData.closeReports[sid];
+      const curr=newStoreStats[sid]&&newStoreStats[sid].close_report;
+      if(!prev&&curr){
+        // New submission!
+        const storeName=STORES[sid]?STORES[sid].name:sid.toUpperCase();
+        const submitter=curr.submitted_by||'';
+        const total=curr.grand_total||0;
+        showActivityPopup(
+          'closeday',
+          (lang==='km'?'បានបិទថ្ងៃ':'Close day submitted'),
+          submitter+' · '+storeName+' · '+fmt(total),
+          lang==='km'?'មើលរបាយការណ៍':'View report',
+          "showPage('dashboard')",
+          '#E8F5E9','💰'
+        );
+      }
+    });
+  }
+
+  // 2. Check new edit requests
+  if(_popupSettings.editrequest){
+    (newEditReqs||[]).forEach(function(req){
+      const alreadyKnown=(prevData.editRequests||[]).find(function(r){return r.id===req.id;});
+      if(!alreadyKnown&&req.status==='pending'){
+        const storeName=STORES[req.store_id]?STORES[req.store_id].name:req.store_id;
+        showActivityPopup(
+          'editrequest',
+          (lang==='km'?'សំណើកែប្រែ':'Edit request'),
+          (req.requested_by||'')+' · '+storeName,
+          lang==='km'?'អនុញ្ញាត / បដិសេធ':'Approve / Reject',
+          "showPage('dashboard')",
+          '#FFF3DC','📝'
+        );
+      }
+    });
+  }
+
+  // 3. Check new end-day stock submissions
+  if(_popupSettings.endstock){
+    ['atm','hru'].forEach(function(sid){
+      const prev=prevData.stockSubmissions[sid];
+      const curr=newStoreStats[sid]&&newStoreStats[sid].last_stock_submission;
+      if(curr&&curr!==prev){
+        const storeName=STORES[sid]?STORES[sid].name:sid.toUpperCase();
+        showActivityPopup(
+          'endstock',
+          (lang==='km'?'ស្តុកចុងថ្ងៃបានដាក់ស្នើ':'End-day stock submitted'),
+          storeName,
+          lang==='km'?'មើលស្តុក':'View stock',
+          "showPage('inventory')",
+          '#E3F2FD','📦'
+        );
+      }
+    });
+  }
+}
+
+function snapshotState(){
+  var snap={closeReports:{},editRequests:[],stockSubmissions:{}};
+  ['atm','hru'].forEach(function(sid){
+    var s=storeStats[sid]||{};
+    snap.closeReports[sid]=s.close_report||null;
+    snap.stockSubmissions[sid]=s.last_stock_submission||null;
+  });
+  snap.editRequests=JSON.parse(JSON.stringify(editRequests||[]));
+  return snap;
+}
+// ─────────────────────────────────────────────────────────────────────────
 </script>
+<div class="act-popup-wrap" id="act-popup-wrap"></div>
 </body>
 </html>

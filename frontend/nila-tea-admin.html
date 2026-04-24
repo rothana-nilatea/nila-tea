@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nila Tea POS — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brown: #6B3F1F;
+  --brown-dark: #4A2910;
+  --brown-light: #C8956A;
+  --cream: #FDF6EE;
+  --cream-dark: #F3E8D8;
+  --cream-border: #E8D5BE;
+  --green: #2D6A4F;
+  --green-light: #D8F3DC;
+  --green-text: #1B4332;
+  --amber: #B45309;
+  --amber-light: #FEF3C7;
+  --amber-text: #92400E;
+  --red: #B91C1C;
+  --red-light: #FEE2E2;
+  --red-text: #991B1B;
+  --blue: #1E40AF;
+  --blue-light: #DBEAFE;
+  --blue-text: #1E3A8A;
+  --text: #1C0A00;
+  --text-2: #5C3D1E;
+  --text-3: #9A7055;
+  --border: #D4B896;
+  --surface: #FFFFFF;
+  --bg: #F7EFE4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar { width: 220px; background: var(--brown-dark); padding: 0; flex-shrink: 0; display: flex; flex-direction: column; }
+.sidebar-logo { padding: 20px 18px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.logo-text { font-size: 16px; font-weight: 600; color: #FDF6EE; letter-spacing: -0.3px; }
+.logo-sub { font-size: 11px; color: rgba(253,246,238,0.5); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.sidebar-nav { padding: 12px 0; flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 18px; font-size: 13px; color: rgba(253,246,238,0.65); cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
+.nav-item:hover { color: #FDF6EE; background: rgba(255,255,255,0.06); }
+.nav-item.active { color: #FDF6EE; background: rgba(255,255,255,0.1); border-left-color: var(--brown-light); }
+.nav-icon { font-size: 14px; opacity: 0.8; }
+.sidebar-footer { padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.1); }
+.user-chip { display: flex; align-items: center; gap: 8px; }
+.user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--brown-light); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--brown-dark); }
+.user-info .name { font-size: 12px; color: #FDF6EE; font-weight: 500; }
+.user-info .role { font-size: 10px; color: rgba(253,246,238,0.45); font-family: 'DM Mono', monospace; }
+
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.topbar { background: var(--surface); border-bottom: 1px solid var(--cream-border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.topbar-title { font-size: 15px; font-weight: 500; color: var(--text); }
+.topbar-date { font-size: 12px; color: var(--text-3); font-family: 'DM Mono', monospace; margin-top: 1px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.store-pill { font-size: 11px; font-weight: 500; background: var(--brown); color: var(--cream); padding: 4px 10px; border-radius: 20px; font-family: 'DM Mono', monospace; letter-spacing: 0.3px; }
+
+.bell-btn { position: relative; width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--cream-border); background: var(--cream); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+.bell-btn:hover { background: var(--cream-dark); border-color: var(--border); }
+.bell-btn svg { width: 16px; height: 16px; stroke: var(--text-2); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.bell-badge { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; background: var(--red); color: #fff; font-size: 10px; font-weight: 600; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 4px; border: 2px solid var(--surface); font-family: 'DM Mono', monospace; transition: all 0.2s; }
+.bell-badge.zero { display: none; }
+
+.notif-dropdown { position: absolute; top: 52px; right: 24px; width: 340px; background: var(--surface); border: 1px solid var(--cream-border); border-radius: 14px; box-shadow: 0 8px 32px rgba(107,63,31,0.12); z-index: 200; overflow: hidden; display: none; animation: fadeSlide 0.15s ease; }
+.notif-dropdown.open { display: block; }
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+.notif-head { padding: 14px 16px 10px; border-bottom: 1px solid var(--cream-border); display: flex; justify-content: space-between; align-items: center; }
+.notif-head-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.notif-head-close { width: 24px; height: 24px; border-radius: 6px; border: none; background: var(--cream); cursor: pointer; font-size: 12px; color: var(--text-3); display: flex; align-items: center; justify-content: center; }
+.notif-head-close:hover { background: var(--cream-dark); }
+.notif-list { max-height: 320px; overflow-y: auto; }
+.notif-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--cream-border); cursor: pointer; transition: background 0.1s; }
+.notif-row:last-child { border-bottom: none; }
+.notif-row:hover { background: var(--cream); }
+.notif-row.resolved { opacity: 0.5; }
+.ndot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.ndot-amber { background: #F59E0B; }
+.ndot-blue { background: #3B82F6; }
+.ndot-red { background: #EF4444; }
+.ndot-green { background: #10B981; }
+.n-content { flex: 1; }
+.n-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.3; }
+.n-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.n-time { font-size: 11px; color: var(--text-3); white-space: nowrap; font-family: 'DM Mono', monospace; }
+
+.content { padding: 24px; overflow-y: auto; flex: 1; }
+
+.revenue-card { background: var(--brown); border-radius: 16px; padding: 20px 24px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+.rev-main .label { font-size: 11px; color: rgba(253,246,238,0.6); text-transform: uppercase; letter-spacing: 0.8px; font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+.rev-main .amount { font-size: 32px; font-weight: 600; color: var(--cream); letter-spacing: -1px; }
+.rev-main .sub { font-size: 12px; color: rgba(253,246,238,0.5); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.rev-stores { display: flex; gap: 12px; }
+.rev-store-pill { background: rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 16px; text-align: center; }
+.rev-store-pill .s-label { font-size: 10px; color: rgba(253,246,238,0.55); text-transform: uppercase; letter-spacing: 0.5px; font-family: 'DM Mono', monospace; }
+.rev-store-pill .s-val { font-size: 18px; font-weight: 600; color: var(--cream); margin-top: 2px; }
+
+.section-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.8px; font-family: 'DM Mono', monospace; margin-bottom: 12px; }
+
+.stores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+.store-card { background: var(--surface); border: 1px solid var(--cream-border); border-radius: 14px; padding: 18px; }
+.sc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+.sc-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.sc-by { font-size: 11px; color: var(--text-3); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.pill { font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 20px; letter-spacing: 0.3px; font-family: 'DM Mono', monospace; }
+.pill-closed { background: var(--green-light); color: var(--green-text); }
+.pill-pending { background: var(--amber-light); color: var(--amber-text); }
+.pill-approved { background: var(--green-light); color: var(--green-text); }
+.pill-rejected { background: var(--red-light); color: var(--red-text); }
+.metrics-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.metric { background: var(--cream); border-radius: 8px; padding: 8px 10px; }
+.metric-label { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; margin-bottom: 2px; }
+.metric-val { font-size: 14px; font-weight: 600; color: var(--text); }
+
+.edit-req-box { background: var(--amber-light); border: 1px solid #FCD34D; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+.edit-req-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.edit-req-title { font-size: 12px; font-weight: 600; color: var(--amber-text); }
+.edit-req-time { font-size: 11px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+.action-row { display: flex; gap: 8px; }
+.btn { padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+.btn:active { transform: scale(0.97); }
+.btn-green { background: var(--green); color: #fff; flex: 1; }
+.btn-green:hover { background: var(--green-text); }
+.btn-outline-red { background: transparent; color: var(--red); border: 1px solid #FCA5A5; flex: 1; }
+.btn-outline-red:hover { background: var(--red-light); }
+
+.result-box { border-radius: 10px; padding: 12px; margin-bottom: 10px; text-align: center; }
+.result-box.success { background: var(--green-light); border: 1px solid #6EE7B7; }
+.result-box.danger { background: var(--red-light); border: 1px solid #FCA5A5; }
+.result-box p { font-size: 13px; font-weight: 500; }
+.result-box.success p { color: var(--green-text); }
+.result-box.danger p { color: var(--red-text); }
+
+.btn-sm { padding: 7px 12px; width: 100%; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.12s; margin-top: 6px; }
+.btn-unlock-gray { background: var(--cream); color: var(--text-2); border: 1px solid var(--border); }
+.btn-unlock-gray:hover { background: var(--cream-dark); }
+.btn-delete-red { background: transparent; color: var(--red); border: 1px solid #FCA5A5; }
+.btn-delete-red:hover { background: var(--red-light); }
+
+.alert-row { display: flex; align-items: center; gap: 10px; background: var(--amber-light); border: 1px solid #FCD34D; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+.alert-icon { font-size: 14px; }
+.alert-text { font-size: 13px; color: var(--amber-text); font-weight: 500; flex: 1; }
+.alert-val { font-size: 12px; font-weight: 600; color: var(--amber); font-family: 'DM Mono', monospace; }
+
+.staff-preview { background: var(--surface); border: 1px solid var(--cream-border); border-radius: 14px; padding: 18px; }
+.sp-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.sp-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--brown); }
+.sp-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.sp-store { font-size: 11px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+.sp-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+.waiting-box { background: var(--amber-light); border: 1px solid #FCD34D; border-radius: 10px; padding: 12px; }
+.waiting-title { font-size: 13px; font-weight: 600; color: var(--amber-text); margin-bottom: 2px; }
+.waiting-sub { font-size: 12px; color: var(--text-3); }
+.waiting-btn { width: 100%; margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.04); color: var(--text-3); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; cursor: default; font-family: 'DM Sans', sans-serif; }
+.unlocked-box { background: var(--green-light); border: 1px solid #6EE7B7; border-radius: 10px; padding: 12px; }
+.unlocked-title { font-size: 13px; font-weight: 600; color: var(--green-text); margin-bottom: 2px; }
+.unlocked-sub { font-size: 12px; color: var(--text-2); }
+.edit-now-btn { width: 100%; margin-top: 10px; padding: 9px; background: var(--green); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.edit-now-btn:hover { background: var(--green-text); }
+.rejected-staff-box { background: var(--red-light); border: 1px solid #FCA5A5; border-radius: 10px; padding: 12px; }
+.rejected-staff-title { font-size: 13px; font-weight: 600; color: var(--red-text); margin-bottom: 2px; }
+.rejected-staff-sub { font-size: 12px; color: var(--text-3); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">Nila Tea POS</div>
+      <div class="logo-sub">@admin · owner</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active"><span class="nav-icon">◈</span> Dashboard</div>
+      <div class="nav-item"><span class="nav-icon">◎</span> Sales</div>
+      <div class="nav-item"><span class="nav-icon">▤</span> Inventory</div>
+      <div class="nav-item"><span class="nav-icon">◷</span> Reports</div>
+      <div class="nav-item"><span class="nav-icon">◑</span> Staff</div>
+      <div class="nav-item"><span class="nav-icon">◌</span> Settings</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar">N</div>
+        <div class="user-info">
+          <div class="name">Nila</div>
+          <div class="role">Owner · All stores</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Good morning, Nila</div>
+        <div class="topbar-date">Fri, Apr 24 · Both stores</div>
+      </div>
+      <div class="topbar-right">
+        <div class="store-pill">ATM</div>
+        <div class="store-pill">HRU</div>
+        <div style="position:relative;">
+          <button class="bell-btn" onclick="toggleNotif()" id="bell-btn">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </button>
+          <div class="bell-badge" id="bell-badge">3</div>
+          <div class="notif-dropdown" id="notif-panel">
+            <div class="notif-head">
+              <span class="notif-head-title">Notifications</span>
+              <button class="notif-head-close" onclick="toggleNotif()">✕</button>
+            </div>
+            <div class="notif-list">
+              <div class="notif-row" id="n-edit">
+                <div class="ndot ndot-amber"></div>
+                <div class="n-content">
+                  <div class="n-title">Edit request from Dara</div>
+                  <div class="n-sub">HRU Store — close-day report</div>
+                </div>
+                <div class="n-time">10:06</div>
+              </div>
+              <div class="notif-row" id="n-submit">
+                <div class="ndot ndot-blue"></div>
+                <div class="n-content">
+                  <div class="n-title">Close-day submitted by Sokha</div>
+                  <div class="n-sub">ATM Store · $60.98 total</div>
+                </div>
+                <div class="n-time">09:48</div>
+              </div>
+              <div class="notif-row" id="n-stock">
+                <div class="ndot ndot-red"></div>
+                <div class="n-content">
+                  <div class="n-title">Low stock — មេឃដាំតូ</div>
+                  <div class="n-sub">80 grams remaining · needs restock</div>
+                </div>
+                <div class="n-time">09:30</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="revenue-card">
+        <div class="rev-main">
+          <div class="label">Combined revenue today</div>
+          <div class="amount">$327.69</div>
+          <div class="sub">₭1,343,529 · Both stores</div>
+        </div>
+        <div class="rev-stores">
+          <div class="rev-store-pill">
+            <div class="s-label">ATM</div>
+            <div class="s-val">$60.98</div>
+          </div>
+          <div class="rev-store-pill">
+            <div class="s-label">HRU</div>
+            <div class="s-val">$266.71</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert-row">
+        <span class="alert-icon">⚠</span>
+        <span class="alert-text">Low stock — មេឃដាំតូ needs restocking</span>
+        <span class="alert-val">80 grams</span>
+      </div>
+
+      <div class="section-label">Store reports</div>
+      <div class="stores-grid">
+        <div class="store-card">
+          <div class="sc-top">
+            <div>
+              <div class="sc-name">ATM — Angtamin Store</div>
+              <div class="sc-by">submitted by sokha</div>
+            </div>
+            <span class="pill pill-closed">Closed</span>
+          </div>
+          <div class="metrics-row">
+            <div class="metric"><div class="metric-label">Revenue</div><div class="metric-val">$60.98</div></div>
+            <div class="metric"><div class="metric-label">Cash</div><div class="metric-val">$60.98</div></div>
+            <div class="metric"><div class="metric-label">ABA</div><div class="metric-val">$0</div></div>
+          </div>
+          <button class="btn-sm btn-unlock-gray">Admin unlock to edit</button>
+          <button class="btn-sm btn-delete-red">Delete report</button>
+        </div>
+
+        <div class="store-card">
+          <div class="sc-top">
+            <div>
+              <div class="sc-name">HRU — HRU Store</div>
+              <div class="sc-by">submitted by dara</div>
+            </div>
+            <span class="pill pill-pending" id="hru-pill">Pending</span>
+          </div>
+          <div class="metrics-row">
+            <div class="metric"><div class="metric-label">Revenue</div><div class="metric-val">$266.71</div></div>
+            <div class="metric"><div class="metric-label">Cash</div><div class="metric-val">$266.71</div></div>
+            <div class="metric"><div class="metric-label">ABA</div><div class="metric-val">$0</div></div>
+          </div>
+          <div id="edit-req-block">
+            <div class="edit-req-box">
+              <div class="edit-req-header">
+                <span class="edit-req-title">Edit request from dara</span>
+                <span class="edit-req-time">10:06 AM</span>
+              </div>
+              <div class="action-row">
+                <button class="btn btn-green" onclick="doApprove()">✓ Approve</button>
+                <button class="btn btn-outline-red" onclick="doReject()">✕ Reject</button>
+              </div>
+            </div>
+          </div>
+          <button class="btn-sm btn-delete-red">Delete report</button>
+        </div>
+      </div>
+
+      <div class="section-label">Staff view — what happens after your decision</div>
+      <div class="two-col">
+        <div class="staff-preview">
+          <div class="sp-header">
+            <div class="sp-avatar">DA</div>
+            <div>
+              <div class="sp-name">Dara</div>
+              <div class="sp-store">@dara · HRU Store</div>
+            </div>
+          </div>
+          <div class="sp-label">Status on Dara's screen</div>
+          <div id="staff-state">
+            <div class="waiting-box">
+              <div class="waiting-title">Waiting for admin approval</div>
+              <div class="waiting-sub">Already self-edited once. Admin must approve to edit again.</div>
+              <button class="waiting-btn">Request admin approval</button>
+            </div>
+          </div>
+        </div>
+        <div class="staff-preview">
+          <div class="sp-header">
+            <div class="sp-avatar">SO</div>
+            <div>
+              <div class="sp-name">Sokha</div>
+              <div class="sp-store">@sokha · ATM Store</div>
+            </div>
+          </div>
+          <div class="sp-label">Status on Sokha's screen</div>
+          <div class="result-box success"><p>Day closed — submitted successfully</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let notifOpen = false;
+let badgeCount = 3;
+
+function toggleNotif() {
+  notifOpen = !notifOpen;
+  document.getElementById('notif-panel').classList.toggle('open', notifOpen);
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#bell-btn') && !e.target.closest('#notif-panel')) {
+    notifOpen = false;
+    document.getElementById('notif-panel').classList.remove('open');
+  }
+});
+
+function updateBadge() {
+  badgeCount = Math.max(0, badgeCount - 1);
+  const badge = document.getElementById('bell-badge');
+  badge.textContent = badgeCount;
+  if (badgeCount === 0) badge.classList.add('zero');
+  const nEdit = document.getElementById('n-edit');
+  if (nEdit) nEdit.classList.add('resolved');
+}
+
+function doApprove() {
+  document.getElementById('edit-req-block').innerHTML = `
+    <div class="result-box success" style="margin-bottom:10px;">
+      <p>Approved — Dara can now edit the report</p>
+    </div>`;
+  document.getElementById('hru-pill').textContent = 'Approved';
+  document.getElementById('hru-pill').className = 'pill pill-approved';
+  document.getElementById('staff-state').innerHTML = `
+    <div class="unlocked-box">
+      <div class="unlocked-title">Admin approved — you can edit now</div>
+      <div class="unlocked-sub">Make your changes and re-submit the report.</div>
+      <button class="edit-now-btn">Edit close-day report</button>
+    </div>`;
+  updateBadge();
+}
+
+function doReject() {
+  document.getElementById('edit-req-block').innerHTML = `
+    <div class="result-box danger" style="margin-bottom:10px;">
+      <p>Rejected — Dara cannot edit this report</p>
+    </div>`;
+  document.getElementById('hru-pill').textContent = 'Closed';
+  document.getElementById('hru-pill').className = 'pill pill-rejected';
+  document.getElementById('staff-state').innerHTML = `
+    <div class="rejected-staff-box">
+      <div class="rejected-staff-title">Request rejected by admin</div>
+      <div class="rejected-staff-sub">Contact Nila if you need to make changes.</div>
+    </div>`;
+  updateBadge();
+}
+</script>
+</body>
+</html>

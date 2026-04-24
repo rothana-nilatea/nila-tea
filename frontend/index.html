@@ -505,6 +505,21 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
   .d-top { padding: 32px 20px 20px; }
   .d-app-name { font-size: 17px; }
 }
+
+/* ── BELL NOTIFICATION ── */
+.bell-btn{position:relative;width:34px;height:34px;border-radius:10px;background:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.bell-btn:active{opacity:0.7;}
+.bell-badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;background:#E84040;color:#fff;font-size:9px;font-weight:700;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--card);pointer-events:none;}
+.bell-panel{position:fixed;top:56px;right:8px;width:300px;background:var(--card);border:1px solid var(--bd);border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,0.13);z-index:200;overflow:hidden;display:none;}
+.bell-panel.open{display:block;}
+.bell-panel-head{padding:11px 14px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;}
+.bell-panel-title{font-size:13px;font-weight:700;color:var(--t1);}
+.bell-panel-close{width:22px;height:22px;border-radius:6px;border:none;background:var(--bg);cursor:pointer;font-size:12px;color:var(--t2);display:flex;align-items:center;justify-content:center;}
+.bell-list{max-height:300px;overflow-y:auto;}
+.bell-row{display:flex;align-items:flex-start;gap:9px;padding:11px 14px;border-bottom:0.5px solid var(--bd);cursor:default;}
+.bell-row:last-child{border:none;}
+.bell-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.bell-empty{padding:20px;text-align:center;font-size:12px;color:var(--t3);}
 </style>
 </head>
 <body>
@@ -977,6 +992,7 @@ async function loadAllData(){
         }
       });
     }
+    updateBellBadge();
     // Update refresh timestamp
     const rt=document.getElementById('dash-refresh-time');
     if(rt)rt.textContent='🟢 '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
@@ -1070,7 +1086,18 @@ function buildApp(){
       <button class="ham" onclick="toggleDrawer()"><svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1 1h14M1 6h14M1 11h14" stroke="var(--t1)" stroke-width="1.6" stroke-linecap="round"/></svg></button>
       <div class="pg-lbl" id="pg-lbl">Dashboard</div>
       <button class="store-pill" style="background:${s.color};color:#fff;font-weight:800;padding:5px 14px;border-radius:99px;font-size:12px;border:none;cursor:pointer;font-family:inherit;" onclick="toggleDrawer()">${s.short}</button>
+      ${isAdmin()?`<button class="bell-btn" id="bell-btn" onclick="toggleBellPanel(event)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="bell-badge" id="bell-badge" style="display:none;">0</span>
+      </button>`:''}
     </div>
+    ${isAdmin()?`<div class="bell-panel" id="bell-panel">
+      <div class="bell-panel-head">
+        <span class="bell-panel-title">${lang==='km'?'ការជូនដំណឹង':'Notifications'}</span>
+        <button class="bell-panel-close" onclick="toggleBellPanel(event)">✕</button>
+      </div>
+      <div class="bell-list" id="bell-list"></div>
+    </div>`:''}
 
     <!-- PAGES -->
     <div class="content" id="mc">
@@ -1781,15 +1808,14 @@ async function deleteCloseReport(sid){
   });
 }
 
-function approveEdit(sid){
-  const adminKey='nila_admin_unlock_'+sid+'_'+new Date().toDateString();
-  const reqKey='nila_edit_request_'+sid+'_'+new Date().toDateString();
-  const selfKey='nila_self_edited_'+sid+'_'+new Date().toDateString();
-  localStorage.setItem(adminKey,'1');
-  localStorage.removeItem(reqKey);
-  localStorage.removeItem(selfKey);
-  showPage('dashboard');
-  alert(lang==='km'?'✅ បានអនุញ្ញាត។ បុគ្គលិកអាចកែប្រែឥឡូវ':'✅ Approved. Staff can now edit.');
+async function approveEdit(sid){
+  try{
+    await api('PUT','/api/stores/'+sid+'/edit-request',{status:'approved'});
+    editRequests=editRequests.filter(function(r){return r.store_id!==sid;});
+    updateBellBadge();
+    showAlert('✅',lang==='km'?'បានអនុញ្ញាត':'Approved',lang==='km'?'បុគ្គលិកអាចកែប្រែឥឡូវ':'Staff can now edit the report.');
+    await loadAllData();
+  }catch(e){showAlert('❌','Error',e.message);}
 }
 
 function requestAdminEdit(s){
@@ -2836,6 +2862,67 @@ async function init(){
 }
 
 init();
+
+// ── BELL NOTIFICATION PANEL ──────────────────────────────────────────────
+function updateBellBadge(){
+  if(!isAdmin||!isAdmin()) return;
+  const badge=document.getElementById('bell-badge');
+  if(!badge) return;
+  const editCount=(editRequests||[]).length;
+  const inv=Object.values(storeStats||{}).flatMap(s=>(s&&s.inventory)||[]);
+  const lowCount=inv.filter(x=>x.status==='low'||x.status==='out').length;
+  const total=editCount+lowCount;
+  if(total>0){badge.style.display='flex';badge.textContent=total;}
+  else{badge.style.display='none';}
+}
+
+function renderBellList(){
+  const list=document.getElementById('bell-list');
+  if(!list) return;
+  let html='';
+  // Edit requests
+  (editRequests||[]).forEach(function(req){
+    const storeName=STORES[req.store_id]?STORES[req.store_id].name:req.store_id;
+    const time=req.created_at?new Date(req.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+    html+='<div class="bell-row">';
+    html+='<div class="bell-dot" style="background:#F59F00;margin-top:4px;"></div>';
+    html+='<div style="flex:1;">';
+    html+='<div style="font-size:12px;font-weight:700;color:var(--t1);">'+(lang==='km'?'សំណើកែប្រែពី':'Edit request from')+' '+( req.requested_by||'')+'</div>';
+    html+='<div style="font-size:11px;color:var(--t2);">'+storeName+(time?' · '+time:'')+'</div>';
+    html+='</div></div>';
+  });
+  // Low stock
+  const inv=Object.values(storeStats||{}).flatMap(s=>(s&&s.inventory)||[]);
+  const lowItems=inv.filter(x=>x.status==='low'||x.status==='out');
+  lowItems.slice(0,5).forEach(function(it){
+    html+='<div class="bell-row">';
+    html+='<div class="bell-dot" style="background:#E84040;margin-top:4px;"></div>';
+    html+='<div style="flex:1;">';
+    html+='<div style="font-size:12px;font-weight:700;color:var(--t1);">'+(lang==='km'?'ស្តុកទាប — ':'Low stock — ')+it.name+'</div>';
+    html+='<div style="font-size:11px;color:var(--t2);">'+(it.quantity!==undefined?it.quantity+' '+(it.unit||''):'')+(it.status==='out'?' · '+(lang==='km'?'អស់ស្តុក':'Out of stock'):'')+'</div>';
+    html+='</div></div>';
+  });
+  if(!html) html='<div class="bell-empty">'+(lang==='km'?'គ្មានការជូនដំណឹង':'No notifications')+'</div>';
+  list.innerHTML=html;
+}
+
+function toggleBellPanel(e){
+  if(e){e.stopPropagation();}
+  const panel=document.getElementById('bell-panel');
+  if(!panel) return;
+  const isOpen=panel.classList.contains('open');
+  panel.classList.toggle('open',!isOpen);
+}
+
+document.addEventListener('click',function(e){
+  const panel=document.getElementById('bell-panel');
+  const btn=document.getElementById('bell-btn');
+  if(!panel||!btn) return;
+  if(panel.classList.contains('open')&&!panel.contains(e.target)&&e.target!==btn&&!btn.contains(e.target)){
+    panel.classList.remove('open');
+  }
+});
+// ─────────────────────────────────────────────────────────────────────────
 </script>
 </body>
 </html>

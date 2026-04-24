@@ -3322,6 +3322,28 @@ function startSSE() {
   try {
     _sseSource = new EventSource('/api/events?token='+encodeURIComponent(token));
 
+    _sseSource.addEventListener('endstock_submitted', function(e) {
+      try {
+        const data = JSON.parse(e.data);
+        // Build item summary
+        const itemSummary = data.items && data.items.length > 0
+          ? data.items.map(function(it){ return it.name||''; }).filter(Boolean).slice(0,3).join(', ')
+            + (data.item_count > 3 ? ' +' + (data.item_count-3) + ' more' : '')
+          : data.item_count + ' items';
+
+        showActivityPopup(
+          'endstock',
+          lang==='km' ? 'ស្តុកចុងថ្ងៃបានដាក់ស្នើ' : 'End-day stock submitted',
+          (data.submitted_by||'') + ' · ' + (data.store_name||data.store_id) + ' · ' + itemSummary,
+          lang==='km' ? 'មើលស្តុក' : 'View stock',
+          "navigateToEndStock('" + data.store_id + "')",
+          '#E3F2FD', '📦'
+        );
+        // Refresh data
+        loadAllData();
+      } catch(err) { console.warn('SSE endstock parse error:', err); }
+    });
+
     _sseSource.addEventListener('aba_payment', function(e) {
       try {
         const data = JSON.parse(e.data);

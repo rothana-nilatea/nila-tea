@@ -240,8 +240,8 @@ app.post('/api/stores/:storeId/inventory/endstock', auth, async (req, res) => {
         [item.quantity, item.status, item.id]
       );
     }
-    await pool.query(
-      'INSERT INTO stock_submissions (store_id,submitted_by) VALUES ($1,$2)',
+    const subResult = await pool.query(
+      'INSERT INTO stock_submissions (store_id,submitted_by) VALUES ($1,$2) RETURNING submitted_at',
       [storeId, submitted_by]
     );
     // Push notification to admins
@@ -251,6 +251,15 @@ app.post('/api/stores/:storeId/inventory/endstock', auth, async (req, res) => {
       `${storeName} — ${items.length} items counted by ${submitted_by}`,
       'endstock-' + storeId
     );
+    // SSE real-time push to all connected clients
+    pushToClients('endstock_submitted', {
+      store_id: storeId,
+      store_name: storeName,
+      submitted_by,
+      item_count: items.length,
+      submitted_at: subResult.rows[0]?.submitted_at || new Date(),
+      items: items.slice(0, 5) // send first 5 items for preview
+    });
     res.json({ success: true });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
@@ -431,6 +440,15 @@ app.get('/api/stores/:storeId/revenue/today', auth, async (req, res) => {
     }
 
     const total = cash + aba;
+    // Get last stock submission for today
+    const { rows: stockRows } = await pool.query(
+      `SELECT submitted_by, submitted_at FROM stock_submissions 
+       WHERE store_id=$1 AND DATE(submitted_at)=$2 
+       ORDER BY submitted_at DESC LIMIT 1`,
+      [storeId, today]
+    );
+    const lastStock = stockRows[0] || null;
+
     res.json({
       cash_total: cash, aba_total: aba, grand_total: total,
       khr_total: Math.round(total * KHR_RATE),
@@ -439,7 +457,8 @@ app.get('/api/stores/:storeId/revenue/today', auth, async (req, res) => {
       close_report: closeReport ? {
         submitted_by: closeReport.submitted_by,
         submitted_at: closeReport.created_at
-      } : null
+      } : null,
+      last_stock_submission: lastStock ? lastStock.submitted_at : null
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

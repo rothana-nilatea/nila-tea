@@ -1285,9 +1285,21 @@ function buildStoreCards(atmS,hruS,atmT,hruT){
     html+='<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;background:'+sbg+';color:'+sc+';">'+stxt+'</span>';
     html+='</div>';
     html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:'+(closed?'10px':'0')+'">';
-    html+='<div style="text-align:center;"><div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">'+t('revenueLbl')+'</div><div style="font-size:15px;font-weight:700;">'+fmt(total)+'</div><div style="font-size:9px;color:var(--t3);">'+fmtK(total)+'</div></div>';
-    html+='<div style="text-align:center;"><div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">'+t('cashLbl')+'</div><div style="font-size:15px;font-weight:700;">'+fmt(s?s.cash_total||0:0)+'</div></div>';
-    html+='<div style="text-align:center;"><div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">'+t('abaLbl')+'</div><div style="font-size:15px;font-weight:700;">'+fmt(s?s.aba_total||0:0)+'</div></div>';
+    html+='<div style="text-align:center;">'
+        +'<div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">'+t('revenueLbl')+'</div>'
+        +'<div style="font-size:15px;font-weight:700;">'+fmt(total)+'</div>'
+        +'<div style="font-size:10px;color:var(--t3);margin-top:1px;">'+Math.round(total*RATE).toLocaleString()+' KHR</div>'
+        +'</div>';
+    html+='<div style="text-align:center;">'
+        +'<div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">'+t('cashLbl')+'</div>'
+        +'<div style="font-size:15px;font-weight:700;">'+fmt(s?s.cash_total||0:0)+'</div>'
+        +'<div style="font-size:10px;color:var(--t3);margin-top:1px;">'+Math.round((s?s.cash_total||0:0)*RATE).toLocaleString()+' KHR</div>'
+        +'</div>';
+    html+='<div style="text-align:center;">'
+        +'<div style="font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;">'+t('abaLbl')+'</div>'
+        +'<div style="font-size:15px;font-weight:700;">'+fmt(s?s.aba_total||0:0)+'</div>'
+        +'<div style="font-size:10px;color:var(--t3);margin-top:1px;">'+Math.round((s?s.aba_total||0:0)*RATE).toLocaleString()+' KHR</div>'
+        +'</div>';
     html+='</div>';
     if(closed){
       html+='<div style="border-top:0.5px solid var(--bd);padding-top:8px;">';

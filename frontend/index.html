@@ -2688,7 +2688,13 @@ document.getElementById('mi-file').addEventListener('change',function(){
 
 // ════════ SERVICE WORKER ════════
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  navigator.serviceWorker.register('/sw.js')
+    .then(reg => {
+      console.log('[App] SW registered, scope:', reg.scope);
+    })
+    .catch(err => {
+      console.error('[App] SW registration failed:', err);
+    });
 }
 
 // ════════ AUTO-LOGIN ════════
@@ -2714,11 +2720,31 @@ async function getPushSubscription(){
 
 async function subscribePush(){
   try{
+    if(!('serviceWorker' in navigator)){
+      showAlert('⚠️','Not supported','Your browser does not support push notifications. Try Chrome on Android.');
+      return;
+    }
+    if(!('PushManager' in window)){
+      showAlert('⚠️','Not supported','Push notifications not supported on this browser. Try Chrome on Android.');
+      return;
+    }
     const reg = await navigator.serviceWorker.ready;
     // Get VAPID key from server
-    const {key} = await api('GET', '/api/push/vapid-key');
+    let key = null;
+    try{
+      const resp = await api('GET', '/api/push/vapid-key');
+      key = resp?.key;
+    }catch(e){
+      showAlert('❌','Server Error','Could not connect to notification server: '+e.message);
+      return;
+    }
     if(!key){
-      showAlert('⚠️','Not configured','Push notifications not configured on server yet.');
+      showAlert('⚠️','Not configured','Push notifications not configured on server. Please add VAPID keys in Render Environment.');
+      return;
+    }
+    const permission = await Notification.requestPermission();
+    if(permission !== 'granted'){
+      showAlert('⚠️','Permission denied','Please allow notifications in your browser settings.');
       return;
     }
     const sub = await reg.pushManager.subscribe({
@@ -2734,7 +2760,7 @@ async function subscribePush(){
     showAlert('🔔','Notifications enabled!','You will receive alerts when staff submit reports.');
     updatePushButton();
   }catch(e){
-    showAlert('❌','Error',e.message);
+    showAlert('❌','Error',e.message||'Unknown error. Try Chrome browser.');
   }
 }
 

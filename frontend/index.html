@@ -860,7 +860,7 @@ var delType=null, delIdx=-1, eMI=-1, eII=-1, eUI=-1, stkPh={};
 
 // ── HELPERS ──
 function fmt(u){const v=parseFloat(u)||0;return '$'+(v%1===0?v.toFixed(0):v.toFixed(2));}
-function fmtK(u){return '៛'+(Math.round((parseFloat(u)||0)*RATE)).toLocaleString();}
+function fmtK(u){return (Math.round((parseFloat(u)||0)*RATE)).toLocaleString()+' KHR';}
 function can(p){return me&&(me.role==='owner'||me.role==='manager'||me.perms?.[p]);}
 function isSuperAdmin(){return me&&me.role==='owner';}
 function isAdmin(){return me&&(me.role==='owner'||me.role==='manager');}
@@ -1330,23 +1330,30 @@ function bDash(){
     </div>
     <div class="combined-card" style="background:var(--store-color,var(--g));">
       <div class="gt-label">${t('combinedRevToday')} <span id="dash-refresh-time" style="font-size:9px;opacity:0.5;"></span></div>
-      <div class="gt-val">${fmt(total)}</div>
-      <div style="display:flex;gap:10px;margin-top:4px;margin-bottom:10px;">
-        <div style="font-size:11px;color:rgba(255,255,255,0.75);">💵 USD: <b>${fmt(atmS.cash_total+hruS.cash_total)}</b></div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.75);">🇰🇭 KHR: <b>₭${Math.round((atmS.cash_total+hruS.cash_total)*4100).toLocaleString()}</b></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">💵 USD</div>
+          <div style="font-size:20px;font-weight:700;color:#fff;">${fmt(total)}</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">🇰🇭 KHR</div>
+          <div style="font-size:20px;font-weight:700;color:#fff;">${Math.round(total*RATE).toLocaleString()}</div>
+        </div>
       </div>
+      <div style="height:0.5px;background:rgba(255,255,255,0.2);margin-bottom:10px;"></div>
       <div class="gt-breakdown">
         <div class="gt-part">
           <div class="gt-part-lbl">${t('atmStoreTxt')}</div>
           <div class="gt-part-val">${fmt(atmT)}</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px;">₭${Math.round(atmT*4100).toLocaleString()}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-top:2px;">${Math.round(atmT*RATE).toLocaleString()} KHR</div>
         </div>
         <div class="gt-part" style="background:rgba(255,255,255,0.08);">
           <div class="gt-part-lbl">${t('hruStoreTxt')}</div>
           <div class="gt-part-val">${fmt(hruT)}</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px;">₭${Math.round(hruT*4100).toLocaleString()}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-top:2px;">${Math.round(hruT*RATE).toLocaleString()} KHR</div>
         </div>
       </div>
+      <span id="dash-refresh-time" style="font-size:9px;opacity:0.4;margin-top:6px;display:block;"></span>
     </div>
     <div class="sh"><div class="sh-t">${t('storeComparison')}</div><button class="btn sm" onclick="refreshDashboard()" style="display:flex;align-items:center;gap:4px;">🔄 ${lang==='km'?'ធ្វើបច្ចុប្បន្ន':'Refresh'}</button></div>
     ${buildStoreCards(atmS,hruS,atmT,hruT)}

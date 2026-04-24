@@ -295,20 +295,14 @@ app.get('/api/events', auth, (req, res) => {
   res.flushHeaders();
 
   // Send initial ping
-  res.write('event: ping
-data: {}
-
-');
+  res.write('event: ping\ndata: {}\n\n');
 
   const token = req.headers.authorization || Date.now().toString();
   sseClients.set(token, res);
 
   // Keepalive every 25s
   const keepalive = setInterval(() => {
-    try { res.write('event: ping
-data: {}
-
-'); } catch(e) {}
+    try { res.write('event: ping\ndata: {}\n\n'); } catch(e) {}
   }, 25000);
 
   req.on('close', () => {

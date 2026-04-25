@@ -268,32 +268,31 @@ app.post('/api/stores/:storeId/inventory/endstock', auth, async (req, res) => {
 app.get('/api/reports/stock', auth, ownerOnly, async (req, res) => {
   try {
     const { store_id, date_from, date_to, item_name } = req.query;
-    let where = [];
+    let ssWhere = [];
     let params = [];
     let p = 1;
 
     if (store_id && store_id !== 'all') {
-      where.push(`i.store_id=$${p++}`);
+      ssWhere.push(`ss.store_id=$${p++}`);
       params.push(store_id);
     }
     if (date_from) {
-      where.push(`DATE(ss.submitted_at AT TIME ZONE 'Asia/Phnom_Penh')>=$${p++}`);
+      ssWhere.push(`DATE(ss.submitted_at AT TIME ZONE 'Asia/Phnom_Penh')>=$${p++}`);
       params.push(date_from);
     }
     if (date_to) {
-      where.push(`DATE(ss.submitted_at AT TIME ZONE 'Asia/Phnom_Penh')<=$${p++}`);
+      ssWhere.push(`DATE(ss.submitted_at AT TIME ZONE 'Asia/Phnom_Penh')<=$${p++}`);
       params.push(date_to);
     }
-    if (item_name) {
-      where.push(`(i.name ILIKE $${p} OR i.name_km ILIKE $${p})`);
-      params.push('%' + item_name + '%');
-      p++;
-    }
 
-    const whereClause = where.length ? 'WHERE ' + where.join(' AND ') : '';
+    const whereClause = ssWhere.length ? 'WHERE ' + ssWhere.join(' AND ') : '';
+
+    // item_name filter applied after aggregation
+    const itemFilter = item_name ? item_name.toLowerCase() : '';
 
     const { rows } = await pool.query(`
-      SELECT ss.id, ss.store_id, ss.submitted_by, ss.submitted_at, ss.verified, ss.verified_by,
+      SELECT ss.id, ss.store_id, ss.submitted_by, ss.submitted_at, 
+             COALESCE(ss.verified, false) as verified, ss.verified_by,
              s.name as store_name,
              json_agg(json_build_object(
                'id', i.id, 'name', i.name, 'name_km', i.name_km,
@@ -301,14 +300,25 @@ app.get('/api/reports/stock', auth, ownerOnly, async (req, res) => {
              ) ORDER BY i.name) as items
       FROM stock_submissions ss
       JOIN stores s ON s.id = ss.store_id
-      JOIN inventory i ON i.store_id = ss.store_id AND i.count_daily = true
+      LEFT JOIN inventory i ON i.store_id = ss.store_id AND i.count_daily = true
       ${whereClause}
       GROUP BY ss.id, ss.store_id, ss.submitted_by, ss.submitted_at, ss.verified, ss.verified_by, s.name
       ORDER BY ss.submitted_at DESC
       LIMIT 100
     `, params);
 
-    res.json(rows);
+    // Filter by item name in JS if needed
+    let result = rows;
+    if (itemFilter) {
+      result = rows.filter(row => 
+        (row.items || []).some(it => 
+          (it.name || '').toLowerCase().includes(itemFilter) ||
+          (it.name_km || '').toLowerCase().includes(itemFilter)
+        )
+      );
+    }
+
+    res.json(result);
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 

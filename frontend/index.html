@@ -1118,6 +1118,8 @@ var navDefs=[
    ico:'<path d="M2 3h10v8a3 3 0 01-3 3H5a3 3 0 01-3-3V3z" stroke="currentColor" stroke-width="1.3"/><path d="M4 3V2a1 1 0 012 0v1M8 3V2a1 1 0 012 0v1" stroke="currentColor" stroke-width="1.3"/>'},
   {id:'revenue',label:'Revenue',perm:'revenue',sec:'Reports',showFor:['owner','manager','staff'],secLabel:'Reports',
    ico:'<path d="M1 10l3-4 3 3 3-5 3 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>'},
+  {id:'stockreports',label:'Stock Reports',perm:'revenue',sec:'Reports',secLabel:'Reports',
+   ico:'<path d="M2 3h10v8a3 3 0 01-3 3H5a3 3 0 01-3-3V3z" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h4M5 9.5h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'},
   {id:'settings',label:'Settings',always:true,sec:'Account',secLabel:'Account',
    ico:'<circle cx="7" cy="7" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 1v1.5M7 12.5V14M1 7h1.5M12.5 7H14M3 3l1 1M10 10l1 1M10 4l1-1M3 11l1-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'},
 ];
@@ -1197,7 +1199,7 @@ function buildApp(){
 function buildNavItems(nav){
   let html='',lastSec='';
   const secLabels={Main:t('main'),Manage:t('manage'),Reports:t('reports'),Account:t('account')};
-  const navLabels={dashboard:t('dashboard'),sales:t('sales'),closeday:t('closeday'),menu:t('menu'),inventory:t('inventory'),endstock:t('endstock'),revenue:t('revenue'),settings:t('settings')};
+  const navLabels={dashboard:t('dashboard'),sales:t('sales'),closeday:t('closeday'),menu:t('menu'),inventory:t('inventory'),endstock:t('endstock'),revenue:t('revenue'),stockreports:lang==='km'?'របាយការណ៍ស្តុក':'Stock Reports',settings:t('settings')};
   nav.forEach(p=>{
     if(p.sec!==lastSec){html+=`<div class="d-sec">${secLabels[p.sec]||p.sec}</div>`;lastSec=p.sec;}
     html+=`<button class="d-item" id="di-${p.id}" onclick="goPage('${p.id}')">
@@ -1235,6 +1237,7 @@ function switchStore(s){
 
 function showPage(id){
   if(id==='settings') setTimeout(updatePushButton, 100);
+  if(id==='stockreports') setTimeout(loadStockHistory, 100);
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.d-item').forEach(b=>b.classList.remove('active'));
   const pg=document.getElementById('pg-'+id);
@@ -1255,7 +1258,7 @@ function buildPage(id){
   const pages={
     dashboard:bDash, sales:bSales, closeday:bCloseDay,
     menu:bMenu, inventory:bInv, endstock:bEndStock,
-    revenue:bRevenue, settings:bSettings
+    revenue:bRevenue, stockreports:bStockReports, settings:bSettings
   };
   return (pages[id]||(() => ''))();
 }
@@ -2505,6 +2508,28 @@ async function loadDailyReports(){
   }
 }
 
+
+function bStockReports(){
+  if(me.role!=='owner'&&me.role!=='manager') return '<div class="card"><div class="cb" style="text-align:center;color:var(--t3);">No access</div></div>';
+  // Set default date range to today
+  const todayStr=new Date().toISOString().split('T')[0];
+  return `<div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <select id="sr-store" onchange="loadStockHistory()" style="font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
+        <option value="all">${lang==='km'?'ហាងទាំងអស់':'Both stores'}</option>
+        <option value="atm">ATM Store</option>
+        <option value="hru">HRU Store</option>
+      </select>
+      <input type="date" id="sr-date-from" value="${todayStr}" onchange="loadStockHistory()" style="font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input type="date" id="sr-date-to" value="${todayStr}" onchange="loadStockHistory()" style="flex:1;font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
+      <input type="text" id="sr-item" placeholder="${lang==='km'?'ស្វែងរកទំនិញ...':'Search item...'}" oninput="loadStockHistory()" style="flex:1;font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
+    </div>
+    <div id="sr-data"><div style="text-align:center;padding:20px;color:var(--t3);font-size:12px;">Loading...</div></div>
+  </div>`;
+}
+
 function bRevenue(){
   const s=currentStore, st=STORES[s];
   const isOwner=me.role==='owner';
@@ -2521,7 +2546,9 @@ function bRevenue(){
     <button onclick="showRevTab('daily')" id="rtab-daily" style="flex:1;white-space:nowrap;padding:8px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📅 Daily</button>
     <button onclick="showRevTab('month')" id="rtab-month" style="flex:1;white-space:nowrap;padding:8px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Monthly</button>
     <button onclick="showRevTab('range')" id="rtab-range" style="flex:1;white-space:nowrap;padding:8px;border-radius:10px;border:2px solid var(--bd2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">By date</button>
+
   </div>
+
   
   <!-- DAILY TAB -->
   <div id="rev-daily" style="display:none;">
@@ -2624,6 +2651,80 @@ function showRevTab(tab){
     }
   });
   if(tab==='month') loadMonthly();
+}
+
+async function loadStockHistory(){
+  const el=document.getElementById('sr-data');
+  if(!el) return;
+  el.innerHTML='<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px;">Loading...</div>';
+
+  const store=document.getElementById('sr-store')?.value||'all';
+  const dateFrom=document.getElementById('sr-date-from')?.value||'';
+  const dateTo=document.getElementById('sr-date-to')?.value||'';
+  const item=document.getElementById('sr-item')?.value||'';
+
+  let qs='?';
+  if(store!=='all') qs+='store_id='+store+'&';
+  if(dateFrom) qs+='date_from='+dateFrom+'&';
+  if(dateTo) qs+='date_to='+dateTo+'&';
+  if(item) qs+='item_name='+encodeURIComponent(item)+'&';
+
+  try{
+    const rows=await api('GET','/api/reports/stock'+qs);
+    if(!rows||!rows.length){
+      el.innerHTML='<div style="text-align:center;padding:24px;color:var(--t3);font-size:13px;">No reports found</div>';
+      return;
+    }
+    let html='';
+    rows.forEach(function(row){
+      const dt=new Date(row.submitted_at);
+      const dateStr=dt.toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'});
+      const timeStr=dt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      const items=row.items||[];
+      const lowCount=items.filter(function(x){return x.status==='low'||x.status==='out';}).length;
+
+      html+='<div style="background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:10px;">';
+      // Header
+      html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">';
+      html+='<div>';
+      html+='<div style="font-size:13px;font-weight:700;color:var(--t1);">'+row.store_name+'</div>';
+      html+='<div style="font-size:11px;color:var(--t3);">'+dateStr+' · '+timeStr+' · by '+row.submitted_by+'</div>';
+      html+='</div>';
+      html+='<div style="display:flex;align-items:center;gap:6px;">';
+      if(row.verified){
+        html+='<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--gl);color:var(--gt);">✓ Verified</span>';
+      }
+      html+='<button onclick="delStockReport('+row.id+',this)" style="font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid #FCA5A5;background:transparent;color:var(--red);cursor:pointer;font-family:inherit;">🗑</button>';
+      html+='</div></div>';
+
+      // Items preview
+      html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">';
+      items.slice(0,6).forEach(function(it){
+        const sc=it.status==='ok'?'var(--g)':it.status==='low'?'var(--amb)':'var(--red)';
+        html+='<div style="font-size:11px;padding:3px 8px;border-radius:6px;background:'+sc+'15;color:'+sc+';border:1px solid '+sc+'30;font-weight:600;">'
+          +(it.name_km&&lang==='km'?it.name_km:it.name)+' '+parseFloat(it.quantity)+(it.unit?' '+it.unit:'')+'</div>';
+      });
+      if(items.length>6) html+='<div style="font-size:11px;color:var(--t3);padding:3px 6px;">+'+( items.length-6)+' more</div>';
+      html+='</div>';
+
+      if(lowCount>0){
+        html+='<div style="font-size:11px;font-weight:600;color:var(--amb);">⚠ '+lowCount+' low stock items</div>';
+      }
+      html+='</div>';
+    });
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML='<div style="text-align:center;padding:20px;color:var(--red);font-size:12px;">Error: '+(e.message||JSON.stringify(e))+'<br><br><span style="color:var(--t3);font-size:11px;">Make sure backend server.js is updated and redeployed.</span></div>';
+  }
+}
+
+async function delStockReport(id, btn){
+  if(!confirm('Delete this stock report?')) return;
+  try{
+    await api('DELETE','/api/reports/stock/'+id);
+    const card=btn.closest('[style*="border-radius:14px"]');
+    if(card) card.remove();
+  }catch(e){showAlert('❌','Error',e.message);}
 }
 
 async function loadMonthly(){
@@ -3323,7 +3424,7 @@ async function renderStockModal(sid){
       +'<div style="font-size:12px;color:var(--t3);">'+st.name+' · '+today()+'</div></div>'
       +'<button onclick="closeModStock()" style="width:28px;height:28px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;font-size:14px;">✕</button>'
       +'</div>'
-      +'<div style="font-size:11px;color:var(--t3);margin-bottom:12px;">'+subInfo+'</div>'
+      +'<div style="font-size:11px;color:var(--t3);margin-bottom:12px;">'+(submittedBy?(lang==='km'?'ដាក់ស្នើដោយ ':'Submitted by ')+submittedBy+(submittedAt?' · '+submittedAt:''):(lang==='km'?'មិនទាន់ដាក់ស្នើ':'Not submitted yet'))+'</div>'
       +(items.length?rows:'<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px;">'+(lang==='km'?'គ្មានទិន្នន័យ':'No data')+'</div>')
       +'<div style="display:flex;gap:8px;margin-top:14px;">'
       +verifyBtn

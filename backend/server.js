@@ -264,6 +264,62 @@ app.post('/api/stores/:storeId/inventory/endstock', auth, async (req, res) => {
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
+// ── STOCK HISTORY REPORTS (for admin) ──
+app.get('/api/reports/stock', auth, ownerOnly, async (req, res) => {
+  try {
+    const { store_id, date_from, date_to, item_name } = req.query;
+    let where = [];
+    let params = [];
+    let p = 1;
+
+    if (store_id && store_id !== 'all') {
+      where.push(`i.store_id=$${p++}`);
+      params.push(store_id);
+    }
+    if (date_from) {
+      where.push(`DATE(ss.submitted_at AT TIME ZONE 'Asia/Phnom_Penh')>=$${p++}`);
+      params.push(date_from);
+    }
+    if (date_to) {
+      where.push(`DATE(ss.submitted_at AT TIME ZONE 'Asia/Phnom_Penh')<=$${p++}`);
+      params.push(date_to);
+    }
+    if (item_name) {
+      where.push(`(i.name ILIKE $${p} OR i.name_km ILIKE $${p})`);
+      params.push('%' + item_name + '%');
+      p++;
+    }
+
+    const whereClause = where.length ? 'WHERE ' + where.join(' AND ') : '';
+
+    const { rows } = await pool.query(`
+      SELECT ss.id, ss.store_id, ss.submitted_by, ss.submitted_at, ss.verified, ss.verified_by,
+             s.name as store_name,
+             json_agg(json_build_object(
+               'id', i.id, 'name', i.name, 'name_km', i.name_km,
+               'quantity', i.quantity, 'unit', i.unit, 'status', i.status
+             ) ORDER BY i.name) as items
+      FROM stock_submissions ss
+      JOIN stores s ON s.id = ss.store_id
+      JOIN inventory i ON i.store_id = ss.store_id AND i.count_daily = true
+      ${whereClause}
+      GROUP BY ss.id, ss.store_id, ss.submitted_by, ss.submitted_at, ss.verified, ss.verified_by, s.name
+      ORDER BY ss.submitted_at DESC
+      LIMIT 100
+    `, params);
+
+    res.json(rows);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Delete specific stock submission by id
+app.delete('/api/reports/stock/:id', auth, ownerOnly, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM stock_submissions WHERE id=$1', [req.params.id]);
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── STOCK SUBMISSIONS REPORT ──
 
 // Add verified column if not exists (migration)

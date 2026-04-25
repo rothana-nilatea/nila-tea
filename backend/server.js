@@ -294,15 +294,18 @@ app.get('/api/reports/stock', auth, ownerOnly, async (req, res) => {
       SELECT ss.id, ss.store_id, ss.submitted_by, ss.submitted_at,
              false as verified, null as verified_by,
              s.name as store_name,
-             json_agg(json_build_object(
-               'id', i.id, 'name', i.name, 'name_km', i.name_km,
-               'quantity', i.quantity, 'unit', i.unit, 'status', i.status
-             ) ORDER BY i.name) as items
+             COALESCE(
+               json_agg(json_build_object(
+                 'id', i.id, 'name', i.name, 'name_km', i.name_km,
+                 'quantity', i.quantity, 'unit', i.unit, 'status', i.status
+               ) ORDER BY i.name) FILTER (WHERE i.id IS NOT NULL),
+               '[]'::json
+             ) as items
       FROM stock_submissions ss
       JOIN stores s ON s.id = ss.store_id
       LEFT JOIN inventory i ON i.store_id = ss.store_id AND i.count_daily = true
       ${whereClause}
-      GROUP BY ss.id, ss.store_id, ss.submitted_by, ss.submitted_at, ss.verified, ss.verified_by, s.name
+      GROUP BY ss.id, ss.store_id, ss.submitted_by, ss.submitted_at, s.name
       ORDER BY ss.submitted_at DESC
       LIMIT 100
     `, params);

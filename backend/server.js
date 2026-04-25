@@ -291,8 +291,8 @@ app.get('/api/reports/stock', auth, ownerOnly, async (req, res) => {
     const itemFilter = item_name ? item_name.toLowerCase() : '';
 
     const { rows } = await pool.query(`
-      SELECT ss.id, ss.store_id, ss.submitted_by, ss.submitted_at, 
-             COALESCE(ss.verified, false) as verified, ss.verified_by,
+      SELECT ss.id, ss.store_id, ss.submitted_by, ss.submitted_at,
+             false as verified, null as verified_by,
              s.name as store_name,
              json_agg(json_build_object(
                'id', i.id, 'name', i.name, 'name_km', i.name_km,
@@ -318,7 +318,19 @@ app.get('/api/reports/stock', auth, ownerOnly, async (req, res) => {
       );
     }
 
+    console.log('Stock reports query returned:', rows.length, 'rows, filtered:', result.length);
     res.json(result);
+  } catch(e) { 
+    console.error('Stock reports error:', e.message);
+    res.status(500).json({ error: e.message }); 
+  }
+});
+
+// Debug: check stock submissions count
+app.get('/api/reports/stock/debug', auth, ownerOnly, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT id, store_id, submitted_by, submitted_at FROM stock_submissions ORDER BY submitted_at DESC LIMIT 10');
+    res.json({ count: rows.length, rows });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -333,9 +345,8 @@ app.delete('/api/reports/stock/:id', auth, ownerOnly, async (req, res) => {
 // ── STOCK SUBMISSIONS REPORT ──
 
 // Add verified column if not exists (migration)
-pool.query(`ALTER TABLE stock_submissions ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT false;
-            ALTER TABLE stock_submissions ADD COLUMN IF NOT EXISTS verified_by VARCHAR(50);`
-).catch(()=>{});
+pool.query(`ALTER TABLE stock_submissions ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT false`).catch(()=>{});
+pool.query(`ALTER TABLE stock_submissions ADD COLUMN IF NOT EXISTS verified_by VARCHAR(50)`).catch(()=>{});
 
 app.get('/api/stores/:storeId/stock-report', auth, async (req, res) => {
   try {

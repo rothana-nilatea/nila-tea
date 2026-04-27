@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nila Tea — Fresh Cambodian Tea</title>
+<link rel="icon" href="logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brown: #5C3317;
+  --brown-mid: #8B5E3C;
+  --brown-light: #C8956A;
+  --cream: #FDF6EE;
+  --cream-2: #F5E8D6;
+  --cream-3: #EDD5B5;
+  --green: #2D6A4F;
+  --green-light: #52B788;
+  --text: #2C1810;
+  --text-2: #6B4226;
+  --text-3: #A07050;
+  --white: #FFFDF9;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 5%;height:70px;display:flex;align-items:center;justify-content:space-between;transition:all 0.3s;}
+nav.scrolled{background:var(--white);box-shadow:0 2px 20px rgba(92,51,23,0.1);}
+.nav-logo{display:flex;align-items:center;gap:10px;}
+.nav-logo img{width:36px;height:36px;border-radius:10px;}
+.nav-logo-text{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--brown);}
+.nav-links{display:flex;align-items:center;gap:32px;}
+.nav-links a{font-size:13px;font-weight:500;color:var(--text-2);text-decoration:none;letter-spacing:0.3px;transition:color 0.2s;}
+.nav-links a:hover{color:var(--brown);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.lang-btn{font-size:12px;font-weight:500;padding:6px 12px;border-radius:20px;border:1px solid var(--cream-3);background:transparent;color:var(--text-2);cursor:pointer;transition:all 0.2s;}
+.lang-btn:hover{background:var(--cream-2);}
+.lang-btn.active{background:var(--brown);color:#fff;border-color:var(--brown);}
+.staff-btn{font-size:12px;font-weight:600;padding:8px 18px;border-radius:20px;background:var(--brown);color:#fff;text-decoration:none;transition:all 0.2s;border:none;cursor:pointer;}
+.staff-btn:hover{background:var(--brown-mid);transform:translateY(-1px);}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:100px 5% 60px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--cream) 0%,var(--cream-2) 50%,var(--cream-3) 100%);}
+.hero-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.hero-circle{position:absolute;border-radius:50%;opacity:0.08;}
+.hero-content{max-width:580px;position:relative;z-index:1;}
+.hero-tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green);background:rgba(45,106,79,0.1);padding:6px 14px;border-radius:20px;margin-bottom:20px;}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(42px,7vw,72px);font-weight:700;color:var(--brown);line-height:1.1;margin-bottom:20px;}
+.hero-title span{color:var(--green);}
+.hero-desc{font-size:16px;color:var(--text-2);line-height:1.7;margin-bottom:36px;max-width:440px;}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-primary{font-size:14px;font-weight:600;padding:14px 28px;border-radius:30px;background:var(--brown);color:#fff;text-decoration:none;border:none;cursor:pointer;transition:all 0.2s;display:inline-block;}
+.btn-primary:hover{background:var(--brown-mid);transform:translateY(-2px);box-shadow:0 8px 24px rgba(92,51,23,0.25);}
+.btn-outline{font-size:14px;font-weight:600;padding:14px 28px;border-radius:30px;border:1.5px solid var(--brown);color:var(--brown);text-decoration:none;background:transparent;cursor:pointer;transition:all 0.2s;display:inline-block;}
+.btn-outline:hover{background:var(--cream-2);}
+.hero-image{position:absolute;right:5%;top:50%;transform:translateY(-50%);width:min(45vw,500px);pointer-events:none;}
+.hero-img-wrap{width:100%;aspect-ratio:1;border-radius:50%;background:var(--cream-2);border:3px solid var(--cream-3);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.hero-img-wrap img{width:70%;height:70%;object-fit:contain;}
+
+/* SECTION COMMON */
+section{padding:80px 5%;}
+.section-tag{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:10px;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:700;color:var(--brown);margin-bottom:16px;line-height:1.2;}
+.section-desc{font-size:15px;color:var(--text-2);line-height:1.7;max-width:520px;}
+
+/* ABOUT */
+.about{background:var(--white);}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.about-visual{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.about-card{border-radius:16px;padding:24px;text-align:center;}
+.about-card:nth-child(1){background:var(--brown);color:#fff;grid-row:span 1;}
+.about-card:nth-child(2){background:var(--cream-2);}
+.about-card:nth-child(3){background:var(--green);color:#fff;}
+.about-card:nth-child(4){background:var(--cream-3);}
+.about-card-num{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;margin-bottom:4px;}
+.about-card-label{font-size:12px;font-weight:500;opacity:0.8;}
+.stores-list{display:flex;flex-direction:column;gap:10px;margin-top:24px;}
+.store-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--cream);border-radius:12px;border:1px solid var(--cream-3);}
+.store-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.store-name{font-size:13px;font-weight:600;color:var(--text);}
+.store-loc{font-size:12px;color:var(--text-3);}
+
+/* MENU */
+.menu-section{background:var(--cream-2);}
+.menu-tabs{display:flex;gap:8px;margin-bottom:32px;flex-wrap:wrap;}
+.menu-tab{font-size:13px;font-weight:500;padding:8px 20px;border-radius:20px;border:1.5px solid var(--cream-3);background:transparent;color:var(--text-2);cursor:pointer;transition:all 0.2s;}
+.menu-tab.active{background:var(--brown);color:#fff;border-color:var(--brown);}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;}
+.menu-card{background:var(--white);border-radius:16px;overflow:hidden;border:1px solid var(--cream-3);transition:all 0.2s;cursor:pointer;}
+.menu-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(92,51,23,0.1);}
+.menu-img{height:140px;background:var(--cream-2);display:flex;align-items:center;justify-content:center;font-size:40px;}
+.menu-img img{width:100%;height:100%;object-fit:cover;}
+.menu-info{padding:12px 14px;}
+.menu-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.menu-name-km{font-size:11px;color:var(--text-3);margin-bottom:6px;}
+.menu-price{font-size:14px;font-weight:700;color:var(--brown);}
+.menu-add{float:right;width:28px;height:28px;border-radius:50%;background:var(--brown);color:#fff;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.menu-add:hover{background:var(--green);}
+
+/* ORDER */
+.order-section{background:var(--brown);color:#fff;position:relative;overflow:hidden;}
+.order-section::before{content:'';position:absolute;top:-50%;right:-10%;width:600px;height:600px;border-radius:50%;background:rgba(255,255,255,0.03);}
+.order-content{max-width:540px;position:relative;}
+.order-section .section-tag{color:var(--green-light);}
+.order-section .section-title{color:#fff;}
+.order-section .section-desc{color:rgba(255,255,255,0.7);}
+.order-form{margin-top:32px;display:flex;flex-direction:column;gap:14px;}
+.order-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.order-input{width:100%;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s;}
+.order-input::placeholder{color:rgba(255,255,255,0.4);}
+.order-input:focus{border-color:rgba(255,255,255,0.5);}
+.order-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+.order-input option{background:var(--brown);color:#fff;}
+.order-submit{padding:14px;border-radius:12px;background:var(--green-light);color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;letter-spacing:0.3px;}
+.order-submit:hover{background:#40a578;transform:translateY(-1px);}
+.order-items-preview{margin-top:20px;display:flex;flex-direction:column;gap:8px;max-height:160px;overflow-y:auto;}
+.order-item-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(255,255,255,0.08);border-radius:8px;font-size:13px;}
+.order-item-name{color:rgba(255,255,255,0.9);}
+.order-item-price{color:var(--green-light);font-weight:600;}
+.order-item-remove{background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;padding:0 4px;}
+.order-total{display:flex;justify-content:space-between;padding:10px 12px;border-top:1px solid rgba(255,255,255,0.15);margin-top:4px;font-weight:700;color:#fff;}
+.cart-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:10px;background:var(--green-light);color:#fff;font-size:11px;font-weight:700;margin-left:6px;padding:0 5px;}
+
+/* CONTACT */
+.contact-section{background:var(--white);}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;}
+.contact-info{display:flex;flex-direction:column;gap:20px;margin-top:24px;}
+.contact-item{display:flex;align-items:flex-start;gap:14px;}
+.contact-icon{width:40px;height:40px;border-radius:12px;background:var(--cream-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;}
+.contact-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:4px;}
+.contact-val{font-size:14px;color:var(--text);font-weight:500;}
+.contact-form{background:var(--cream);border-radius:20px;padding:28px;border:1px solid var(--cream-3);}
+.contact-form-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--brown);margin-bottom:20px;font-weight:700;}
+.cf-input{width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--cream-3);background:var(--white);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:12px;transition:border 0.2s;}
+.cf-input:focus{border-color:var(--brown-light);}
+.cf-textarea{resize:vertical;min-height:100px;}
+.cf-submit{width:100%;padding:13px;border-radius:10px;background:var(--brown);color:#fff;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.cf-submit:hover{background:var(--brown-mid);}
+
+/* FOOTER */
+footer{background:var(--text);color:rgba(255,255,255,0.6);padding:40px 5%;text-align:center;}
+footer .f-logo{font-family:'Playfair Display',serif;font-size:22px;color:#fff;margin-bottom:12px;}
+footer p{font-size:13px;line-height:1.6;}
+footer a{color:rgba(255,255,255,0.5);text-decoration:none;}
+
+/* ORDER MODAL */
+.order-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.order-modal-overlay.open{display:flex;}
+.order-modal{background:var(--white);border-radius:24px 24px 0 0;padding:28px 24px 40px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;}
+.order-modal-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--brown);margin-bottom:6px;}
+.order-modal-sub{font-size:12px;color:var(--text-3);margin-bottom:20px;}
+.qty-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.qty-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--cream-3);background:transparent;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--brown);}
+.qty-btn:hover{background:var(--cream-2);}
+.qty-num{font-size:18px;font-weight:700;color:var(--text);min-width:30px;text-align:center;}
+.store-select-row{display:flex;gap:8px;margin-bottom:20px;}
+.store-sel-btn{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--cream-3);background:transparent;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-2);transition:all 0.2s;}
+.store-sel-btn.active{border-color:var(--brown);background:var(--brown);color:#fff;}
+.add-to-order-btn{width:100%;padding:14px;border-radius:12px;background:var(--brown);color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.add-to-order-btn:hover{background:var(--brown-mid);}
+.floating-cart{position:fixed;bottom:28px;right:24px;z-index:150;display:none;}
+.floating-cart.show{display:block;}
+.floating-cart-btn{display:flex;align-items:center;gap:8px;padding:12px 20px;border-radius:30px;background:var(--brown);color:#fff;border:none;cursor:pointer;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(92,51,23,0.3);font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.floating-cart-btn:hover{transform:translateY(-2px);}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+.fade-up{animation:fadeUp 0.6s ease forwards;}
+.fade-up-1{animation-delay:0.1s;opacity:0;}
+.fade-up-2{animation-delay:0.2s;opacity:0;}
+.fade-up-3{animation-delay:0.3s;opacity:0;}
+.fade-up-4{animation-delay:0.4s;opacity:0;}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .hero-image{display:none;}
+  .about-grid,.contact-grid{grid-template-columns:1fr;}
+  .nav-links{display:none;}
+  .order-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">
+    <img src="logo.svg" alt="Nila Tea" onerror="this.style.display='none'">
+    <span class="nav-logo-text">Nila Tea</span>
+  </div>
+  <div class="nav-links">
+    <a href="#about" data-km="អំពីយើង" data-en="About">About</a>
+    <a href="#menu" data-km="ម៉ឺនុយ" data-en="Menu">Menu</a>
+    <a href="#order" data-km="បញ្ជាទិញ" data-en="Order">Order</a>
+    <a href="#contact" data-km="ទំនាក់ទំនង" data-en="Contact">Contact</a>
+  </div>
+  <div class="nav-right">
+    <button class="lang-btn active" onclick="setLang('en')" id="btn-en">EN</button>
+    <button class="lang-btn" onclick="setLang('km')" id="btn-km">ខ្មែរ</button>
+    <a href="/index.html" class="staff-btn" data-km="ចូលបុគ្គលិក" data-en="Staff Login">Staff Login</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg">
+    <div class="hero-circle" style="width:600px;height:600px;background:var(--brown);top:-200px;right:-100px;"></div>
+    <div class="hero-circle" style="width:300px;height:300px;background:var(--green);bottom:-50px;left:-80px;"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-tag fade-up fade-up-1" data-km="🍵 ភេសជ្ជៈប្រពៃណីខ្មែរ" data-en="🍵 Authentic Cambodian Tea">🍵 Authentic Cambodian Tea</div>
+    <h1 class="hero-title fade-up fade-up-2">Fresh Tea, <span>Good Vibes</span></h1>
+    <p class="hero-desc fade-up fade-up-3" data-km="រស្មីតែស្រស់ស្អាត ជាមួយរសជាតិក្លិនក្រអូប ពីស្លឹកតែប្រពៃណីខ្មែរ។ ជ្រើសរើសពីម៉ឺនុយចម្រុះ។" data-en="Freshly brewed teas crafted with care. Choose from our wide selection of milk teas, lattes, and smoothies at two convenient locations.">Freshly brewed teas crafted with care. Choose from our wide selection of milk teas, lattes, and smoothies at two convenient locations.</p>
+    <div class="hero-btns fade-up fade-up-4">
+      <a href="#menu" class="btn-primary" data-km="មើលម៉ឺនុយ" data-en="View Menu">View Menu</a>
+      <a href="#order" class="btn-outline" data-km="បញ្ជាទិញឥឡូវ" data-en="Order Now">Order Now</a>
+    </div>
+  </div>
+  <div class="hero-image">
+    <div class="hero-img-wrap">
+      <img src="Logo_Nila_Tea.png" alt="Nila Tea" onerror="this.src='logo.svg'">
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-grid">
+    <div>
+      <div class="section-tag" data-km="អំពីយើង" data-en="About Us">About Us</div>
+      <h2 class="section-title" data-km="ហាងតែដ៏ល្បីល្បាញ ២ សាខា" data-en="Two Stores, One Passion">Two Stores, One Passion</h2>
+      <p class="section-desc" data-km="Nila Tea ផ្តល់ជូននូវភេសជ្ជៈដ៏ស្រស់ស្អាត ក្នុងបរិយាកាសសន្តិភាព ជាមួយសេវាកម្មដ៏ល្អឥតខ្ចោះ។" data-en="Nila Tea brings you the finest freshly brewed beverages in a warm, welcoming atmosphere. Quality ingredients, crafted with love at every cup.">Nila Tea brings you the finest freshly brewed beverages in a warm, welcoming atmosphere. Quality ingredients, crafted with love at every cup.</p>
+      <div class="stores-list">
+        <div class="store-item">
+          <div class="store-dot" style="background:#1A6B3C;"></div>
+          <div>
+            <div class="store-name">ATM — Angtamin Store</div>
+            <div class="store-loc" data-km="សាខា អង្គតាម៉ីញ" data-en="Angtamin branch">Angtamin branch</div>
+          </div>
+        </div>
+        <div class="store-item">
+          <div class="store-dot" style="background:#1A4A8A;"></div>
+          <div>
+            <div class="store-name">HRU — Human Resource University</div>
+            <div class="store-loc" data-km="សាខា សាកលវិទ្យាល័យធនធានមនុស្ស" data-en="HRU campus branch">HRU campus branch</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="about-visual">
+      <div class="about-card">
+        <div class="about-card-num">2</div>
+        <div class="about-card-label" data-km="សាខា" data-en="Locations">Locations</div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-num" style="color:var(--brown);">15+</div>
+        <div class="about-card-label" data-km="ភេសជ្ជៈ" data-en="Drinks">Drinks</div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-num">🍵</div>
+        <div class="about-card-label" data-km="ស្រស់ ៗ រៀងរាល់ថ្ងៃ" data-en="Fresh Daily">Fresh Daily</div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-num" style="color:var(--brown-mid);">❤️</div>
+        <div class="about-card-label" data-km="ផ្អែមល្ហែម" data-en="Made with Love">Made with Love</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section class="menu-section" id="menu">
+  <div class="section-tag" data-km="ម៉ឺនុយ" data-en="Our Menu">Our Menu</div>
+  <h2 class="section-title" data-km="ជ្រើសរើសភេសជ្ជៈ" data-en="Choose Your Drink">Choose Your Drink</h2>
+  <div class="menu-tabs" id="menu-tabs">
+    <button class="menu-tab active" onclick="filterMenu('all',this)" data-km="ទាំងអស់" data-en="All">All</button>
+    <button class="menu-tab" onclick="filterMenu('Tea',this)" data-km="តែ" data-en="Tea">Tea</button>
+    <button class="menu-tab" onclick="filterMenu('Coffee',this)" data-km="កាហ្វេ" data-en="Coffee">Coffee</button>
+    <button class="menu-tab" onclick="filterMenu('Smoothie',this)" data-km="ស្មូស៊ី" data-en="Smoothie">Smoothie</button>
+  </div>
+  <div class="menu-grid" id="menu-grid">
+    <div style="text-align:center;padding:40px;color:var(--text-3);font-size:14px;grid-column:1/-1;" data-km="កំពុងផ្ទុក..." data-en="Loading menu...">Loading menu...</div>
+  </div>
+</section>
+
+<!-- ORDER -->
+<section class="order-section" id="order">
+  <div class="order-content">
+    <div class="section-tag" data-km="បញ្ជាទិញ" data-en="Order Online">Order Online</div>
+    <h2 class="section-title" data-km="បញ្ជាទិញទុកជាមុន" data-en="Pre-order for Pickup">Pre-order for Pickup</h2>
+    <p class="section-desc" data-km="ជ្រើសរើសភេសជ្ជៈ ហើយបញ្ជាទិញទុកជាមុន។ យើងនឹងត្រៀមរួចរាល់នៅពេលអ្នកមកដល់។" data-en="Pick your drinks and pre-order online. We'll have everything ready when you arrive — no waiting in line.">Pick your drinks and pre-order online. We'll have everything ready when you arrive — no waiting in line.</p>
+
+    <!-- Cart items preview -->
+    <div id="cart-preview" style="display:none;margin-top:20px;">
+      <div class="order-items-preview" id="cart-items"></div>
+      <div class="order-total"><span data-km="សរុប" data-en="Total">Total</span><span id="cart-total">$0.00</span></div>
+    </div>
+
+    <div class="order-form" id="order-form" style="display:none;">
+      <div class="order-row">
+        <input class="order-input" type="text" id="ord-name" placeholder="Your name / ឈ្មោះ">
+        <input class="order-input" type="tel" id="ord-phone" placeholder="Phone / ទូរស័ព្ទ">
+      </div>
+      <select class="order-input order-select" id="ord-store">
+        <option value="" data-km="ជ្រើសសាខា" data-en="Select store">Select store</option>
+        <option value="atm">ATM — Angtamin Store</option>
+        <option value="hru">HRU Store</option>
+      </select>
+      <input class="order-input" type="datetime-local" id="ord-time">
+      <button class="order-submit" onclick="submitOrder()" data-km="ផ្ញើការបញ្ជាទិញ" data-en="Send Order">Send Order</button>
+    </div>
+
+    <div id="order-empty-msg" style="margin-top:24px;">
+      <p style="color:rgba(255,255,255,0.6);font-size:14px;" data-km="ជ្រើសរើសភេសជ្ជៈពីម៉ឺនុយខាងលើ ដើម្បីបញ្ជាទិញ" data-en="Select items from the menu above to start your order">Select items from the menu above to start your order ↑</p>
+    </div>
+    <div id="order-success" style="display:none;margin-top:24px;padding:20px;background:rgba(82,183,136,0.2);border-radius:12px;border:1px solid var(--green-light);">
+      <div style="font-size:16px;font-weight:700;color:var(--green-light);margin-bottom:6px;">✓ <span data-km="ការបញ្ជាទិញបានទទួល!" data-en="Order received!">Order received!</span></div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.7);" data-km="យើងនឹងទំនាក់ទំនងអ្នកឆាប់ៗ" data-en="We'll contact you shortly to confirm.">We'll contact you shortly to confirm.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <div class="contact-grid">
+    <div>
+      <div class="section-tag" data-km="ទំនាក់ទំនង" data-en="Contact">Contact</div>
+      <h2 class="section-title" data-km="ទាក់ទងមកយើង" data-en="Get in Touch">Get in Touch</h2>
+      <div class="contact-info">
+        <div class="contact-item">
+          <div class="contact-icon">📍</div>
+          <div>
+            <div class="contact-label" data-km="ទីតាំង" data-en="Locations">Locations</div>
+            <div class="contact-val">ATM — Angtamin Store</div>
+            <div class="contact-val">HRU — Human Resource University</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">🕐</div>
+          <div>
+            <div class="contact-label" data-km="ម៉ោងបើក" data-en="Hours">Hours</div>
+            <div class="contact-val" data-km="ច័ន្ទ — សៅរ៍: ៧ព្រឹក — ៦ល្ងាច" data-en="Mon — Sat: 7:00 AM — 6:00 PM">Mon — Sat: 7:00 AM — 6:00 PM</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">💬</div>
+          <div>
+            <div class="contact-label" data-km="ទូរស័ព្ទ / Telegram" data-en="Phone / Telegram">Phone / Telegram</div>
+            <div class="contact-val">@NilaTea</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="contact-form">
+      <div class="contact-form-title" data-km="ផ្ញើសំណួរ" data-en="Send a Message">Send a Message</div>
+      <input class="cf-input" type="text" id="cf-name" placeholder="Name / ឈ្មោះ">
+      <input class="cf-input" type="text" id="cf-phone" placeholder="Phone / ទូរស័ព្ទ">
+      <textarea class="cf-input cf-textarea" id="cf-msg" placeholder="Message / សំណួរ"></textarea>
+      <button class="cf-submit" onclick="sendContact()" data-km="ផ្ញើ" data-en="Send Message">Send Message</button>
+      <div id="cf-success" style="display:none;margin-top:12px;text-align:center;font-size:13px;color:var(--green);font-weight:600;">✓ <span data-km="បានផ្ញើ!" data-en="Sent! We'll be in touch.">Sent! We'll be in touch.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="f-logo">Nila Tea</div>
+  <p data-km="ភេសជ្ជៈស្រស់ ❤️ រស់ជាតិប្រពៃណី" data-en="Fresh Drinks ❤️ Two Locations in Phnom Penh">Fresh Drinks ❤️ Two Locations in Phnom Penh</p>
+  <p style="margin-top:8px;font-size:12px;">© 2026 Nila Tea. All rights reserved.</p>
+</footer>
+
+<!-- ITEM MODAL -->
+<div class="order-modal-overlay" id="item-modal">
+  <div class="order-modal">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+      <div>
+        <div class="order-modal-title" id="modal-item-name">Milk Tea</div>
+        <div class="order-modal-sub" id="modal-item-name-km"></div>
+      </div>
+      <button onclick="closeItemModal()" style="width:28px;height:28px;border-radius:8px;border:1px solid var(--cream-3);background:transparent;cursor:pointer;font-size:14px;color:var(--text-2);">✕</button>
+    </div>
+    <div style="font-size:22px;font-weight:700;color:var(--brown);margin-bottom:20px;" id="modal-item-price">$1.50</div>
+    <div class="qty-row">
+      <button class="qty-btn" onclick="adjModalQty(-1)">−</button>
+      <span class="qty-num" id="modal-qty">1</span>
+      <button class="qty-btn" onclick="adjModalQty(1)">+</button>
+      <span style="font-size:14px;color:var(--text-3);margin-left:8px;" id="modal-subtotal">= $1.50</span>
+    </div>
+    <button class="add-to-order-btn" onclick="addToCart()" data-km="បន្ថែមទៅការបញ្ជាទិញ" data-en="Add to Order">Add to Order</button>
+  </div>
+</div>
+
+<!-- FLOATING CART -->
+<div class="floating-cart" id="floating-cart">
+  <button class="floating-cart-btn" onclick="scrollToOrder()">
+    🛒 <span data-km="ការបញ្ជាទិញ" data-en="Order">Order</span> <span class="cart-badge" id="cart-count">0</span>
+  </button>
+</div>
+
+<script>
+// ── STATE ───────────────────────────────────────────────────────────────
+let lang='en', allMenu=[], cart=[], currentItem=null, modalQty=1;
+const API='https://nila-tea-app.onrender.com';
+
+// ── LANGUAGE ─────────────────────────────────────────────────────────────
+function setLang(l){
+  lang=l;
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.getElementById('btn-km').classList.toggle('active',l==='km');
+  document.querySelectorAll('[data-'+l+']').forEach(el=>{
+    const t=el.getAttribute('data-'+l);
+    if(t) el.textContent=t;
+  });
+  renderMenu();
+}
+
+// ── NAV SCROLL ───────────────────────────────────────────────────────────
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50);
+});
+
+// ── MENU ─────────────────────────────────────────────────────────────────
+async function loadMenu(){
+  try{
+    // Try ATM store menu first
+    const res=await fetch(API+'/api/stores/atm/menu');
+    if(res.ok){
+      allMenu=await res.json();
+      renderMenu();
+    }
+  }catch(e){
+    // Show sample menu if API fails
+    allMenu=[
+      {id:1,name:'Milk Tea',name_km:'តែទឹកដោះគោ',category:'Tea',category_km:'តែ',price_usd:1.50},
+      {id:2,name:'Taro Latte',name_km:'តែអ្រ័ន',category:'Tea',category_km:'តែ',price_usd:2.00},
+      {id:3,name:'Matcha Latte',name_km:'តែជៀក',category:'Coffee',category_km:'កាហ្វេ',price_usd:2.00},
+      {id:4,name:'Americano',name_km:'អាមេរីកាណូ',category:'Coffee',category_km:'កាហ្វេ',price_usd:1.25},
+      {id:5,name:'Mango Smoothie',name_km:'ស្មូស៊ីម៉ាងហ្គោ',category:'Smoothie',category_km:'ស្មូស៊ី',price_usd:2.25},
+      {id:6,name:'Brown Sugar Milk',name_km:'ទឹកដោះគោស្ករ',category:'Tea',category_km:'តែ',price_usd:1.75},
+    ];
+    renderMenu();
+  }
+}
+
+let currentFilter='all';
+function filterMenu(cat, btn){
+  currentFilter=cat;
+  document.querySelectorAll('.menu-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMenu();
+}
+
+const EMOJIS={Tea:'🍵',Coffee:'☕',Smoothie:'🥤'};
+function renderMenu(){
+  const grid=document.getElementById('menu-grid');
+  const items=currentFilter==='all'?allMenu:allMenu.filter(m=>m.category===currentFilter);
+  if(!items.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3);font-size:14px;">'+(lang==='km'?'មិនមានទំនិញ':'No items found')+'</div>';return;}
+  grid.innerHTML=items.map(m=>`
+    <div class="menu-card" onclick="openItemModal(${m.id})">
+      <div class="menu-img">${m.image_url?`<img src="${m.image_url}" alt="${m.name}">`:(EMOJIS[m.category]||'🍵')}</div>
+      <div class="menu-info">
+        <div class="menu-name">${lang==='km'&&m.name_km?m.name_km:m.name}</div>
+        <div class="menu-name-km">${lang==='km'?m.name:(m.name_km||'')}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="menu-price">$${parseFloat(m.price_usd).toFixed(2)}</span>
+          <button class="menu-add" onclick="event.stopPropagation();openItemModal(${m.id})">+</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── ITEM MODAL ────────────────────────────────────────────────────────────
+function openItemModal(id){
+  const item=allMenu.find(m=>m.id===id);
+  if(!item) return;
+  currentItem=item;
+  modalQty=1;
+  document.getElementById('modal-item-name').textContent=lang==='km'&&item.name_km?item.name_km:item.name;
+  document.getElementById('modal-item-name-km').textContent=lang==='km'?item.name:(item.name_km||'');
+  document.getElementById('modal-item-price').textContent='$'+parseFloat(item.price_usd).toFixed(2);
+  document.getElementById('modal-qty').textContent=1;
+  document.getElementById('modal-subtotal').textContent='= $'+parseFloat(item.price_usd).toFixed(2);
+  document.getElementById('item-modal').classList.add('open');
+}
+
+function closeItemModal(){document.getElementById('item-modal').classList.remove('open');}
+document.getElementById('item-modal').addEventListener('click',function(e){if(e.target===this)closeItemModal();});
+
+function adjModalQty(d){
+  modalQty=Math.max(1,modalQty+d);
+  document.getElementById('modal-qty').textContent=modalQty;
+  document.getElementById('modal-subtotal').textContent='= $'+(parseFloat(currentItem.price_usd)*modalQty).toFixed(2);
+}
+
+function addToCart(){
+  if(!currentItem) return;
+  const existing=cart.find(c=>c.id===currentItem.id);
+  if(existing) existing.qty+=modalQty;
+  else cart.push({...currentItem,qty:modalQty});
+  closeItemModal();
+  updateCart();
+  document.getElementById('order').scrollIntoView({behavior:'smooth'});
+}
+
+// ── CART ──────────────────────────────────────────────────────────────────
+function updateCart(){
+  const total=cart.reduce((s,c)=>s+parseFloat(c.price_usd)*c.qty,0);
+  const count=cart.reduce((s,c)=>s+c.qty,0);
+  document.getElementById('cart-count').textContent=count;
+  document.getElementById('floating-cart').classList.toggle('show',count>0);
+  document.getElementById('cart-preview').style.display=count?'block':'none';
+  document.getElementById('order-form').style.display=count?'flex':'none';
+  document.getElementById('order-empty-msg').style.display=count?'none':'block';
+
+  document.getElementById('cart-items').innerHTML=cart.map(c=>`
+    <div class="order-item-row">
+      <span class="order-item-name">${lang==='km'&&c.name_km?c.name_km:c.name} ×${c.qty}</span>
+      <span style="display:flex;align-items:center;gap:8px;">
+        <span class="order-item-price">$${(parseFloat(c.price_usd)*c.qty).toFixed(2)}</span>
+        <button class="order-item-remove" onclick="removeFromCart(${c.id})">×</button>
+      </span>
+    </div>`).join('');
+  document.getElementById('cart-total').textContent='$'+total.toFixed(2);
+}
+
+function removeFromCart(id){cart=cart.filter(c=>c.id!==id);updateCart();}
+function scrollToOrder(){document.getElementById('order').scrollIntoView({behavior:'smooth'});}
+
+// ── ORDER SUBMIT ──────────────────────────────────────────────────────────
+async function submitOrder(){
+  const name=document.getElementById('ord-name').value.trim();
+  const phone=document.getElementById('ord-phone').value.trim();
+  const store=document.getElementById('ord-store').value;
+  const time=document.getElementById('ord-time').value;
+  if(!name||!phone||!store){
+    alert(lang==='km'?'សូមបំពេញឈ្មោះ ទូរស័ព្ទ និងជ្រើសសាខា':'Please fill in name, phone and store.');
+    return;
+  }
+  // For now: show success (in production, send to Telegram or email)
+  document.getElementById('order-form').style.display='none';
+  document.getElementById('cart-preview').style.display='none';
+  document.getElementById('order-success').style.display='block';
+  document.getElementById('order-empty-msg').style.display='none';
+  cart=[];
+  updateCart();
+  setTimeout(()=>{document.getElementById('order-success').style.display='none';document.getElementById('order-empty-msg').style.display='block';},6000);
+}
+
+// ── CONTACT ───────────────────────────────────────────────────────────────
+function sendContact(){
+  const name=document.getElementById('cf-name').value.trim();
+  const phone=document.getElementById('cf-phone').value.trim();
+  const msg=document.getElementById('cf-msg').value.trim();
+  if(!name||!msg){alert(lang==='km'?'សូមបំពេញឈ្មោះ និងសំណួរ':'Please fill in name and message.');return;}
+  document.getElementById('cf-success').style.display='block';
+  document.getElementById('cf-name').value='';
+  document.getElementById('cf-phone').value='';
+  document.getElementById('cf-msg').value='';
+  setTimeout(()=>document.getElementById('cf-success').style.display='none',4000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+loadMenu();
+
+// Set default pickup time to 1 hour from now
+const dt=new Date(Date.now()+60*60*1000);
+dt.setSeconds(0,0);
+document.getElementById('ord-time').value=dt.toISOString().slice(0,16);
+</script>
+</body>
+</html>

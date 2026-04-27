@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { pool, initDB } = require('./db');
@@ -30,6 +31,12 @@ function cambodiaDate() {
   const cambodia = new Date(now.getTime() + (7 * 60 * 60 * 1000));
   return cambodia.toISOString().split('T')[0];
 }
+
+// ── SERVE PUBLIC WEBSITE ──
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/website.html'));
+});
+app.use(express.static(path.join(__dirname, '../frontend'), {index: false}));
 
 app.use(cors({
   origin: '*',

@@ -2511,20 +2511,26 @@ async function loadDailyReports(){
 
 function bStockReports(){
   if(me.role!=='owner'&&me.role!=='manager') return '<div class="card"><div class="cb" style="text-align:center;color:var(--t3);">No access</div></div>';
-  // Set default date range to today
+  // Keep existing filter values if already set, otherwise default to last 7 days
   const todayStr=new Date().toISOString().split('T')[0];
+  const sevenDaysAgo=new Date(Date.now()-7*24*60*60*1000).toISOString().split('T')[0];
+  // Preserve current values across re-renders
+  const prevStore=window._srStore||'all';
+  const prevFrom=window._srFrom||sevenDaysAgo;
+  const prevTo=window._srTo||todayStr;
+  const prevItem=window._srItem||'';
   return `<div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-      <select id="sr-store" onchange="loadStockHistory()" style="font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
-        <option value="all">${lang==='km'?'ហាងទាំងអស់':'Both stores'}</option>
-        <option value="atm">ATM Store</option>
-        <option value="hru">HRU Store</option>
+      <select id="sr-store" onchange="window._srStore=this.value;loadStockHistory()" style="font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
+        <option value="all" ${prevStore==='all'?'selected':''}>${lang==='km'?'ហាងទាំងអស់':'Both stores'}</option>
+        <option value="atm" ${prevStore==='atm'?'selected':''}>ATM Store</option>
+        <option value="hru" ${prevStore==='hru'?'selected':''}>HRU Store</option>
       </select>
-      <input type="date" id="sr-date-from" value="${todayStr}" onchange="loadStockHistory()" style="font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
+      <input type="date" id="sr-date-from" value="${prevFrom}" onchange="window._srFrom=this.value;loadStockHistory()" style="font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
-      <input type="date" id="sr-date-to" value="${todayStr}" onchange="loadStockHistory()" style="flex:1;font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
-      <input type="text" id="sr-item" placeholder="${lang==='km'?'ស្វែងរកទំនិញ...':'Search item...'}" oninput="loadStockHistory()" style="flex:1;font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
+      <input type="date" id="sr-date-to" value="${prevTo}" onchange="window._srTo=this.value;loadStockHistory()" style="flex:1;font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
+      <input type="text" id="sr-item" value="${prevItem}" placeholder="${lang==='km'?'ស្វែងរកទំនិញ...':'Search item...'}" oninput="window._srItem=this.value;loadStockHistory()" style="flex:1;font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg);font-family:inherit;">
     </div>
     <div id="sr-data"><div style="text-align:center;padding:20px;color:var(--t3);font-size:12px;">Loading...</div></div>
   </div>`;

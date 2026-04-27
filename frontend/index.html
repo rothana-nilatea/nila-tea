@@ -1602,7 +1602,15 @@ function bCloseDay(){
     const adminUnlockKey='nila_admin_unlock_'+s+'_'+new Date().toDateString();
     const hasSelfEdited=localStorage.getItem(selfEditKey);
     const adminUnlocked=localStorage.getItem(adminUnlockKey);
-    const isLocked=hasSelfEdited && !adminUnlocked;
+    // Also check server-side edit requests - if server has approved, unlock regardless of localStorage
+    const serverReq=(editRequests||[]).find(function(r){return r.store_id===s;});
+    const serverApproved=serverReq&&serverReq.status==='approved';
+    if(serverApproved&&!adminUnlocked){
+      localStorage.setItem(adminUnlockKey,'1');
+      localStorage.removeItem(selfEditKey);
+    }
+    const serverPending=serverReq&&serverReq.status==='pending';
+    const isLocked=(hasSelfEdited||serverPending) && !adminUnlocked && !serverApproved;
     return `<div style="padding:8px 0 16px;">
       <div class="success-card">
         <div class="s-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 13l5.5 5.5 12-12" stroke="var(--store-color,var(--g))" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -1620,8 +1628,9 @@ function bCloseDay(){
           <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 2px;">
             <span style="font-size:12px;opacity:0.75;font-weight:700;">${lang==='km'?'សរុប':'Total'}</span>
             <div style="text-align:right;">
-              <div style="font-size:18px;font-weight:700;">${fmt(sub.cashTotal+sub.abaAuto)}</div>
-              <div style="font-size:10px;opacity:0.6;">${fmtK(sub.cashTotal+sub.abaAuto)}</div>
+              ${sub.cashUSD>0?`<div style="font-size:15px;font-weight:700;">$${(sub.cashUSD||0).toLocaleString('en-US',{minimumFractionDigits:2})}</div>`:''}
+              ${sub.cashKHR>0?`<div style="font-size:15px;font-weight:700;">៛${(sub.cashKHR||0).toLocaleString('en-US')}</div>`:''}
+              ${sub.abaAuto>0?`<div style="font-size:13px;opacity:0.8;">+ ABA $${(sub.abaAuto||0).toFixed(2)}</div>`:''}
             </div>
           </div>
         </div>

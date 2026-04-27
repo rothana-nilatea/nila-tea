@@ -166,6 +166,14 @@ async function notifyAppClients(storeId, amountUsd, fromAccount, ref) {
 
 async function poll() {
   console.log('🤖 NilaTea ABA Bot starting...');
+  // Test DB connection on startup
+  try {
+    await pool.query('SELECT 1');
+    console.log('✅ Database connected');
+  } catch(e) {
+    console.error('❌ Database connection failed:', e.message);
+    console.error('Make sure DATABASE_URL env var is set correctly');
+  }
   await setPrivacy();
 
   while (true) {
@@ -182,7 +190,7 @@ async function poll() {
         }
       }
     } catch (e) {
-      console.error('Poll error:', e.message);
+      console.error('Poll error:', e.message, e.stack);
       await new Promise(r => setTimeout(r, 5000));
     }
   }

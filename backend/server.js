@@ -290,10 +290,18 @@ app.get('/api/reports/stock', auth, ownerOnly, async (req, res) => {
     // item_name filter applied after aggregation
     const itemFilter = item_name ? item_name.toLowerCase() : '';
 
+    // Get only the latest submission per store per day
     const { rows } = await pool.query(`
-      SELECT ss.id, ss.store_id, ss.submitted_by, ss.submitted_at,
-             false as verified, null as verified_by,
-             s.name as store_name,
+      WITH latest_subs AS (
+        SELECT DISTINCT ON (store_id, DATE(submitted_at AT TIME ZONE 'Asia/Phnom_Penh'))
+          ss.id, ss.store_id, ss.submitted_by, ss.submitted_at,
+          false as verified, null as verified_by, s.name as store_name
+        FROM stock_submissions ss
+        JOIN stores s ON s.id = ss.store_id
+        ${whereClause}
+        ORDER BY store_id, DATE(submitted_at AT TIME ZONE 'Asia/Phnom_Penh'), ss.submitted_at DESC
+      )
+      SELECT ls.*,
              COALESCE(
                json_agg(json_build_object(
                  'id', i.id, 'name', i.name, 'name_km', i.name_km,
@@ -301,12 +309,10 @@ app.get('/api/reports/stock', auth, ownerOnly, async (req, res) => {
                ) ORDER BY i.name) FILTER (WHERE i.id IS NOT NULL),
                '[]'::json
              ) as items
-      FROM stock_submissions ss
-      JOIN stores s ON s.id = ss.store_id
-      LEFT JOIN inventory i ON i.store_id = ss.store_id AND i.count_daily = true
-      ${whereClause}
-      GROUP BY ss.id, ss.store_id, ss.submitted_by, ss.submitted_at, s.name
-      ORDER BY ss.submitted_at DESC
+      FROM latest_subs ls
+      LEFT JOIN inventory i ON i.store_id = ls.store_id AND i.count_daily = true
+      GROUP BY ls.id, ls.store_id, ls.submitted_by, ls.submitted_at, ls.verified, ls.verified_by, ls.store_name
+      ORDER BY ls.submitted_at DESC
       LIMIT 100
     `, params);
 
@@ -327,14 +333,6 @@ app.get('/api/reports/stock', auth, ownerOnly, async (req, res) => {
     console.error('Stock reports error:', e.message);
     res.status(500).json({ error: e.message }); 
   }
-});
-
-// Debug: check stock submissions count
-app.get('/api/reports/stock/debug', auth, ownerOnly, async (req, res) => {
-  try {
-    const { rows } = await pool.query('SELECT id, store_id, submitted_by, submitted_at FROM stock_submissions ORDER BY submitted_at DESC LIMIT 10');
-    res.json({ count: rows.length, rows });
-  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // Delete specific stock submission by id

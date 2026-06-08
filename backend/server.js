@@ -171,6 +171,17 @@ app.delete('/api/users/:id', auth, ownerOnly, async (req, res) => {
   res.json({ success: true });
 });
 
+// ── PUBLIC MENU (no auth — for website.html) ──
+app.get('/api/public/menu/:storeId', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id,name,name_km,category,category_km,price_usd,image_url FROM menu_items WHERE store_id=$1 AND active=true ORDER BY id',
+      [req.params.storeId]
+    );
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── MENU ──
 app.get('/api/stores/:storeId/menu', auth, async (req, res) => {
   const { rows } = await pool.query(

@@ -1,4 +1,20 @@
 require('dotenv').config();
+
+// ── ENV CHECK ── Print clear guidance if DATABASE_URL is missing
+if (!process.env.DATABASE_URL) {
+  console.error('');
+  console.error('╔══════════════════════════════════════════════════════════╗');
+  console.error('║  ❌  DATABASE_URL is not set!                            ║');
+  console.error('║                                                          ║');
+  console.error('║  Fix on Render:                                          ║');
+  console.error('║  1. Dashboard → PostgreSQL → copy Internal Database URL  ║');
+  console.error('║  2. Your web service → Environment → add DATABASE_URL    ║');
+  console.error('║  3. Save → auto-redeploy                                 ║');
+  console.error('╚══════════════════════════════════════════════════════════╝');
+  console.error('');
+  process.exit(1);
+}
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -829,9 +845,27 @@ app.delete('/api/push/subscribe', auth, async (req, res) => {
 });
 
 // ── START ──
-initDB().then(() => {
-  app.listen(PORT, () => console.log(`🍵 Nila Tea API on port ${PORT}`));
-}).catch(e => { console.error('DB init failed:', e); process.exit(1); });
+// Start HTTP server FIRST so Render's health check passes immediately,
+// then connect to the database in the background with retries.
+let dbReady = false;
+
+app.get('/health', (req, res) => res.json({ status: 'ok', db: dbReady, time: new Date() }));
+
+app.listen(PORT, () => {
+  console.log(`🍵 Nila Tea API on port ${PORT}`);
+  console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`   DATABASE_URL set: ${!!process.env.DATABASE_URL}`);
+
+  // Connect DB in background after server is already listening
+  initDB()
+    .then(() => { dbReady = true; })
+    .catch(e => {
+      console.error('❌ DB init failed after all retries:', e.message);
+      console.error('   ➜ Go to Render → your service → Environment');
+      console.error('   ➜ Set DATABASE_URL to the INTERNAL Database URL from your Render Postgres');
+      // Do NOT process.exit — keep the server alive so you can see the logs and fix env vars
+    });
+});
 
 // ── LOGO ──
 app.get('/api/logo', async (req, res) => {

@@ -110,153 +110,187 @@ nav.scrolled{
 
 /* ── HERO ── */
 .hero{
-  min-height:100vh;display:flex;align-items:center;
-  padding:110px 6% 80px;position:relative;overflow:hidden;
-  background:linear-gradient(150deg,var(--cream) 0%,var(--cream-2) 60%,#E8D0A0 100%);
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:center;
+  padding:100px 7% 80px;
+  position:relative;overflow:hidden;
+  background:linear-gradient(145deg,var(--cream) 0%,var(--cream-2) 55%,#E5CFA0 100%);
+  gap:60px;
 }
-.hero-orb{
-  position:absolute;border-radius:50%;pointer-events:none;
-  filter:blur(80px);
-}
-.hero-orb-1{
-  width:700px;height:700px;
-  background:radial-gradient(circle,rgba(194,105,42,0.18) 0%,transparent 70%);
-  top:-150px;right:-150px;
-  animation:orbFloat 12s ease-in-out infinite;
-}
-.hero-orb-2{
-  width:500px;height:500px;
-  background:radial-gradient(circle,rgba(30,92,58,0.12) 0%,transparent 70%);
-  bottom:-100px;left:-100px;
-  animation:orbFloat 15s ease-in-out infinite reverse;
-}
-.hero-orb-3{
-  width:300px;height:300px;
-  background:radial-gradient(circle,rgba(212,168,67,0.15) 0%,transparent 70%);
-  top:40%;left:35%;
-  animation:orbFloat 10s ease-in-out infinite 3s;
-}
+
+/* Background orbs */
+.hero-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(90px);}
+.hero-orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(194,105,42,0.15) 0%,transparent 70%);top:-200px;right:-100px;animation:orbFloat 14s ease-in-out infinite;}
+.hero-orb-2{width:450px;height:450px;background:radial-gradient(circle,rgba(30,92,58,0.10) 0%,transparent 70%);bottom:-100px;left:-100px;animation:orbFloat 18s ease-in-out infinite reverse;}
+.hero-orb-3{width:250px;height:250px;background:radial-gradient(circle,rgba(212,168,67,0.12) 0%,transparent 70%);top:35%;left:48%;animation:orbFloat 10s ease-in-out infinite 2s;}
 @keyframes orbFloat{
   0%,100%{transform:translate(0,0) scale(1);}
-  33%{transform:translate(30px,-20px) scale(1.05);}
-  66%{transform:translate(-20px,15px) scale(0.97);}
+  33%{transform:translate(25px,-18px) scale(1.04);}
+  66%{transform:translate(-18px,12px) scale(0.97);}
 }
 
-/* Floating tea particles */
-.particle{
-  position:absolute;pointer-events:none;
-  font-size:28px;opacity:0;
-  animation:particleFloat linear infinite;
-}
+/* Floating particles */
+.particle{position:absolute;pointer-events:none;font-size:26px;opacity:0;animation:particleFloat linear infinite;}
 @keyframes particleFloat{
   0%{transform:translateY(100vh) rotate(0deg) scale(0.5);opacity:0;}
-  5%{opacity:0.4;}
-  90%{opacity:0.2;}
-  100%{transform:translateY(-150px) rotate(720deg) scale(1.2);opacity:0;}
+  5%{opacity:0.35;}
+  90%{opacity:0.15;}
+  100%{transform:translateY(-120px) rotate(720deg) scale(1.1);opacity:0;}
 }
 
-.hero-content{max-width:580px;position:relative;z-index:2;}
+/* ── LEFT: text content ── */
+.hero-content{position:relative;z-index:2;}
 .hero-tag{
   display:inline-flex;align-items:center;gap:8px;
   font-size:11px;font-weight:600;letter-spacing:2.5px;
   text-transform:uppercase;color:var(--green);
   background:rgba(30,92,58,0.08);
-  padding:7px 16px;border-radius:24px;margin-bottom:24px;
+  padding:7px 16px;border-radius:24px;margin-bottom:28px;
   border:1px solid rgba(30,92,58,0.15);
-  transform:translateY(30px);opacity:0;
-  animation:revealUp 0.8s cubic-bezier(.4,0,.2,1) 0.2s forwards;
+  opacity:0;transform:translateY(20px);
+  animation:revealUp 0.7s cubic-bezier(.4,0,.2,1) 0.15s forwards;
 }
 .hero-title{
   font-family:'Cormorant Garamond',serif;
-  font-size:clamp(52px,8vw,88px);
+  font-size:clamp(46px,5.5vw,80px);
   font-weight:700;color:var(--brown);
-  line-height:1.0;margin-bottom:24px;
-  transform:translateY(40px);opacity:0;
-  animation:revealUp 0.9s cubic-bezier(.4,0,.2,1) 0.35s forwards;
+  line-height:1.0;margin-bottom:20px;
+  opacity:0;transform:translateY(30px);
+  animation:revealUp 0.8s cubic-bezier(.4,0,.2,1) 0.3s forwards;
 }
 .hero-title em{font-style:italic;color:var(--brown-warm);}
-.hero-title .line2{display:block;color:var(--green);font-size:0.75em;}
+.hero-title .line2{display:block;color:var(--green);font-size:0.72em;margin-top:4px;}
 .hero-desc{
-  font-size:16px;color:var(--text-2);line-height:1.8;
-  margin-bottom:40px;max-width:440px;
-  transform:translateY(30px);opacity:0;
-  animation:revealUp 0.9s cubic-bezier(.4,0,.2,1) 0.5s forwards;
+  font-size:15px;color:var(--text-2);line-height:1.85;
+  margin-bottom:36px;max-width:420px;
+  opacity:0;transform:translateY(20px);
+  animation:revealUp 0.8s cubic-bezier(.4,0,.2,1) 0.45s forwards;
 }
 .hero-btns{
-  display:flex;gap:14px;flex-wrap:wrap;
-  transform:translateY(30px);opacity:0;
-  animation:revealUp 0.9s cubic-bezier(.4,0,.2,1) 0.65s forwards;
+  display:flex;gap:12px;flex-wrap:wrap;
+  opacity:0;transform:translateY(20px);
+  animation:revealUp 0.8s cubic-bezier(.4,0,.2,1) 0.6s forwards;
 }
 .btn-primary{
-  font-size:14px;font-weight:600;padding:15px 32px;
+  font-size:14px;font-weight:600;padding:14px 32px;
   border-radius:40px;background:var(--brown);color:#fff;
   text-decoration:none;border:none;cursor:none;
-  transition:all 0.35s cubic-bezier(.4,0,.2,1);
+  transition:all 0.3s cubic-bezier(.4,0,.2,1);
   display:inline-block;letter-spacing:0.3px;
-  box-shadow:0 6px 24px rgba(74,37,18,0.3),inset 0 1px 0 rgba(255,255,255,0.1);
+  box-shadow:0 6px 24px rgba(74,37,18,0.28);
   position:relative;overflow:hidden;
 }
-.btn-primary::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent);
-  opacity:0;transition:opacity 0.3s;
-}
+.btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.12),transparent);opacity:0;transition:opacity 0.3s;}
 .btn-primary:hover::before{opacity:1;}
-.btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(74,37,18,0.4);}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(74,37,18,0.38);}
 .btn-outline{
-  font-size:14px;font-weight:600;padding:15px 32px;
+  font-size:14px;font-weight:600;padding:14px 32px;
   border-radius:40px;border:1.5px solid var(--brown);
   color:var(--brown);text-decoration:none;background:transparent;
   cursor:none;transition:all 0.3s;display:inline-block;
 }
 .btn-outline:hover{background:var(--brown);color:#fff;transform:translateY(-3px);}
 
-/* Hero image side */
+/* ── RIGHT: logo visual ── */
 .hero-visual{
-  position:absolute;right:6%;top:50%;
-  transform:translateY(-50%);
-  width:min(42vw,480px);
-  pointer-events:none;z-index:2;
-  opacity:0;animation:revealScale 1.2s cubic-bezier(.4,0,.2,1) 0.4s forwards;
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;
+  animation:revealScale 1s cubic-bezier(.4,0,.2,1) 0.3s forwards;
 }
 @keyframes revealScale{
-  from{opacity:0;transform:translateY(-50%) scale(0.85);}
-  to{opacity:1;transform:translateY(-50%) scale(1);}
+  from{opacity:0;transform:scale(0.88);}
+  to{opacity:1;transform:scale(1);}
 }
-.hero-ring{
-  width:100%;aspect-ratio:1;border-radius:50%;
-  background:conic-gradient(from 0deg,var(--cream-2),var(--cream-3),var(--cream-2),var(--brown-warm),var(--cream-2));
-  padding:4px;
-  animation:spinRing 20s linear infinite;
-  box-shadow:0 20px 80px rgba(74,37,18,0.2);
-}
-@keyframes spinRing{to{transform:rotate(360deg);}}
-.hero-ring-inner{
-  width:100%;height:100%;border-radius:50%;
-  background:var(--cream-2);
-  display:flex;align-items:center;justify-content:center;overflow:hidden;
-}
-.hero-ring-inner img{width:72%;height:72%;object-fit:contain;}
 
-/* Floating badges */
-.hero-badge{
-  position:absolute;background:var(--white);
-  border-radius:16px;padding:12px 18px;
-  box-shadow:0 8px 40px rgba(74,37,18,0.15);
-  border:1px solid var(--cream-2);
-  font-size:12px;font-weight:600;color:var(--text);
-  display:flex;align-items:center;gap:8px;
-  animation:badgeFloat 4s ease-in-out infinite;
-  backdrop-filter:blur(10px);
+/* Decorative outer ring */
+.logo-deco-outer{
+  position:relative;
+  width:clamp(280px,32vw,400px);
+  aspect-ratio:1;
 }
-.hero-badge-1{top:15%;left:-10%;animation-delay:0s;}
-.hero-badge-2{bottom:20%;right:-5%;animation-delay:2s;}
-@keyframes badgeFloat{
-  0%,100%{transform:translateY(0px);}
-  50%{transform:translateY(-8px);}
+/* Spinning dashed ring */
+.logo-deco-outer::before{
+  content:'';
+  position:absolute;inset:-14px;
+  border-radius:50%;
+  border:1.5px dashed rgba(194,105,42,0.35);
+  animation:spinSlow 30s linear infinite;
 }
-.hero-badge-icon{font-size:20px;}
-.hero-badge-text span{display:block;font-size:10px;color:var(--text-3);font-weight:400;}
+/* Dot accents on the outer ring */
+.logo-deco-outer::after{
+  content:'';
+  position:absolute;inset:-14px;
+  border-radius:50%;
+  border:1.5px solid transparent;
+  background:
+    radial-gradient(circle at 50% 0%, var(--brown-warm) 0%, var(--brown-warm) 4px, transparent 4px),
+    radial-gradient(circle at 100% 50%, var(--brown-warm) 0%, var(--brown-warm) 4px, transparent 4px),
+    radial-gradient(circle at 50% 100%, var(--brown-warm) 0%, var(--brown-warm) 4px, transparent 4px),
+    radial-gradient(circle at 0% 50%, var(--brown-warm) 0%, var(--brown-warm) 4px, transparent 4px);
+  background-clip:border-box;
+  animation:spinSlow 30s linear infinite;
+}
+@keyframes spinSlow{to{transform:rotate(360deg);}}
+
+/* Main logo circle */
+.logo-circle-main{
+  width:100%;height:100%;
+  border-radius:50%;
+  background:linear-gradient(145deg, var(--white) 0%, var(--cream-2) 100%);
+  border:3px solid var(--cream-3);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:
+    0 24px 80px rgba(74,37,18,0.16),
+    0 8px 24px rgba(74,37,18,0.10),
+    inset 0 2px 0 rgba(255,255,255,0.8);
+  animation:logoFloat 6s ease-in-out infinite;
+  overflow:hidden;
+  padding:18px;
+}
+@keyframes logoFloat{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-12px);}
+}
+.logo-circle-main img{
+  width:100%;height:100%;
+  object-fit:contain;
+  filter:drop-shadow(0 4px 12px rgba(74,37,18,0.12));
+}
+
+/* Brand name below logo */
+.logo-brand-block{
+  margin-top:22px;
+  text-align:center;
+}
+.logo-brand-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(28px,3vw,40px);
+  font-weight:700;color:var(--brown);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  line-height:1;
+}
+.logo-brand-name em{
+  font-style:italic;
+  color:var(--brown-warm);
+  font-size:0.7em;
+  letter-spacing:1px;
+  display:block;
+  margin-top:2px;
+}
+.logo-brand-divider{
+  width:40px;height:1.5px;
+  background:linear-gradient(90deg,transparent,var(--brown-warm),transparent);
+  margin:10px auto;
+}
+.logo-brand-tagline{
+  font-size:11px;font-weight:500;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--text-3);
+}
 
 /* ── MARQUEE ── */
 .marquee-strip{
@@ -688,13 +722,18 @@ footer::before{
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
-  .hero-visual{display:none;}
+  .hero{grid-template-columns:1fr;text-align:center;padding:100px 6% 60px;gap:40px;}
+  .hero-content{order:2;}
+  .hero-visual{order:1;}
+  .hero-desc{margin-left:auto;margin-right:auto;}
+  .hero-btns{justify-content:center;}
+  .logo-deco-outer{width:clamp(200px,55vw,280px);}
   .about-grid,.contact-grid{grid-template-columns:1fr;}
   .about-grid{gap:40px;}
   .contact-grid{gap:40px;}
   .nav-links{display:none;}
   .order-row{grid-template-columns:1fr;}
-  .hero-title{font-size:clamp(40px,10vw,64px);}
+  .hero-title{font-size:clamp(38px,9vw,60px);}
 }
 @media(max-width:480px){
   section{padding:72px 5%;}
@@ -757,24 +796,15 @@ footer::before{
   </div>
 
   <div class="hero-visual">
-    <div class="hero-badge hero-badge-1">
-      <span class="hero-badge-icon">🏪</span>
-      <div class="hero-badge-text">
-        <strong>2 Locations</strong>
-        <span>ATM & HRU</span>
+    <div class="logo-deco-outer">
+      <div class="logo-circle-main">
+        <img src="Logo_Nila_Tea.png" alt="Nila Tea logo" onerror="this.src='logo.svg'">
       </div>
     </div>
-    <div class="hero-ring">
-      <div class="hero-ring-inner">
-        <img src="Logo_Nila_Tea.png" alt="Nila Tea" onerror="this.src='logo.svg'">
-      </div>
-    </div>
-    <div class="hero-badge hero-badge-2">
-      <span class="hero-badge-icon">⭐</span>
-      <div class="hero-badge-text">
-        <strong>Fresh Daily</strong>
-        <span>7AM — 6PM</span>
-      </div>
+    <div class="logo-brand-block">
+      <div class="logo-brand-name">Nila<em>Tea</em></div>
+      <div class="logo-brand-divider"></div>
+      <div class="logo-brand-tagline" data-km="ស្រស់ · ប្រពៃណីខ្មែរ" data-en="Fresh · Cambodian · Phnom Penh">Fresh · Cambodian · Phnom Penh</div>
     </div>
   </div>
 </section>
